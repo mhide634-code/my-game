@@ -5,17 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>無機化学カードバトラー</title>
     <style>
-        /* ここはデザイン（CSS）を書く場所 */
         body {
             font-family: sans-serif;
-            background-color: #2c3e50; /* 背景色：濃い青 */
+            background-color: #2c3e50;
             color: white;
             text-align: center;
+            user-select: none; /* 文字選択を防止 */
         }
         
-        #game-area {
-            margin-top: 20px;
+        /* ボタンのデザイン */
+        #action-btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px;
+            font-weight: bold;
         }
+        #action-btn:hover { background-color: #d35400; }
 
         /* カードのデザイン */
         .card {
@@ -29,71 +39,179 @@
             padding: 10px;
             vertical-align: top;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            cursor: pointer; /* マウスを乗せると指マークに */
-            transition: transform 0.1s;
+            cursor: pointer;
+            transition: transform 0.1s, border 0.1s;
+            border: 4px solid transparent; /* 枠線の場所を確保 */
+            position: relative;
         }
 
-        .card:active {
-            transform: scale(0.95); /* クリックで少し凹む */
+        .card:active { transform: scale(0.95); }
+
+        /* 選択された時のデザイン */
+        .card.selected {
+            border-color: #f1c40f; /* 黄色の枠線 */
+            background-color: #fff;
+            transform: translateY(-10px); /* 少し上に浮く */
         }
 
         .symbol {
             font-size: 40px;
             font-weight: bold;
             margin-top: 20px;
-            color: #e74c3c; /* 元素記号は赤 */
+            color: #e74c3c;
         }
+        
+        .name { font-size: 14px; margin-top: 10px; font-weight: bold;}
+        
+        /* 化合物（分子）は青色にする */
+        .card.molecule .symbol { color: #2980b9; }
 
-        .name {
-            font-size: 14px;
-            margin-top: 10px;
-        }
+        #message-area { height: 30px; color: #f1c40f; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>無機化学カードバトラー</h1>
-    <p>手札（クリックして確認）</p>
+    
+    <div id="message-area">カードを選んで「合成」しよう！</div>
+    
+    <div>
+        <button id="action-btn" onclick="synthesize()">合成する (反応)</button>
+    </div>
 
     <div id="hand-container"></div>
 
     <script>
-        // ここはプログラム（JavaScript）を書く場所
-
-        // 1. 元素データの定義（とりあえずH, C, O, Na, Cl）
-        const elementData = [
-            { symbol: 'H', name: '水素', atomicNumber: 1 },
-            { symbol: 'C', name: '炭素', atomicNumber: 6 },
-            { symbol: 'O', name: '酸素', atomicNumber: 8 },
-            { symbol: 'Na', name: 'ナトリウム', atomicNumber: 11 },
-            { symbol: 'Cl', name: '塩素', atomicNumber: 17 }
+        // --- 1. データ定義 ---
+        
+        // 最初のデッキ（手札）
+        let myHand = [
+            { id: 1, symbol: 'H', name: '水素', type: 'element' },
+            { id: 2, symbol: 'H', name: '水素', type: 'element' },
+            { id: 3, symbol: 'Cl', name: '塩素', type: 'element' },
+            { id: 4, symbol: 'Na', name: 'ナトリウム', type: 'element' },
+            { id: 5, symbol: 'O', name: '酸素', type: 'element' },
+            { id: 6, symbol: 'C', name: '炭素', type: 'element' },
+            { id: 7, symbol: 'O', name: '酸素', type: 'element' }
         ];
 
-        // 2. 手札を表示する機能
+        // 合成レシピ（化学反応式）
+        // 順番に関係なく反応させるため、素材はアルファベット順にソートして判定します
+        const recipes = [
+            { ingredients: ['Cl', 'H'], product: { symbol: 'HCl', name: '塩化水素', type: 'molecule' } },
+            { ingredients: ['Cl', 'Na'], product: { symbol: 'NaCl', name: '塩化ナトリウム', type: 'molecule' } },
+            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', type: 'molecule' } },
+            { ingredients: ['C', 'O', 'O'], product: { symbol: 'CO2', name: '二酸化炭素', type: 'molecule' } },
+        ];
+
+        // 選択中のカードIDリスト
+        let selectedIds = [];
+
+        // --- 2. 画面表示の仕組み ---
+
         function renderHand() {
             const container = document.getElementById('hand-container');
-            
-            // データをループしてカードを作る
-            elementData.forEach(element => {
-                // HTMLのタグを作る
+            container.innerHTML = ''; // 一度空にする
+
+            myHand.forEach(card => {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'card';
+                if (card.type === 'molecule') cardDiv.classList.add('molecule'); // 分子なら色を変える
+                
+                // 選択されているかチェック
+                if (selectedIds.includes(card.id)) {
+                    cardDiv.classList.add('selected');
+                }
+
                 cardDiv.innerHTML = `
-                    <div class="symbol">${element.symbol}</div>
-                    <div class="name">${element.name}</div>
+                    <div class="symbol">${card.symbol}</div>
+                    <div class="name">${card.name}</div>
                 `;
 
-                // クリックしたときの動作（とりあえずログを出す）
-                cardDiv.onclick = function() {
-                    alert(element.name + ' を選択しました！');
-                };
+                // クリック時の動作
+                cardDiv.onclick = () => toggleSelect(card.id);
 
-                // 画面に追加
                 container.appendChild(cardDiv);
             });
         }
 
-        // ゲーム開始時に実行
+        // --- 3. ゲームのロジック ---
+
+        // カードを選択・解除する機能
+        function toggleSelect(id) {
+            if (selectedIds.includes(id)) {
+                // すでに選ばれていたら外す
+                selectedIds = selectedIds.filter(selectedId => selectedId !== id);
+            } else {
+                // 選ばれていなければ追加する
+                selectedIds.push(id);
+            }
+            renderHand(); // 画面更新
+        }
+
+        // 合成（反応）ボタンを押したときの機能
+        function synthesize() {
+            if (selectedIds.length < 2) {
+                showMessage("2枚以上のカードを選んでください");
+                return;
+            }
+
+            // 選ばれたカードのデータを取り出す
+            const selectedCards = myHand.filter(card => selectedIds.includes(card.id));
+            
+            // 元素記号のリストを作って、アルファベット順に並べる（H, Cl の順でも Cl, H の順でも反応させるため）
+            const selectedSymbols = selectedCards.map(c => c.symbol).sort();
+
+            // レシピ帳を検索
+            let matchRecipe = null;
+            
+            for (const recipe of recipes) {
+                // レシピの素材もソートしておく
+                const recipeIngredients = recipe.ingredients.sort();
+                
+                // 文字列にして比較（配列の比較を簡単にするため）
+                if (JSON.stringify(selectedSymbols) === JSON.stringify(recipeIngredients)) {
+                    matchRecipe = recipe;
+                    break;
+                }
+            }
+
+            if (matchRecipe) {
+                // 合成成功！
+                successSynthesis(matchRecipe);
+            } else {
+                // 失敗
+                showMessage("反応しませんでした...");
+                selectedIds = []; // 選択解除
+                renderHand();
+            }
+        }
+
+        function successSynthesis(recipe) {
+            showMessage(`合成成功！ ${recipe.product.name} を生成！`);
+
+            // 1. 素材になったカードを手札から消す
+            myHand = myHand.filter(card => !selectedIds.includes(card.id));
+
+            // 2. 新しいカード（生成物）を追加する
+            const newCard = {
+                id: Date.now(), // 現在時刻をIDにして重複を防ぐ
+                symbol: recipe.product.symbol,
+                name: recipe.product.name,
+                type: 'molecule'
+            };
+            myHand.push(newCard);
+
+            // 3. 選択状態をリセットして画面更新
+            selectedIds = [];
+            renderHand();
+        }
+
+        function showMessage(text) {
+            document.getElementById('message-area').innerText = text;
+        }
+
+        // 開始
         renderHand();
 
     </script>
