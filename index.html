@@ -3,9 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>私のゲームサイト</title>
+    <title>無機化学カードバトラー</title>
+    <style>
+        /* ここはデザイン（CSS）を書く場所 */
+        body {
+            font-family: sans-serif;
+            background-color: #2c3e50; /* 背景色：濃い青 */
+            color: white;
+            text-align: center;
+        }
+        
+        #game-area {
+            margin-top: 20px;
+        }
+
+        /* カードのデザイン */
+        .card {
+            display: inline-block;
+            width: 100px;
+            height: 140px;
+            background-color: #ecf0f1;
+            color: #333;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 10px;
+            vertical-align: top;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer; /* マウスを乗せると指マークに */
+            transition: transform 0.1s;
+        }
+
+        .card:active {
+            transform: scale(0.95); /* クリックで少し凹む */
+        }
+
+        .symbol {
+            font-size: 40px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #e74c3c; /* 元素記号は赤 */
+        }
+
+        .name {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>ウェブサイト完成</h1>
+
+    <h1>無機化学カードバトラー</h1>
+    <p>手札（クリックして確認）</p>
+
+    <div id="hand-container"></div>
+
+    <script>
+        // ここはプログラム（JavaScript）を書く場所
+
+        // 1. 元素データの定義（とりあえずH, C, O, Na, Cl）
+        const elementData = [
+            { symbol: 'H', name: '水素', atomicNumber: 1 },
+            { symbol: 'C', name: '炭素', atomicNumber: 6 },
+            { symbol: 'O', name: '酸素', atomicNumber: 8 },
+            { symbol: 'Na', name: 'ナトリウム', atomicNumber: 11 },
+            { symbol: 'Cl', name: '塩素', atomicNumber: 17 }
+        ];
+
+        // 2. 手札を表示する機能
+        function renderHand() {
+            const container = document.getElementById('hand-container');
+            
+            // データをループしてカードを作る
+            elementData.forEach(element => {
+                // HTMLのタグを作る
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.innerHTML = `
+                    <div class="symbol">${element.symbol}</div>
+                    <div class="name">${element.name}</div>
+                `;
+
+                // クリックしたときの動作（とりあえずログを出す）
+                cardDiv.onclick = function() {
+                    alert(element.name + ' を選択しました！');
+                };
+
+                // 画面に追加
+                container.appendChild(cardDiv);
+            });
+        }
+
+        // ゲーム開始時に実行
+        renderHand();
+
+    </script>
 </body>
 </html>
