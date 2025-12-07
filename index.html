@@ -2,217 +2,743 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>無機化学カードバトラー</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chem-Verse Mobile</title>
     <style>
+        :root {
+            --bg-color: #1a1a1d;
+            --card-bg: #ecf0f1;
+            --accent: #f1c40f;
+            --primary: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+
         body {
-            font-family: sans-serif;
-            background-color: #2c3e50;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
+            background-color: var(--bg-color);
             color: white;
-            text-align: center;
-            user-select: none; /* 文字選択を防止 */
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        /* ボタンのデザイン */
-        #action-btn {
-            padding: 15px 30px;
-            font-size: 20px;
-            background-color: #e67e22;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 20px;
-            font-weight: bold;
-        }
-        #action-btn:hover { background-color: #d35400; }
 
-        /* カードのデザイン */
+        /* --- スタート画面 --- */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            z-index: 2000;
+            display: flex; flex-direction: column; align-items: center;
+            overflow-y: auto; padding: 20px 10px; box-sizing: border-box;
+        }
+        h1 { margin: 20px 0; font-size: 24px; text-shadow: 0 0 10px var(--accent); color: var(--accent); }
+        .deck-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            width: 100%; max-width: 600px; padding-bottom: 40px;
+        }
+        .deck-card {
+            background: rgba(255,255,255,0.1); border: 2px solid #fff;
+            padding: 10px; border-radius: 8px; cursor: pointer;
+            display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 100px;
+        }
+        .deck-card:active { background: rgba(255,255,255,0.3); border-color: var(--accent); transform: scale(0.98); }
+        .deck-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
+        .deck-desc { font-size: 10px; color: #ddd; line-height: 1.3; }
+
+        /* --- ゲームボード (スマホ縦レイアウト) --- */
+        #game-board { display: none; flex-direction: column; height: 100vh; position: relative; }
+        
+        /* エリア配分調整 */
+        #enemy-hand-area { height: 8%; background: #2c3e50; display: flex; justify-content: center; align-items: center; gap: 2px; }
+        #enemy-field { height: 22%; background: #34495e; border-bottom: 2px solid #7f8c8d; display: flex; justify-content: center; align-items: center; }
+        
+        #info-area {
+            height: 12%; background: #222;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 10px; z-index: 10; box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        #player-field { height: 22%; background: #34495e; border-top: 2px solid #7f8c8d; display: flex; justify-content: center; align-items: center; }
+        #player-hand-area { 
+            height: 36%; background: #2c3e50; 
+            overflow-x: auto; display: flex; align-items: center; 
+            padding-left: 10px; gap: 5px;
+        }
+
+        /* --- カード (スマホサイズ) --- */
         .card {
-            display: inline-block;
-            width: 100px;
-            height: 140px;
-            background-color: #ecf0f1;
-            color: #333;
-            border-radius: 10px;
-            margin: 10px;
-            padding: 10px;
-            vertical-align: top;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: transform 0.1s, border 0.1s;
-            border: 4px solid transparent; /* 枠線の場所を確保 */
-            position: relative;
+            width: 64px; height: 90px; /* 少し小さく */
+            background: var(--card-bg); color: #333;
+            border-radius: 5px; position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            border: 2px solid #bdc3c7; flex-shrink: 0;
+            transition: transform 0.1s;
         }
-
         .card:active { transform: scale(0.95); }
+        .card.selected { border-color: var(--accent); transform: translateY(-10px); box-shadow: 0 0 10px var(--accent); }
+        .card.can-attack { border-color: var(--primary); box-shadow: 0 0 8px var(--primary); }
+        .card.attacking { border-color: var(--danger); box-shadow: 0 0 15px var(--danger); z-index: 100; transform: scale(1.1); }
 
-        /* 選択された時のデザイン */
-        .card.selected {
-            border-color: #f1c40f; /* 黄色の枠線 */
-            background-color: #fff;
-            transform: translateY(-10px); /* 少し上に浮く */
+        .card-symbol { font-size: 16px; font-weight: bold; text-align: center; margin-top: 8px; overflow: hidden; white-space: nowrap;}
+        .card-name { font-size: 8px; text-align: center; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 2px;}
+        
+        .stats {
+            position: absolute; bottom: 2px; width: 100%;
+            display: flex; justify-content: space-between; padding: 0 3px; box-sizing: border-box;
+            font-weight: bold; font-size: 10px;
         }
+        .stat-atk { background: #e67e22; color: white; padding: 1px 3px; border-radius: 3px; }
+        .stat-hp { background: var(--success); color: white; padding: 1px 3px; border-radius: 3px; }
 
-        .symbol {
-            font-size: 40px;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #e74c3c;
+        /* バッジ */
+        .ability-container { position: absolute; top: -6px; right: -6px; display: flex; flex-direction: column; gap: 1px; }
+        .badge {
+            width: 16px; height: 16px; border-radius: 50%; color: white; font-size: 10px;
+            display: flex; align-items: center; justify-content: center; border: 1px solid white; font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .badge-ward { background-color: var(--primary); }
+        .badge-toxic { background-color: #8e44ad; }
+        .badge-storm { background-color: #f39c12; }
+        .badge-stealth { background-color: #7f8c8d; }
+
+        /* --- UIパーツ --- */
+        .leader { text-align: center; position: relative; padding: 2px; width: 60px; }
+        .leader-name { font-size: 10px; font-weight: bold; color: var(--accent); margin-bottom: 2px;}
+        .hp-circle { 
+            background: #c0392b; color: white; border-radius: 50%; 
+            width: 34px; height: 34px; line-height: 34px; 
+            font-weight: bold; font-size: 14px; margin: 0 auto; 
+            border: 2px solid white; box-shadow: 0 0 5px #e74c3c;
         }
         
-        .name { font-size: 14px; margin-top: 10px; font-weight: bold;}
-        
-        /* 化合物（分子）は青色にする */
-        .card.molecule .symbol { color: #2980b9; }
+        .turn-info { text-align: center; font-size: 12px; }
+        .mp-bar { font-size: 14px; color: var(--success); font-weight: bold; }
 
-        #message-area { height: 30px; color: #f1c40f; font-weight: bold; }
+        /* --- ボタン類 --- */
+        .action-overlay { 
+            position: absolute; bottom: 120px; right: 10px; 
+            display: flex; flex-direction: column; gap: 8px; z-index: 50; 
+        }
+        .game-btn { 
+            padding: 12px 16px; border-radius: 25px; border: none; 
+            font-weight: bold; color: white; font-size: 12px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-draw { background: linear-gradient(to right, #27ae60, #2ecc71); } 
+        .btn-syn { background: linear-gradient(to right, #e67e22, #f39c12); }
+        #btn-end-turn { 
+            padding: 8px 12px; font-size: 11px; background: #f39c12; 
+            border-radius: 20px; border: none; color: white; font-weight: bold;
+        }
+        #btn-end-turn:disabled { background: #555; color: #888; }
+
+        /* --- 詳細パネル (タップで表示) --- */
+        #card-detail-panel {
+            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
+            width: 85%; max-width: 300px; background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary); border-radius: 10px; padding: 15px;
+            display: none; flex-direction: column; color: white; z-index: 3000;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .detail-close { position: absolute; top: 5px; right: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
+        .detail-header { text-align: center; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px;}
+        .detail-symbol { font-size: 32px; font-weight: bold; color: var(--primary); }
+        .detail-name { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .detail-skills { font-size: 12px; max-height: 200px; overflow-y: auto; }
+        .skill-item { margin-bottom: 8px; border-left: 3px solid var(--accent); padding-left: 8px; }
+        .skill-item-name { font-weight: bold; color: var(--accent); }
+        .skill-item-desc { color: #ccc; font-size: 11px; }
+
+        /* --- ヒント --- */
+        #craftable-list {
+            position: absolute; bottom: 38%; left: 10px;
+            display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none;
+        }
+        .craft-hint-btn {
+            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--accent); color: white;
+            padding: 6px 10px; border-radius: 6px; pointer-events: auto;
+            display: flex; flex-direction: column; min-width: 120px;
+            box-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+        }
+        
+        /* --- モーダル --- */
+        #skill-modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 4000;
+            flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .skill-list { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
+        .skill-btn {
+            background: #fff; color: #333; padding: 12px; border-radius: 8px;
+            border-left: 8px solid var(--primary); position: relative;
+        }
+        .skill-btn:active { background: #eee; }
+
+        #msg-box {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 8px; border: 1px solid white;
+            font-size: 20px; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; text-align: center; white-space: nowrap;
+        }
+
+        /* ターゲット演出 */
+        body.targeting .card { border-style: dashed; }
+        .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger) !important; box-shadow: 0 0 10px var(--danger); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-    <h1>無機化学カードバトラー</h1>
-    
-    <div id="message-area">カードを選んで「合成」しよう！</div>
-    
-    <div>
-        <button id="action-btn" onclick="synthesize()">合成する (反応)</button>
+    <div id="start-screen">
+        <h1>Chem-Verse Mobile</h1>
+        <p>デッキを選んでください</p>
+        <div class="deck-grid">
+            <div class="deck-card" onclick="startGame('aggro')">
+                <div class="deck-title">🔥 超速攻</div>
+                <div class="deck-desc">HCl, HF<br>高火力・低耐久</div>
+            </div>
+            <div class="deck-card" onclick="startGame('counter')">
+                <div class="deck-title">🛡️ カウンター</div>
+                <div class="deck-desc">AgCl, Fe2O3<br>沈殿と不動態</div>
+            </div>
+            <div class="deck-card" onclick="startGame('toxic')">
+                <div class="deck-title">☠️ 害悪(毒)</div>
+                <div class="deck-desc">CO, H2S<br>必殺で即死</div>
+            </div>
+            <div class="deck-card" onclick="startGame('control')">
+                <div class="deck-title">🧪 テクニカル</div>
+                <div class="deck-desc">NaOH, Al2O3<br>回復と両性</div>
+            </div>
+            <div class="deck-card" onclick="startGame('gemstone')">
+                <div class="deck-title">💎 宝石</div>
+                <div class="deck-desc">ダイヤ, ルビー<br>圧倒的HP</div>
+            </div>
+            <div class="deck-card" onclick="startGame('heavy')">
+                <div class="deck-title">🏭 重金属</div>
+                <div class="deck-desc">金, W, Pt<br>後半最強</div>
+            </div>
+            <div class="deck-card" onclick="startGame('noble')">
+                <div class="deck-title">🎈 貴ガス</div>
+                <div class="deck-desc">He2, Ne2<br>潜伏(要2枚)</div>
+            </div>
+            <div class="deck-card" onclick="startGame('hazard')">
+                <div class="deck-title">⚗️ 危険物</div>
+                <div class="deck-desc">王水, 濃硫酸<br>除去スペル</div>
+            </div>
+        </div>
     </div>
 
-    <div id="hand-container"></div>
+    <div id="game-board">
+        <div id="enemy-hand-area"></div>
+        <div id="enemy-field" class="area"></div>
+        <div id="info-area">
+            <div class="leader" id="leader-enemy" onclick="onLeaderClick('enemy')">
+                <div class="avatar">🤖</div>
+                <div class="leader-name" id="enemy-name">CPU</div>
+                <div id="enemy-hp" class="hp-circle">25</div>
+            </div>
+            <div class="turn-info">
+                <div id="turn-display">TURN 1</div>
+                <div id="mp-display" class="mp-bar">MP 1/1</div>
+            </div>
+            <button id="btn-end-turn" onclick="endTurn()">終了</button>
+            <div class="leader" id="leader-player" onclick="onLeaderClick('player')">
+                <div id="player-hp" class="hp-circle">25</div>
+                <div class="leader-name">YOU</div>
+                <div class="avatar">🧑‍🔬</div>
+            </div>
+        </div>
+        
+        <div id="craftable-list"></div>
+
+        <div id="player-field" class="area"></div>
+        <div id="player-hand-area"></div>
+
+        <div id="card-detail-panel" onclick="hideDetail()">
+            <div class="detail-close">×</div>
+            <div class="detail-header">
+                <div class="detail-symbol" id="detail-symbol"></div>
+                <div class="detail-name" id="detail-name"></div>
+            </div>
+            <div style="text-align:center; margin-bottom:10px; font-weight:bold; font-size:16px;" id="detail-stats"></div>
+            <div class="detail-skills" id="detail-skills"></div>
+            <div style="text-align:center; margin-top:10px; font-size:10px; color:#777;">(タップして閉じる)</div>
+        </div>
+    </div>
+
+    <div class="action-overlay" id="action-btns" style="display:none;">
+        <button class="game-btn btn-draw" onclick="actionDraw()">＋ ドロー</button>
+        <button class="game-btn btn-syn" onclick="actionSynthesize()">⚗️ 合成</button>
+    </div>
+
+    <div id="skill-modal">
+        <h3 style="color:white; margin-bottom:15px;">技を選択</h3>
+        <div id="skill-list" class="skill-list"></div>
+        <button class="game-btn" style="background:#7f8c8d; margin-top:20px;" onclick="closeSkillModal()">キャンセル</button>
+    </div>
+
+    <div id="msg-box"></div>
 
     <script>
-        // --- 1. データ定義 ---
-        
-        // 最初のデッキ（手札）
-        let myHand = [
-            { id: 1, symbol: 'H', name: '水素', type: 'element' },
-            { id: 2, symbol: 'H', name: '水素', type: 'element' },
-            { id: 3, symbol: 'Cl', name: '塩素', type: 'element' },
-            { id: 4, symbol: 'Na', name: 'ナトリウム', type: 'element' },
-            { id: 5, symbol: 'O', name: '酸素', type: 'element' },
-            { id: 6, symbol: 'C', name: '炭素', type: 'element' },
-            { id: 7, symbol: 'O', name: '酸素', type: 'element' }
+        const MAX_HAND = 10; 
+        const MAX_FIELD = 5;
+
+        // 全元素定義
+        const ELEM = {
+            H: { symbol: 'H', name: '水素', rarity: 'N' },
+            He: { symbol: 'He', name: 'ヘリウム', rarity: 'SR' },
+            Li: { symbol: 'Li', name: 'リチウム', rarity: 'R' },
+            Be: { symbol: 'Be', name: 'ベリリウム', rarity: 'R' },
+            B: { symbol: 'B', name: 'ホウ素', rarity: 'R' },
+            C: { symbol: 'C', name: '炭素', rarity: 'N' },
+            N: { symbol: 'N', name: '窒素', rarity: 'N' },
+            O: { symbol: 'O', name: '酸素', rarity: 'N' },
+            F: { symbol: 'F', name: 'フッ素', rarity: 'SR' },
+            Ne: { symbol: 'Ne', name: 'ネオン', rarity: 'SR' },
+            Na: { symbol: 'Na', name: 'ナトリウム', rarity: 'N' },
+            Mg: { symbol: 'Mg', name: 'マグネシウム', rarity: 'R' },
+            Al: { symbol: 'Al', name: 'アルミニウム', rarity: 'R' },
+            Si: { symbol: 'Si', name: 'ケイ素', rarity: 'R' },
+            P: { symbol: 'P', name: 'リン', rarity: 'R' },
+            S: { symbol: 'S', name: '硫黄', rarity: 'R' },
+            Cl: { symbol: 'Cl', name: '塩素', rarity: 'N' },
+            Ar: { symbol: 'Ar', name: 'アルゴン', rarity: 'SR' },
+            K: { symbol: 'K', name: 'カリウム', rarity: 'N' },
+            Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R' },
+            Ti: { symbol: 'Ti', name: 'チタン', rarity: 'SR' },
+            V: { symbol: 'V', name: 'バナジウム', rarity: 'SR' },
+            Cr: { symbol: 'Cr', name: 'クロム', rarity: 'SR' },
+            Mn: { symbol: 'Mn', name: 'マンガン', rarity: 'R' },
+            Fe: { symbol: 'Fe', name: '鉄', rarity: 'N' },
+            Ni: { symbol: 'Ni', name: 'ニッケル', rarity: 'R' },
+            Cu: { symbol: 'Cu', name: '銅', rarity: 'N' },
+            Zn: { symbol: 'Zn', name: '亜鉛', rarity: 'R' },
+            Ga: { symbol: 'Ga', name: 'ガリウム', rarity: 'SR' },
+            Ge: { symbol: 'Ge', name: 'ゲルマニウム', rarity: 'SR' },
+            Ag: { symbol: 'Ag', name: '銀', rarity: 'SR' },
+            Cd: { symbol: 'Cd', name: 'カドミウム', rarity: 'R' },
+            Sn: { symbol: 'Sn', name: 'スズ', rarity: 'R' },
+            Ba: { symbol: 'Ba', name: 'バリウム', rarity: 'R' },
+            W:  { symbol: 'W', name: 'タングステン', rarity: 'SSR' },
+            Pt: { symbol: 'Pt', name: 'プラチナ', rarity: 'SSR' },
+            Au: { symbol: 'Au', name: '金', rarity: 'SSR' },
+            Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR' },
+            Pb: { symbol: 'Pb', name: '鉛', rarity: 'R' }
+        };
+
+        const RECIPES = [
+            // 速攻
+            { ingredients: ['H', 'Cl'], product: { symbol: 'HCl', name: '塩化水素', atk: 5, hp: 1, skills: [{name:'強酸腐食', power:5, desc:'高火力の酸攻撃'}] }},
+            { ingredients: ['H', 'F'], product: { symbol: 'HF', name: 'フッ化水素', atk: 4, hp: 2, ability:'toxic', skills: [{name:'ガラス腐食', power:4, desc:'通常攻撃'}, {name:'猛毒', power:0, type:'toxic', desc:'触れると危険(必殺)'}] }},
+            { ingredients: ['Na', 'H'], product: { symbol: 'NaH', name: '水素化Na', atk: 3, hp: 1, ability:'storm', skills: [{name:'還元作用', power:3, desc:'疾走:即攻撃可能'}] }},
+            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', atk: 1, hp: 4, skills: [{name:'水流', power:1, desc:'攻撃'}, {name:'加水分解', power:3, type:'heal', desc:'リーダーを3回復'}] }},
+            // カウンター
+            { ingredients: ['Ag', 'Cl'], product: { symbol: 'AgCl', name: '塩化銀', atk: 1, hp: 6, ability:'ward', skills: [{name:'感光', power:1, desc:'攻撃'}, {name:'白色沈殿', power:0, type:'guard', desc:'守護:壁になる'}] }},
+            { ingredients: ['Fe', 'O'], product: { symbol: 'FeO', name: '酸化鉄(II)', atk: 3, hp: 5, skills: [{name:'黒錆', power:3, desc:'通常攻撃'}] }},
+            { ingredients: ['Fe', 'O', 'O'], product: { symbol: 'Fe2O3', name: '赤錆(不動態)', atk: 2, hp: 8, ability:'ward', skills: [{name:'不動態皮膜', power:2, desc:'高い防御力で守る'}] }},
+            { ingredients: ['Cu', 'O'], product: { symbol: 'CuO', name: '酸化銅(II)', atk: 3, hp: 4, skills: [{name:'黒色粉末', power:3, desc:'通常攻撃'}] }},
+            { ingredients: ['Zn', 'Cu'], product: { symbol: 'Brass', name: '黄銅', atk: 4, hp: 5, skills: [{name:'合金アタック', power:4, desc:'安定した強さ'}] }},
+            { ingredients: ['Hg', 'Zn'], product: { symbol: 'Amalgam', name: '亜鉛アマルガム', atk: 3, hp: 6, ability:'ward', skills: [{name:'アマルガム化', power:3, desc:'守護を持つ合金'}] }},
+            // 害悪
+            { ingredients: ['C', 'O'], product: { symbol: 'CO', name: '一酸化炭素', atk: 1, hp: 2, ability:'toxic', skills: [{name:'不完全燃焼', power:1, desc:'攻撃'}, {name:'ヘモグロビン結合', power:0, type:'toxic', desc:'必殺:即死させる'}] }},
+            { ingredients: ['H', 'S'], product: { symbol: 'H2S', name: '硫化水素', atk: 2, hp: 3, ability:'toxic', skills: [{name:'腐卵臭', power:2, desc:'攻撃'}, {name:'硫化', power:0, type:'toxic', desc:'必殺攻撃'}] }},
+            { ingredients: ['Cl', 'Cl'], product: { symbol: 'Cl2', name: '塩素ガス', atk: 3, hp: 3, skills: [{name:'酸化作用', power:3, desc:'攻撃'}, {name:'毒ガス散布', power:2, type:'aoe', desc:'敵全体に2ダメージ'}] }},
+            { ingredients: ['S', 'O', 'O'], product: { symbol: 'SO2', name: '二酸化硫黄', atk: 2, hp: 4, skills: [{name:'漂白', power:2, desc:'攻撃'}, {name:'酸性雨', power:1, type:'aoe', desc:'敵全体に1ダメージ'}] }},
+            { ingredients: ['Cd', 'S'], product: { symbol: 'CdS', name: '硫化カドミウム', atk: 2, hp: 5, ability:'toxic', skills: [{name:'イタイイタイ', power:0, type:'toxic', desc:'猛毒:触れると即死'}] }},
+            // コントロール
+            { ingredients: ['Na', 'O', 'H'], product: { symbol: 'NaOH', name: '水酸化Na', atk: 3, hp: 3, skills: [{name:'潮解', power:3, desc:'攻撃'}, {name:'中和熱', power:2, type:'aoe_heal', desc:'敵全体2ダメ/自分2回復'}] }},
+            { ingredients: ['Al', 'O', 'O'], product: { symbol: 'Al2O3', name: 'アルミナ', atk: 2, hp: 7, ability:'ward', skills: [{name:'アルマイト', power:2, desc:'酸化被膜バリア'}] }},
+            { ingredients: ['Cl', 'Na'], product: { symbol: 'NaCl', name: '塩化Na', atk: 3, hp: 4, skills: [{name:'塩味', power:3, desc:'通常攻撃'}] }},
+            { ingredients: ['Ca', 'O', 'H', 'H'], product: { symbol: 'Ca(OH)2', name: '消石灰', atk: 1, hp: 6, ability:'ward', skills: [{name:'石灰水', power:1, desc:'攻撃'}, {name:'中和反応', power:4, type:'heal', desc:'HP4回復'}] }},
+            // 宝石
+            { ingredients: ['C', 'C', 'C'], product: { symbol: 'Diamond', name: 'ダイヤモンド', atk: 4, hp: 10, ability:'ward', skills: [{name:'モース硬度10', power:4, desc:'最強の硬度'}] }},
+            { ingredients: ['Al', 'O', 'O', 'Cr'], product: { symbol: 'Ruby', name: 'ルビー', atk: 5, hp: 8, skills: [{name:'深紅の輝き', power:5, desc:'高ステータス'}] }},
+            { ingredients: ['Al', 'O', 'Ti'], product: { symbol: 'Sapphire', name: 'サファイア', atk: 4, hp: 9, skills: [{name:'青玉', power:4, desc:'高耐久'}] }},
+            { ingredients: ['Si', 'O', 'O'], product: { symbol: 'SiO2', name: '石英(水晶)', atk: 3, hp: 6, skills: [{name:'圧電効果', power:3, desc:'攻撃'}, {name:'結晶化', power:2, type:'aoe', desc:'全体2ダメージ'}] }},
+            // 重金属
+            { ingredients: ['Au'], product: { symbol: 'Au', name: '金', atk: 6, hp: 6, skills: [{name:'不変の輝き', power:6, desc:'王水以外無敵の攻撃'}] }},
+            { ingredients: ['Pt'], product: { symbol: 'Pt', name: 'プラチナ', atk: 5, hp: 7, skills: [{name:'触媒作用', power:5, desc:'反応を促進する一撃'}] }},
+            { ingredients: ['W'], product: { symbol: 'W', name: 'タングステン', atk: 7, hp: 8, ability:'ward', skills: [{name:'融点3422℃', power:7, desc:'熱に強い一撃'}] }},
+            { ingredients: ['Ti'], product: { symbol: 'Ti', name: 'チタン', atk: 4, hp: 5, skills: [{name:'高強度', power:4, desc:'軽くて強い'}] }},
+            // ★貴ガス (弱体化: 2枚必要)
+            { ingredients: ['He', 'He'], product: { symbol: 'He', name: 'ヘリウム', atk: 2, hp: 2, ability:'stealth', skills: [{name:'不活性', power:2, desc:'潜伏攻撃'}] }},
+            { ingredients: ['Ne', 'Ne'], product: { symbol: 'Ne', name: 'ネオン', atk: 3, hp: 3, ability:'stealth', skills: [{name:'ネオンサイン', power:3, desc:'潜伏攻撃'}] }},
+            { ingredients: ['Ar', 'Ar'], product: { symbol: 'Ar', name: 'アルゴン', atk: 4, hp: 4, ability:'stealth', skills: [{name:'フィラメント保護', power:4, desc:'潜伏攻撃'}] }},
+            // 危険物
+            { ingredients: ['H', 'Cl', 'N', 'O', 'O', 'O'], product: { symbol: 'AquaRegia', name: '王水', atk: 0, hp: 0, type:'spell', skills: [{name:'金溶かし', power:99, type:'toxic', desc:'単体確定除去'}] }},
+            { ingredients: ['H', 'H', 'S', 'O', 'O', 'O', 'O'], product: { symbol: 'H2SO4', name: '濃硫酸', atk: 0, hp: 0, type:'spell', skills: [{name:'脱水作用', power:5, type:'aoe', desc:'敵全体5ダメージ'}] }},
+            { ingredients: ['K', 'Mn', 'O', 'O', 'O', 'O'], product: { symbol: 'KMnO4', name: '過マンガン酸K', atk: 0, hp: 0, type:'spell', skills: [{name:'強力酸化', power:7, type:'damage', desc:'単体7ダメージ'}] }},
         ];
 
-        // 合成レシピ（化学反応式）
-        // 順番に関係なく反応させるため、素材はアルファベット順にソートして判定します
-        const recipes = [
-            { ingredients: ['Cl', 'H'], product: { symbol: 'HCl', name: '塩化水素', type: 'molecule' } },
-            { ingredients: ['Cl', 'Na'], product: { symbol: 'NaCl', name: '塩化ナトリウム', type: 'molecule' } },
-            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', type: 'molecule' } },
-            { ingredients: ['C', 'O', 'O'], product: { symbol: 'CO2', name: '二酸化炭素', type: 'molecule' } },
-        ];
+        // デッキ構成 (貴ガスは2枚組で出るように増量)
+        const DECKS = {
+            aggro: { name: '超速攻', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
+            counter: { name: 'カウンター', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
+            toxic: { name: '害悪', elements: ['C', 'O', 'S', 'H', 'Cl', 'Cd'], recipes: ['CO', 'H2S', 'Cl2', 'SO2', 'CdS'] },
+            control: { name: 'コントロール', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
+            gemstone: { name: '宝石', elements: ['C', 'Al', 'O', 'Si', 'Cr', 'Ti'], recipes: ['Diamond', 'Ruby', 'Sapphire', 'SiO2'] },
+            heavy: { name: '重金属', elements: ['Au', 'Pt', 'W', 'Ti', 'Fe'], recipes: ['Au', 'Pt', 'W', 'Ti'] },
+            noble: { name: '貴ガス', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] }, // 2枚ずつ入る
+            hazard: { name: '危険物', elements: ['H', 'Cl', 'N', 'O', 'S', 'K', 'Mn'], recipes: ['AquaRegia', 'H2SO4', 'KMnO4'] }
+        };
 
-        // 選択中のカードIDリスト
-        let selectedIds = [];
+        let gs = {
+            playerDeck: null, enemyDeck: null,
+            playerPool: [], enemyPool: [],
+            playerRecipes: [], enemyRecipes: [],
+            turn: 1, isPlayerTurn: true, mp: 1, maxMp: 1,
+            player: { hp: 25, hand: [], field: [] },
+            enemy: { hp: 25, hand: [], field: [], mp: 1, maxMp: 1 },
+            selectedHandIds: [], attackingUnit: null,
+        };
 
-        // --- 2. 画面表示の仕組み ---
+        /* --- スタート処理 --- */
+        function startGame(playerDeckKey) {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-board').style.display = 'flex';
+            document.getElementById('action-btns').style.display = 'flex';
 
-        function renderHand() {
-            const container = document.getElementById('hand-container');
-            container.innerHTML = ''; // 一度空にする
+            const pConf = DECKS[playerDeckKey];
+            gs.playerPool = pConf.elements.map(sym => ELEM[sym]);
+            gs.playerRecipes = RECIPES.filter(r => pConf.recipes.includes(r.product.symbol));
 
-            myHand.forEach(card => {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'card';
-                if (card.type === 'molecule') cardDiv.classList.add('molecule'); // 分子なら色を変える
-                
-                // 選択されているかチェック
-                if (selectedIds.includes(card.id)) {
-                    cardDiv.classList.add('selected');
+            // CPU Random
+            const keys = Object.keys(DECKS);
+            const cpuKey = keys[Math.floor(Math.random() * keys.length)];
+            const eConf = DECKS[cpuKey];
+            gs.enemyPool = eConf.elements.map(sym => ELEM[sym]);
+            gs.enemyRecipes = RECIPES.filter(r => eConf.recipes.includes(r.product.symbol));
+            
+            document.getElementById('enemy-name').innerText = `CPU (${eConf.name})`;
+
+            for(let i=0; i<5; i++) { drawCard(gs.player); drawCard(gs.enemy); }
+            showMessage("DUEL START!");
+            updateView();
+        }
+
+        function drawCard(target) {
+            const pool = (target === gs.enemy) ? gs.enemyPool : gs.playerPool;
+            if (target.hand.length >= MAX_HAND) {
+                if(target === gs.enemy) target.hand.shift();
+                else return null; 
+            }
+            const base = pool[Math.floor(Math.random() * pool.length)];
+            const card = { ...base, id: Math.random().toString(36).substr(2, 9), type: 'element' };
+            target.hand.push(card);
+            return card;
+        }
+
+        function actionDraw() {
+            if(!gs.isPlayerTurn || gs.mp < 1) { showMessage("MP不足/手番外"); return; }
+            gs.mp--;
+            drawCard(gs.player);
+            updateView();
+        }
+
+        function actionSynthesize() {
+            if(!gs.isPlayerTurn) return;
+            if(gs.selectedHandIds.length === 0) return;
+
+            // ★貴ガスの弱体化により、単体合成は廃止（全てレシピ参照）
+            const selCards = gs.player.hand.filter(c => gs.selectedHandIds.includes(c.id));
+            const symbols = selCards.map(c => c.symbol).sort();
+            const recipe = gs.playerRecipes.find(r => JSON.stringify(r.ingredients.sort()) === JSON.stringify(symbols));
+
+            if(recipe) processSynth(recipe);
+            else { showMessage("反応しません"); gs.selectedHandIds = []; updateView(); }
+        }
+
+        function processSynth(recipe) {
+            if(recipe.product.type === 'spell') {
+                const skill = recipe.product.skills[0];
+                gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
+                gs.selectedHandIds = [];
+                if(gs.enemy.field.length > 0) {
+                    const target = gs.enemy.field.reduce((a,b)=>a.currentHp>b.currentHp?a:b);
+                    showMessage(`${skill.name} -> ${target.name}!`);
+                    if(skill.type === 'toxic') target.currentHp = -99;
+                    else target.currentHp -= skill.power;
+                } else {
+                    showMessage(`${skill.name} -> リーダー!`);
+                    gs.enemy.hp -= skill.power;
                 }
+                checkGameEnd(); updateView(); return;
+            }
 
-                cardDiv.innerHTML = `
-                    <div class="symbol">${card.symbol}</div>
-                    <div class="name">${card.name}</div>
-                `;
+            if(gs.player.field.length >= MAX_FIELD) { showMessage("フィールド満員"); return; }
+            gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
+            gs.selectedHandIds = [];
+            const unit = { ...recipe.product, id: Math.random().toString(36).substr(2, 9), maxHp: recipe.product.hp, currentHp: recipe.product.hp, canAttack: recipe.product.ability === 'storm', type: 'unit' };
+            gs.player.field.push(unit);
+            showMessage(`召喚！ ${unit.name}`);
+            updateView();
+        }
 
-                // クリック時の動作
-                cardDiv.onclick = () => toggleSelect(card.id);
+        function onHandClick(id) {
+            if(!gs.isPlayerTurn) return;
+            // カード詳細を表示
+            const card = gs.player.hand.find(c => c.id === id);
+            if(card) showDetail(card);
 
-                container.appendChild(cardDiv);
+            // 選択処理
+            if(gs.selectedHandIds.includes(id)) gs.selectedHandIds = gs.selectedHandIds.filter(x => x !== id);
+            else gs.selectedHandIds.push(id);
+            updateView();
+        }
+
+        function onFieldCardClick(id, isPlayer) {
+            if(!gs.isPlayerTurn) return;
+            if(isPlayer) {
+                const u = gs.player.field.find(x => x.id === id);
+                if(u) showDetail(u); // 詳細表示
+                if(u && u.canAttack) {
+                    gs.attackingUnit = u;
+                    document.body.classList.add('targeting');
+                    updateView();
+                }
+            } else if(gs.attackingUnit) {
+                const target = gs.enemy.field.find(x => x.id === id);
+                if(target) showDetail(target);
+                if(target.ability === 'stealth') { showMessage("潜伏中で選べない！"); return; }
+                prepareAttack(gs.attackingUnit, target, 'unit');
+            } else {
+                const target = gs.enemy.field.find(x => x.id === id);
+                if(target) showDetail(target);
+            }
+        }
+
+        function onLeaderClick(side) {
+            if(!gs.isPlayerTurn || side !== 'enemy' || !gs.attackingUnit) return;
+            prepareAttack(gs.attackingUnit, 'leader', 'leader');
+        }
+
+        function prepareAttack(attacker, target, type) {
+            if(type === 'leader' || (type === 'unit' && target.ability !== 'ward')) {
+                const guards = gs.enemy.field.filter(u => u.ability === 'ward' && u.ability !== 'stealth');
+                if(guards.length > 0) { showMessage("守護に阻まれた！"); cancelAttack(); return; }
+            }
+            if(attacker.skills.length > 1) openSkillModal(attacker, target);
+            else executeSkill(attacker, target, attacker.skills[0]);
+        }
+
+        function openSkillModal(attacker, target) {
+            const modal = document.getElementById('skill-modal');
+            const list = document.getElementById('skill-list');
+            list.innerHTML = '';
+            attacker.skills.forEach(skill => {
+                const btn = document.createElement('div');
+                btn.className = 'skill-btn';
+                let typeLabel = skill.type ? skill.type.toUpperCase() : 'NORMAL';
+                btn.innerHTML = `<span class="skill-name">${skill.name} <span style="float:right; color:#e67e22">威力:${skill.power}</span></span><span class="skill-desc">${skill.desc}</span>`;
+                btn.onclick = () => { executeSkill(attacker, target, skill); closeSkillModal(); };
+                list.appendChild(btn);
+            });
+            modal.style.display = 'flex';
+        }
+        function closeSkillModal() { document.getElementById('skill-modal').style.display = 'none'; cancelAttack(); }
+
+        function executeSkill(attacker, target, skill) {
+            let log = `${skill.name}!`;
+            if(skill.type === 'aoe') {
+                gs.enemy.field.forEach(u => u.currentHp -= skill.power); gs.enemy.hp -= skill.power;
+            } else if(skill.type === 'aoe_heal') {
+                gs.enemy.field.forEach(u => u.currentHp -= skill.power); gs.player.hp += skill.power;
+            } else if(skill.type === 'heal') {
+                gs.player.hp += skill.power;
+            } else {
+                const dmg = skill.power;
+                if(target === 'leader') gs.enemy.hp -= dmg;
+                else {
+                    const counter = target.atk;
+                    if(skill.type === 'toxic' && dmg > 0) target.currentHp = -99;
+                    else target.currentHp -= dmg;
+                    if(target.currentHp <= 0 && target.ability === 'toxic' && counter > 0) attacker.currentHp = -99;
+                    else attacker.currentHp -= counter;
+                }
+            }
+            attacker.canAttack = false; showMessage(log); cancelAttack(); checkGameEnd(); updateView();
+        }
+
+        function cancelAttack() { gs.attackingUnit = null; document.body.classList.remove('targeting'); updateView(); }
+        function checkGameEnd() {
+            gs.player.field = gs.player.field.filter(u => u.currentHp > 0);
+            gs.enemy.field = gs.enemy.field.filter(u => u.currentHp > 0);
+            if(gs.enemy.hp <= 0) alert("VICTORY!");
+            if(gs.player.hp <= 0) alert("DEFEAT...");
+        }
+
+        function endTurn() {
+            if(!gs.isPlayerTurn) return;
+            gs.isPlayerTurn = false; cancelAttack(); document.getElementById('btn-end-turn').disabled = true;
+            showMessage("ENEMY TURN"); setTimeout(cpuTurn, 1000);
+        }
+
+        async function cpuTurn() {
+            if(gs.enemy.maxMp < 10) gs.enemy.maxMp++; gs.enemy.mp = gs.enemy.maxMp;
+            drawCard(gs.enemy); updateView(); await sleep(800);
+            
+            let acted = true;
+            while(acted && gs.enemy.field.length < MAX_FIELD) {
+                acted = false;
+                const handSym = gs.enemy.hand.map(c => c.symbol);
+                for(const r of gs.enemyRecipes) {
+                    if(r.product.type === 'spell') continue;
+                    const ingredients = [...r.ingredients];
+                    const tempHand = [...handSym];
+                    let possible = true;
+                    for(const ing of ingredients) {
+                        const idx = tempHand.indexOf(ing);
+                        if(idx === -1) { possible = false; break; }
+                        tempHand.splice(idx, 1);
+                    }
+                    if(possible) {
+                        for(const ing of r.ingredients) {
+                            const idx = gs.enemy.hand.findIndex(c => c.symbol === ing);
+                            gs.enemy.hand.splice(idx, 1);
+                        }
+                        const unit = { ...r.product, id: Math.random(), maxHp: r.product.hp, currentHp: r.product.hp, canAttack:false, type:'unit'};
+                        gs.enemy.field.push(unit);
+                        showMessage(`CPU召喚: ${unit.name}`);
+                        await sleep(800); updateView(); acted = true; break;
+                    }
+                }
+            }
+            gs.enemy.field.forEach(u => u.canAttack = true);
+            for(const u of gs.enemy.field) {
+                if(!u.canAttack) continue;
+                const guards = gs.player.field.filter(g => g.ability === 'ward' && g.ability !== 'stealth');
+                let target = 'leader';
+                if(guards.length > 0) target = guards[0];
+                if(target === 'leader') {
+                    gs.player.hp -= u.skills[0].power; showMessage(`CPU攻撃 -> リーダー!`);
+                } else {
+                    const dmg = u.skills[0].power;
+                    const toxic = u.skills[0].type === 'toxic';
+                    if(toxic && dmg > 0) target.currentHp = -99; else target.currentHp -= dmg;
+                    u.currentHp -= target.atk; showMessage(`CPU攻撃 -> ${target.name}!`);
+                }
+                checkGameEnd(); updateView(); await sleep(800);
+            }
+            startPlayerTurn();
+        }
+
+        function startPlayerTurn() {
+            gs.turn++; if(gs.maxMp < 10) gs.maxMp++; gs.mp = gs.maxMp;
+            gs.isPlayerTurn = true; document.getElementById('btn-end-turn').disabled = false;
+            gs.player.field.forEach(u => u.canAttack = true);
+            drawCard(gs.player); showMessage("YOUR TURN"); updateView();
+        }
+        const sleep = m => new Promise(r => setTimeout(r, m));
+
+        function updateView() {
+            document.getElementById('turn-display').innerText = `TURN ${gs.turn}`;
+            document.getElementById('mp-display').innerText = `MP ${gs.mp}/${gs.maxMp}`;
+            document.getElementById('player-hp').innerText = gs.player.hp;
+            document.getElementById('enemy-hp').innerText = gs.enemy.hp;
+            renderCards('player-hand-area', gs.player.hand, 'hand');
+            renderCards('player-field', gs.player.field, 'field', true);
+            renderCards('enemy-field', gs.enemy.field, 'field', false);
+            
+            const eh = document.getElementById('enemy-hand-area'); eh.innerHTML = '';
+            gs.enemy.hand.forEach(() => { const d = document.createElement('div'); d.className = 'card'; d.style.background='#34495e'; d.style.width='30px'; d.style.height='45px'; eh.appendChild(d); });
+            updateHint();
+        }
+
+        function showDetail(card) {
+            const p = document.getElementById('card-detail-panel'); p.style.display = 'flex';
+            document.getElementById('detail-symbol').innerText = card.symbol;
+            document.getElementById('detail-name').innerText = card.name;
+            const stats = document.getElementById('detail-stats');
+            const skills = document.getElementById('detail-skills');
+            skills.innerHTML = '';
+
+            if(card.type === 'element') {
+                stats.innerHTML = `<span style="font-size:14px; color:#ccc">素材カード</span>`;
+                skills.innerHTML = `<div class="skill-item"><div class="skill-item-desc">レアリティ: ${card.rarity}</div></div>`;
+            } else {
+                stats.innerHTML = `<span style="color:#e67e22">⚔️ ${card.atk}</span> <span style="color:#2ecc71">❤️ ${card.currentHp}/${card.maxHp}</span>`;
+                if(card.ability === 'ward') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">🛡️ 守護</div><div class="skill-item-desc">壁になる</div></div>`;
+                if(card.ability === 'toxic') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">☠️ 毒</div><div class="skill-item-desc">必殺</div></div>`;
+                if(card.ability === 'storm') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">⚡ 疾走</div><div class="skill-item-desc">即攻撃可</div></div>`;
+                if(card.ability === 'stealth') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">👁️ 潜伏</div><div class="skill-item-desc">選ばれない</div></div>`;
+                card.skills.forEach(s => {
+                    skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">${s.name} (威力:${s.power})</div><div class="skill-item-desc">${s.desc}</div></div>`;
+                });
+            }
+        }
+        function hideDetail() { document.getElementById('card-detail-panel').style.display = 'none'; }
+
+        function renderCards(id, cards, type, isPlayer) {
+            const el = document.getElementById(id); el.innerHTML = '';
+            cards.forEach(c => {
+                const div = document.createElement('div'); div.className = 'card';
+                // スマホ用: クリックで詳細
+                div.onclick = (e) => { 
+                    e.stopPropagation();
+                    if(type==='hand') onHandClick(c.id); 
+                    if(type==='field') onFieldCardClick(c.id, isPlayer); 
+                };
+
+                if(type === 'hand' && gs.selectedHandIds.includes(c.id)) div.classList.add('selected');
+                if(type === 'field' && c.canAttack && isPlayer) div.classList.add('can-attack');
+                if(type === 'field' && !isPlayer && gs.attackingUnit && c.ability !== 'stealth') {
+                    const hasWard = gs.enemy.field.some(u => u.ability === 'ward' && u.ability !== 'stealth');
+                    if(!hasWard || c.ability === 'ward') div.classList.add('valid-target');
+                }
+                
+                let content = '';
+                if(c.type === 'element') {
+                    content = `<div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div>`;
+                } else {
+                    let badges = `<div class="ability-container">`;
+                    if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡️</div>`;
+                    if(c.ability === 'toxic') badges += `<div class="badge badge-toxic">☠️</div>`;
+                    if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
+                    if(c.ability === 'stealth') badges += `<div class="badge badge-stealth">👁️</div>`;
+                    badges += `</div>`;
+                    content = `${badges}<div class="card-symbol" style="color:#3498db">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div>`;
+                }
+                div.innerHTML = content;
+                el.appendChild(div);
             });
         }
 
-        // --- 3. ゲームのロジック ---
-
-        // カードを選択・解除する機能
-        function toggleSelect(id) {
-            if (selectedIds.includes(id)) {
-                // すでに選ばれていたら外す
-                selectedIds = selectedIds.filter(selectedId => selectedId !== id);
-            } else {
-                // 選ばれていなければ追加する
-                selectedIds.push(id);
-            }
-            renderHand(); // 画面更新
-        }
-
-        // 合成（反応）ボタンを押したときの機能
-        function synthesize() {
-            if (selectedIds.length < 2) {
-                showMessage("2枚以上のカードを選んでください");
-                return;
-            }
-
-            // 選ばれたカードのデータを取り出す
-            const selectedCards = myHand.filter(card => selectedIds.includes(card.id));
-            
-            // 元素記号のリストを作って、アルファベット順に並べる（H, Cl の順でも Cl, H の順でも反応させるため）
-            const selectedSymbols = selectedCards.map(c => c.symbol).sort();
-
-            // レシピ帳を検索
-            let matchRecipe = null;
-            
-            for (const recipe of recipes) {
-                // レシピの素材もソートしておく
-                const recipeIngredients = recipe.ingredients.sort();
-                
-                // 文字列にして比較（配列の比較を簡単にするため）
-                if (JSON.stringify(selectedSymbols) === JSON.stringify(recipeIngredients)) {
-                    matchRecipe = recipe;
-                    break;
+        function updateHint() {
+            const list = document.getElementById('craftable-list'); list.innerHTML = '';
+            if(!gs.isPlayerTurn) return;
+            gs.playerRecipes.forEach(r => {
+                const handSym = gs.player.hand.map(c => c.symbol);
+                let possible = true;
+                for(const ing of r.ingredients) {
+                    const idx = handSym.indexOf(ing);
+                    if(idx === -1) { possible = false; break; }
+                    handSym.splice(idx, 1);
                 }
-            }
-
-            if (matchRecipe) {
-                // 合成成功！
-                successSynthesis(matchRecipe);
-            } else {
-                // 失敗
-                showMessage("反応しませんでした...");
-                selectedIds = []; // 選択解除
-                renderHand();
-            }
+                if(possible) {
+                    const btn = document.createElement('div'); btn.className = 'craft-hint-btn';
+                    let badges = '';
+                    if(r.product.ability === 'ward') badges += '🛡️';
+                    if(r.product.ability === 'toxic') badges += '☠️';
+                    if(r.product.ability === 'storm') badges += '⚡';
+                    btn.innerHTML = `<div style="font-size:12px; font-weight:bold; color:#f1c40f;">✨ ${r.product.name}</div><div style="font-size:10px; display:flex; gap:5px; margin-top:2px;"><span style="color:#e67e22;">⚔️${r.product.atk}</span><span style="color:#2ecc71;">❤️${r.product.hp}</span><span>${badges}</span></div>`;
+                    btn.onclick = () => autoSelect(r.ingredients);
+                    list.appendChild(btn);
+                }
+            });
         }
-
-        function successSynthesis(recipe) {
-            showMessage(`合成成功！ ${recipe.product.name} を生成！`);
-
-            // 1. 素材になったカードを手札から消す
-            myHand = myHand.filter(card => !selectedIds.includes(card.id));
-
-            // 2. 新しいカード（生成物）を追加する
-            const newCard = {
-                id: Date.now(), // 現在時刻をIDにして重複を防ぐ
-                symbol: recipe.product.symbol,
-                name: recipe.product.name,
-                type: 'molecule'
-            };
-            myHand.push(newCard);
-
-            // 3. 選択状態をリセットして画面更新
-            selectedIds = [];
-            renderHand();
+        function autoSelect(ingredients) {
+            gs.selectedHandIds = []; const tempHand = [...gs.player.hand];
+            ingredients.forEach(ing => {
+                const idx = tempHand.findIndex(c => c.symbol === ing);
+                if(idx !== -1) { gs.selectedHandIds.push(tempHand[idx].id); tempHand.splice(idx, 1); }
+            });
+            updateView();
         }
-
-        function showMessage(text) {
-            document.getElementById('message-area').innerText = text;
-        }
-
-        // 開始
-        renderHand();
+        function showMessage(txt) { const box = document.getElementById('msg-box'); box.innerText = txt; box.style.opacity = 1; setTimeout(() => box.style.opacity = 0, 1500); }
 
     </script>
 </body>
