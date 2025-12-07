@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: JP Complete</title>
+    <title>Chem-Verse: Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,7 +30,7 @@
             width: 100vw;
         }
 
-        /* --- 共通コンポーネント --- */
+        /* --- 共通 --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -39,35 +39,32 @@
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-        /* --- CSSアート (画像なしでイラスト表現) --- */
+        /* --- CSSアート (画像なしイラスト) --- */
         .css-art { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         
-        /* 気体: ふわふわ */
         .art-gas { background: linear-gradient(to top, #89f7fe, #66a6ff); }
         .art-gas::after { content: '☁️'; font-size: 24px; filter: drop-shadow(0 0 5px white); animation: float 3s infinite ease-in-out; }
         
-        /* 液体: うるうる */
         .art-liquid { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
         .art-liquid::after { content: '💧'; font-size: 24px; animation: bounce 2s infinite; }
         
-        /* 固体: ごつごつ */
         .art-solid { background: linear-gradient(to bottom, #e6b980, #eacda3); }
         .art-solid::after { content: '🪨'; font-size: 24px; }
         
-        /* 金属: キラキラ */
         .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); }
         .art-metal::after { content: '✨'; font-size: 24px; text-shadow: 0 0 5px white; }
         
-        /* 毒: どろどろ */
         .art-toxic { background: linear-gradient(to bottom, #f093fb, #f5576c); }
         .art-toxic::after { content: '☠️'; font-size: 24px; filter: drop-shadow(0 0 5px purple); }
 
-        /* 個別アート */
         .art-H { background: linear-gradient(to top, #a1c4fd, #c2e9fb); }
         .art-H::after { content: '( •ω• )'; font-size: 14px; color: #555; background: white; padding: 5px; border-radius: 50%; box-shadow: 0 0 10px white; }
         
         .art-Au { background: radial-gradient(circle, #ffd700, #b8860b); }
         .art-Au::after { content: '💰'; font-size: 28px; }
+
+        .art-Cl { background: linear-gradient(to top, #d4fc79, #96e6a1); }
+        .art-Cl::after { content: '🤢'; font-size: 24px; }
 
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -87,7 +84,7 @@
         .deck-desc { font-size: 10px; color: #ccc; }
         .back-btn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; padding: 10px 30px; border-radius: 20px; z-index: 200; }
 
-        /* --- ゲームボード (縦レイアウト) --- */
+        /* --- ゲームボード --- */
         #game-board { display: none; flex-direction: column; height: 100vh; position: relative; background: #111; }
         
         #enemy-hand-area { height: 10%; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 2px; }
@@ -107,14 +104,13 @@
             padding-left: 10px; gap: 8px;
         }
 
-        /* --- カードデザイン --- */
+        /* --- カード --- */
         .card {
             width: 70px; height: 100px; background: #222; color: #fff;
             border-radius: 8px; position: relative; flex-shrink: 0;
             box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 2px solid #555;
             transition: transform 0.1s; overflow: hidden;
         }
-        /* レアリティ演出 */
         .card[data-rarity="N"] { border-color: var(--rare-n); }
         .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow: 0 0 5px var(--rare-r); }
         .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 8px var(--rare-sr); }
@@ -124,13 +120,12 @@
         .card-art-area { width: 100%; height: 55%; position: relative; }
         .card-info-area { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .card-symbol { font-size: 14px; font-weight: bold; color: var(--primary); text-align: center; text-shadow: 0 0 2px black; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; display: none; } /* アートがあるのでシンボルは隠すか控えめに */
+        .card-symbol { font-size: 14px; font-weight: bold; color: var(--primary); text-align: center; text-shadow: 0 0 2px black; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; display: none; }
         .card-name { font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
         
         .stats { display: flex; justify-content: space-between; padding: 0 2px; font-weight: bold; font-size: 10px; margin-bottom: 2px; }
         .stat-atk { color: #e67e22; } .stat-hp { color: #2ecc71; }
 
-        /* バッジ */
         .ability-container { position: absolute; top: 2px; right: 2px; display: flex; gap: 1px; z-index: 5; }
         .badge { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         .badge-ward { background: #3498db; } .badge-toxic { background: #8e44ad; } .badge-storm { background: #f1c40f; } .badge-stealth { background: #95a5a6; }
@@ -234,7 +229,7 @@
     <div id="skill-modal">
         <h3>技を選択してください</h3>
         <div id="skill-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="game-btn" style="background:#777; margin-top:20px;" onclick="document.getElementById('skill-modal').style.display='none'; cancelAttack();">キャンセル</button>
+        <button class="game-btn" style="background:#7f8c8d; margin-top:20px;" onclick="document.getElementById('skill-modal').style.display='none'; cancelAttack();">キャンセル</button>
     </div>
 
     <div id="result-screen" class="hidden">
@@ -263,7 +258,7 @@
             Si: { symbol: 'Si', name: 'ケイ素', rarity: 'R', css: 'art-solid' },
             P: { symbol: 'P', name: 'リン', rarity: 'R', css: 'art-solid' },
             S: { symbol: 'S', name: '硫黄', rarity: 'R', css: 'art-solid' },
-            Cl: { symbol: 'Cl', name: '塩素', rarity: 'N', css: 'art-toxic' },
+            Cl: { symbol: 'Cl', name: '塩素', rarity: 'N', css: 'art-Cl' },
             Ar: { symbol: 'Ar', name: 'アルゴン', rarity: 'SR', css: 'art-gas' },
             K: { symbol: 'K', name: 'カリウム', rarity: 'N', css: 'art-metal' },
             Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R', css: 'art-metal' },
@@ -344,10 +339,17 @@
 
         function startGame(key) {
             gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
-            gs.pool = DECKS[key].elements.map(s => ELEM[s]);
-            gs.recipes = RECIPES; 
-            gs.enemyPool = DECKS[Object.keys(DECKS)[Math.floor(Math.random()*Object.keys(DECKS).length)]].elements.map(s=>ELEM[s]);
+            gs.playerPool = DECKS[key].elements.map(s => ELEM[s]);
+            // ★修正点: プレイヤー用レシピと敵用レシピを分ける
+            gs.playerRecipes = RECIPES.filter(r => DECKS[key].recipes.includes(r.product.symbol));
+
+            // CPU Random
+            const cpuKey = Object.keys(DECKS)[Math.floor(Math.random()*Object.keys(DECKS).length)];
+            gs.enemyPool = DECKS[cpuKey].elements.map(s=>ELEM[s]);
+            gs.enemyRecipes = RECIPES.filter(r => DECKS[cpuKey].recipes.includes(r.product.symbol));
             
+            document.getElementById('enemy-name').innerText = `CPU (${DECKS[cpuKey].name})`;
+
             hideAll();
             document.getElementById('game-board').style.display='flex';
             document.getElementById('action-btns').style.display='flex';
@@ -358,7 +360,7 @@
         }
 
         function draw(isPlayer) {
-            const pool = isPlayer ? gs.pool : gs.enemyPool;
+            const pool = isPlayer ? gs.playerPool : gs.enemyPool;
             const card = { ...pool[Math.floor(Math.random()*pool.length)], id: Math.random(), type:'element' };
             if(isPlayer) { if(gs.hand.length<10) gs.hand.push(card); }
             else { if(gs.enemyHand.length<10) gs.enemyHand.push(card); }
@@ -373,12 +375,14 @@
             if(!gs.isPlayerTurn || gs.selected.length<1) return;
             const sel = gs.hand.filter(c=>gs.selected.includes(c.id));
             const syms = sel.map(c=>c.symbol).sort();
-            const rec = gs.recipes.find(r=>JSON.stringify(r.ingredients.sort())===JSON.stringify(syms));
+            // ★修正点: gs.playerRecipesを使う
+            const rec = gs.playerRecipes.find(r=>JSON.stringify(r.ingredients.sort())===JSON.stringify(syms));
             if(rec) processSynth(rec);
             else { msg("反応しません"); gs.selected=[]; updateView(); }
         }
 
         function processSynth(rec) {
+            // スペル
             if(rec.product.type==='spell') {
                 gs.hand = gs.hand.filter(c=>!gs.selected.includes(c.id)); gs.selected=[];
                 // 簡易効果
@@ -486,12 +490,13 @@
         async function cpuTurn() {
             if(gs.maxMp<10) gs.maxMp++; gs.mp=gs.maxMp;
             draw(false); updateView(); await sleep(500);
-            // 簡易CPU
+            
+            // CPU合成 (修正点: gs.enemyRecipesを使用)
             let acted=true;
             while(acted && gs.enemyField.length<MAX_FIELD) {
                 acted=false;
                 const hand = gs.enemyHand.map(c=>c.symbol);
-                for(let r of gs.recipes) {
+                for(let r of gs.enemyRecipes) {
                     if(r.product.type==='spell') continue;
                     let ing=[...r.ingredients], tHand=[...hand], ok=true;
                     for(let i of ing) {
@@ -558,9 +563,8 @@
                     if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡️</div>`;
                     if(c.ability === 'toxic') badges += `<div class="badge badge-toxic">☠️</div>`;
                     if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
-                    if(c.ability === 'stealth') badges += `<div class="badge badge-stealth">👁️</div>`;
                     badges += `</div>`;
-                    content = `${badges}<div class="card-art-area ${art} css-art"></div><div class="card-info-area"><div class="card-symbol" style="position:static; display:block; color:var(--primary);">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div></div>`;
+                    content = `${badges}<div class="card-art-area ${art} css-art"></div><div class="card-info-area"><div class="card-symbol" style="color:var(--primary); position:static; display:block;">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div></div>`;
                 }
                 d.innerHTML = content;
                 
@@ -576,7 +580,8 @@
         function updateHint() {
             const list = document.getElementById('craftable-list'); list.innerHTML='';
             if(!gs.isPlayerTurn) return;
-            gs.recipes.forEach(r => {
+            // ★修正点: gs.playerRecipesを使う
+            gs.playerRecipes.forEach(r => {
                 const handSym = gs.hand.map(c=>c.symbol);
                 let possible = true;
                 for(let ing of r.ingredients) {
@@ -585,8 +590,8 @@
                     handSym.splice(idx,1);
                 }
                 if(possible) {
-                    const b = document.createElement('div'); b.className='craft-hint-btn';
-                    b.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">✨ ${r.product.name}</div><div style="font-size:10px; color:#ccc;">合成可能</div>`;
+                    const b = document.createElement('div'); b.className='craft-btn';
+                    b.innerText = `✨ ${r.product.name}`;
                     b.onclick = () => {
                         gs.selected = []; const tempHand=[...gs.hand];
                         r.ingredients.forEach(ing => {
@@ -604,15 +609,12 @@
             const p = document.getElementById('detail-panel'); p.style.display='flex';
             document.getElementById('det-sym').innerText = c.symbol;
             document.getElementById('det-name').innerText = c.name;
-            const skillsDiv = document.getElementById('det-skills'); skillsDiv.innerHTML='';
             if(c.type!=='element') {
                 document.getElementById('det-stats').innerHTML = `⚔️${c.atk} <span style="margin-left:10px; color:var(--success)">❤️${c.currentHp}/${c.maxHp}</span>`;
-                c.skills.forEach(s => {
-                    skillsDiv.innerHTML += `<div class="skill-item"><div style="font-weight:bold; color:var(--accent)">${s.name} (威力:${s.power})</div><div style="font-size:11px;">${s.desc}</div></div>`;
-                });
+                document.getElementById('det-desc').innerHTML = (c.skills||[]).map(s=>`<div><b>【${s.name}】</b> ${s.desc}</div>`).join('');
             } else {
                 document.getElementById('det-stats').innerText = '';
-                skillsDiv.innerText = '合成素材';
+                document.getElementById('det-desc').innerText = '合成素材';
             }
         }
 
