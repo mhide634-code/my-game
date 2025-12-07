@@ -1,590 +1,461 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: Complete Fixed</title>
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #1a1a1d;
-            --accent: #f1c40f;
-            --primary: #3498db;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-            --rare-n: #95a5a6;
-            --rare-r: #3498db;
-            --rare-sr: #9b59b6;
-            --rare-ssr: #f1c40f;
-        }
-        body {
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            background-color: var(--bg-color);
-            color: white; margin: 0; user-select: none;
-            overflow: hidden; -webkit-tap-highlight-color: transparent;
-            height: 100vh; width: 100vw;
-        }
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            z-index: 100; transition: opacity 0.3s;
-        }
-        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chem-Verse: Fixed</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<style>
+    :root { --bg:#1a1a1d; --acc:#f1c40f; --pri:#3498db; --dang:#e74c3c; --succ:#2ecc71; --n:#95a5a6; --r:#3498db; --sr:#9b59b6; --ssr:#f1c40f; }
+    body { font-family:'M PLUS Rounded 1c',sans-serif; background:var(--bg); color:white; margin:0; user-select:none; overflow:hidden; height:100vh; width:100vw; -webkit-tap-highlight-color:transparent; }
+    .screen { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg,#0f0c29,#302b63,#24243e); z-index:100; transition:opacity 0.3s; }
+    .hidden { display:none!important; opacity:0; pointer-events:none; }
 
-        /* CSS Art */
-        .css-art { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .art-gas { background: linear-gradient(to top, #89f7fe, #66a6ff); }
-        .art-gas::after { content: '☁️'; font-size: 24px; filter: drop-shadow(0 0 5px white); animation: float 3s infinite ease-in-out; }
-        .art-liquid { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
-        .art-liquid::after { content: '💧'; font-size: 24px; animation: bounce 2s infinite; }
-        .art-solid { background: linear-gradient(to bottom, #e6b980, #eacda3); }
-        .art-solid::after { content: '🪨'; font-size: 24px; }
-        .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); }
-        .art-metal::after { content: '✨'; font-size: 24px; text-shadow: 0 0 5px white; }
-        .art-toxic { background: linear-gradient(to bottom, #f093fb, #f5576c); }
-        .art-toxic::after { content: '☠️'; font-size: 24px; filter: drop-shadow(0 0 5px purple); }
-        .art-H { background: linear-gradient(to top, #a1c4fd, #c2e9fb); }
-        .art-H::after { content: '( •ω• )'; font-size: 14px; background: white; padding: 5px; border-radius: 50%; color:#333; }
-        .art-Au { background: radial-gradient(circle, #ffd700, #b8860b); }
-        .art-Au::after { content: '💰'; font-size: 28px; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    /* CSS Art */
+    .css-art { width:100%; height:100%; position:relative; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+    .art-gas { background:linear-gradient(to top,#89f7fe,#66a6ff); } .art-gas::after { content:'☁️'; font-size:24px; filter:drop-shadow(0 0 5px white); animation:float 3s infinite ease-in-out; }
+    .art-liq { background:linear-gradient(to bottom,#4facfe,#00f2fe); } .art-liq::after { content:'💧'; font-size:24px; animation:bounce 2s infinite; }
+    .art-sol { background:linear-gradient(to bottom,#e6b980,#eacda3); } .art-sol::after { content:'🪨'; font-size:24px; }
+    .art-met { background:linear-gradient(135deg,#f7971e,#ffd200); } .art-met::after { content:'✨'; font-size:24px; text-shadow:0 0 5px white; }
+    .art-tox { background:linear-gradient(to bottom,#f093fb,#f5576c); } .art-tox::after { content:'☠️'; font-size:24px; filter:drop-shadow(0 0 5px purple); }
+    .art-H { background:linear-gradient(to top,#a1c4fd,#c2e9fb); } .art-H::after { content:'(•ω•)'; font-size:12px; background:white; padding:4px; border-radius:50%; color:#333; }
+    .art-Cl { background:linear-gradient(to top,#d4fc79,#96e6a1); } .art-Cl::after { content:'🤢'; font-size:24px; }
+    .art-Au { background:radial-gradient(circle,#ffd700,#b8860b); } .art-Au::after { content:'💰'; font-size:28px; }
+    @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
+    @keyframes bounce { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
 
-        /* UI Styles */
-        #title-screen { background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%); }
-        .game-logo { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--accent); text-shadow: 0 0 20px var(--accent); margin-bottom: 20px; text-align: center; }
-        .menu-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; margin: 10px; transition: 0.2s; }
-        
-        #deck-select-screen { padding: 20px; box-sizing: border-box; display: block; overflow-y: auto; }
-        .deck-header { text-align: center; font-size: 20px; margin-bottom: 20px; color: var(--accent); }
-        .deck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 60px; }
-        .deck-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 15px; border-radius: 12px; cursor: pointer; min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; }
-        .deck-title { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
-        .deck-desc { font-size: 10px; color: #ccc; }
-        .back-btn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; padding: 10px 30px; border-radius: 20px; z-index: 200; }
+    /* UI */
+    #title-screen { background:radial-gradient(circle at center,#2c3e50,#000); }
+    .logo { font-family:'Orbitron',sans-serif; font-size:40px; color:var(--acc); text-shadow:0 0 20px var(--acc); margin-bottom:20px; text-align:center; }
+    .menu-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; padding:15px 40px; border-radius:30px; font-weight:bold; cursor:pointer; margin:10px; }
+    
+    #deck-screen { padding:20px; box-sizing:border-box; overflow-y:auto; display:block; }
+    .d-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding-bottom:60px; }
+    .d-card { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:15px; border-radius:12px; cursor:pointer; min-height:100px; display:flex; flex-direction:column; justify-content:space-between; }
+    .d-title { font-weight:bold; color:var(--acc); margin-bottom:5px; } .d-desc { font-size:10px; color:#ccc; }
+    .back-btn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; padding:10px 30px; border-radius:20px; z-index:200; cursor:pointer;}
 
-        #game-board { display: none; flex-direction: column; height: 100vh; background: #111; position: relative; }
-        #enemy-hand-area { height: 10%; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 2px; }
-        #enemy-field { height: 23%; border-bottom: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
-        #info-area { height: 12%; background: rgba(20,20,30,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 10; border-top: 1px solid #333; border-bottom: 1px solid #333; }
-        #player-field { height: 23%; border-top: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
-        #player-hand-area { height: 32%; background: rgba(0,0,0,0.2); overflow-x: auto; display: flex; align-items: center; padding-left: 10px; gap: 8px; }
+    #board { display:none; flex-direction:column; height:100vh; background:#111; position:relative; }
+    #e-hand { height:10%; background:rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center; gap:2px; }
+    #e-field { height:23%; border-bottom:2px solid #333; display:flex; justify-content:center; align-items:center; }
+    #info { height:12%; background:rgba(20,20,30,0.9); display:flex; justify-content:space-between; align-items:center; padding:0 10px; z-index:10; border-top:1px solid #333; border-bottom:1px solid #333; }
+    #p-field { height:23%; border-top:2px solid #333; display:flex; justify-content:center; align-items:center; }
+    #p-hand { height:32%; background:rgba(0,0,0,0.2); overflow-x:auto; display:flex; align-items:center; padding-left:10px; gap:8px; }
 
-        .card { width: 70px; height: 100px; background: #222; color: #fff; border-radius: 8px; position: relative; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 2px solid #555; transition: transform 0.1s; overflow: hidden; }
-        .card[data-rarity="N"] { border-color: var(--rare-n); }
-        .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow: 0 0 5px var(--rare-r); }
-        .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 8px var(--rare-sr); }
-        .card[data-rarity="SSR"] { border-color: var(--rare-ssr); box-shadow: 0 0 10px var(--rare-ssr); animation: holo 3s infinite linear; }
-        @keyframes holo { 0% { filter: brightness(1); } 50% { filter: brightness(1.3); } 100% { filter: brightness(1); } }
+    .card { width:70px; height:100px; background:#222; border-radius:8px; border:2px solid #555; margin:3px; position:relative; flex-shrink:0; box-shadow:0 4px 8px rgba(0,0,0,0.5); overflow:hidden; transition:transform 0.1s; }
+    .card[data-r="N"]{border-color:var(--n);} .card[data-r="R"]{border-color:var(--r);box-shadow:0 0 5px var(--r);} .card[data-r="SR"]{border-color:var(--sr);box-shadow:0 0 8px var(--sr);} .card[data-r="SSR"]{border-color:var(--ssr);box-shadow:0 0 10px var(--ssr);animation:holo 3s infinite linear;}
+    @keyframes holo { 0%{filter:brightness(1);} 50%{filter:brightness(1.3);} 100%{filter:brightness(1);} }
 
-        .card-art-area { width: 100%; height: 55%; position: relative; }
-        .card-info-area { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
-        .card-symbol { font-size: 14px; font-weight: bold; color: var(--primary); text-align: center; display: none; }
-        .card-name { font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
-        .stats { display: flex; justify-content: space-between; padding: 0 2px; font-weight: bold; font-size: 10px; margin-bottom: 2px; }
-        .stat-atk { color: #e67e22; } .stat-hp { color: #2ecc71; }
-        .ability-container { position: absolute; top: 2px; right: 2px; display: flex; gap: 1px; z-index: 5; }
-        .badge { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid white; }
-        .badge-ward { background: #3498db; } .badge-toxic { background: #8e44ad; } .badge-storm { background: #f1c40f; } .badge-stealth { background: #95a5a6; }
-        .card.selected { transform: translateY(-15px); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); z-index: 10; }
-        .card.can-attack { border-color: var(--success); box-shadow: 0 0 10px var(--success); }
-        .card.attacking { transform: scale(1.2); border-color: var(--danger); box-shadow: 0 0 20px var(--danger); z-index: 100; }
+    .c-art { width:100%; height:55%; position:relative; }
+    .c-info { height:45%; background:rgba(30,30,30,0.95); padding:2px; display:flex; flex-direction:column; justify-content:space-between; }
+    .c-sym { font-size:14px; font-weight:bold; color:var(--pri); text-align:center; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; display:none; }
+    .c-name { font-size:9px; text-align:center; white-space:nowrap; overflow:hidden; font-weight:bold; }
+    .stats { display:flex; justify-content:space-between; padding:0 2px; font-weight:bold; font-size:10px; margin-bottom:2px; }
+    .badges { position:absolute; top:2px; right:2px; display:flex; gap:1px; z-index:5; }
+    .bdg { width:16px; height:16px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; border:1px solid white; }
+    .bdg-w { background:var(--pri); } .bdg-t { background:#8e44ad; } .bdg-s { background:var(--acc); } .bdg-h { background:var(--n); }
 
-        .leader { text-align: center; width: 70px; }
-        .leader-name { font-size: 10px; color: var(--accent); font-weight: bold; }
-        .hp-circle { width: 38px; height: 38px; line-height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c0392b, #900); border: 2px solid white; font-weight: bold; margin: 0 auto; box-shadow: 0 0 5px red; font-size: 16px; }
-        
-        .action-overlay { position: absolute; bottom: 35%; right: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
-        .game-btn { padding: 10px 16px; border-radius: 20px; border: none; font-weight: bold; color: white; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); cursor: pointer; }
-        .btn-draw { background: linear-gradient(to right, #27ae60, #2ecc71); } 
-        .btn-syn { background: linear-gradient(to right, #f39c12, #e67e22); color: #222; }
-        #btn-end-turn { padding: 6px 12px; font-size: 11px; background: #e67e22; border-radius: 15px; border: none; color: white; font-weight: bold; }
-        #btn-end-turn:disabled { background: #555; color: #888; }
-        #cancel-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 200; box-shadow: 0 0 10px var(--danger); cursor: pointer; }
+    .card.sel { transform:translateY(-15px); border-color:var(--acc); box-shadow:0 0 15px var(--acc); z-index:10; }
+    .card.atk { border-color:var(--succ); box-shadow:0 0 10px var(--succ); }
+    .card.tgt { transform:scale(1.2); border-color:var(--dang); box-shadow:0 0 20px var(--dang); z-index:100; }
 
-        #detail-panel { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 320px; background: rgba(20,20,30,0.95); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; color: white; z-index: 3000; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        .detail-close { position: absolute; top: 5px; right: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .skill-item { margin-bottom: 10px; border-left: 3px solid var(--accent); padding-left: 10px; background: rgba(255,255,255,0.05); padding: 8px; }
-        
-        #craftable-list { position: absolute; bottom: 38%; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none; }
-        .craft-btn { background: rgba(0,0,0,0.9); border: 1px solid var(--accent); color: white; padding: 8px 12px; border-radius: 8px; pointer-events: auto; display: flex; flex-direction: column; min-width: 120px; box-shadow: 0 0 5px var(--accent); font-size: 12px; }
+    .ldr { text-align:center; width:70px; } .ldr-n { font-size:10px; color:var(--acc); font-weight:bold; }
+    .hp { width:38px; height:38px; line-height:38px; border-radius:50%; background:linear-gradient(135deg,#c0392b,#900); border:2px solid white; font-weight:bold; margin:0 auto; font-size:16px; box-shadow:0 0 5px red; }
+    
+    .acts { position:absolute; bottom:35%; right:10px; display:flex; flex-direction:column; gap:10px; z-index:50; }
+    .g-btn { padding:10px 16px; border-radius:20px; border:none; font-weight:bold; color:white; font-size:12px; box-shadow:0 4px 8px rgba(0,0,0,0.5); cursor:pointer; }
+    .b-dr { background:linear-gradient(to right,var(--succ),#27ae60); } .b-sy { background:linear-gradient(to right,var(--acc),#e67e22); color:#222; }
+    #end-btn { padding:6px 12px; font-size:11px; background:#e67e22; border-radius:15px; border:none; color:white; font-weight:bold; cursor:pointer;}
+    #end-btn:disabled { background:#555; color:#888; }
+    #cancel-btn { display:none; position:absolute; top:60%; left:50%; transform:translate(-50%,-50%); background:var(--dang); color:white; padding:10px 20px; border-radius:20px; font-weight:bold; z-index:200; box-shadow:0 0 10px var(--dang); cursor:pointer; }
 
-        #skill-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 4000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .skill-btn { background: white; color: #333; padding: 15px; border-radius: 8px; border-left: 8px solid var(--primary); width: 100%; max-width: 300px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
+    #det-pan { position:absolute; top:15%; left:50%; transform:translateX(-50%); width:85%; max-width:320px; background:rgba(20,20,30,0.95); border:2px solid var(--acc); border-radius:12px; padding:20px; display:none; flex-direction:column; color:white; z-index:3000; box-shadow:0 0 30px rgba(0,0,0,0.8); }
+    #hint-list { position:absolute; bottom:38%; left:10px; display:flex; flex-direction:column; gap:5px; z-index:40; pointer-events:none; }
+    .hnt-btn { background:rgba(0,0,0,0.9); border:1px solid var(--acc); color:white; padding:8px 12px; border-radius:8px; pointer-events:auto; display:flex; flex-direction:column; min-width:120px; box-shadow:0 0 5px var(--acc); font-size:12px; cursor:pointer;}
 
-        #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border: 2px solid white; border-radius: 10px; font-weight: bold; font-size: 20px; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; white-space: nowrap; }
-        #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 6000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .result-title { font-size: 48px; font-weight: bold; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
-        .res-win { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
-        .res-lose { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
-        
-        body.targeting .card { border-style: dashed; }
-        .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger) !important; box-shadow: 0 0 10px var(--danger); }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-    </style>
+    #sk-mod { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:4000; flex-direction:column; justify-content:center; align-items:center; padding:20px; }
+    .sk-btn { background:white; color:#333; padding:15px; border-radius:8px; border-left:8px solid var(--pri); width:100%; max-width:300px; margin-bottom:10px; font-weight:bold; cursor:pointer; }
+
+    #msg { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); padding:15px 30px; border:2px solid white; border-radius:10px; font-weight:bold; font-size:20px; pointer-events:none; opacity:0; transition:0.3s; z-index:5000; white-space:nowrap; }
+    #res-scr { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:6000; display:flex; flex-direction:column; align-items:center; justify-content:center; display:none;}
+    .res-tit { font-size:48px; font-weight:bold; margin-bottom:20px; font-family:'Orbitron',sans-serif; }
+    .res-w { color:var(--acc); text-shadow:0 0 20px var(--acc); } .res-l { color:var(--dang); text-shadow:0 0 20px var(--dang); }
+    
+    #error-display { position:fixed; top:0; left:0; width:100%; background:red; color:white; padding:10px; z-index:9999; display:none; text-align:center;}
+</style>
 </head>
 <body>
 
-    <div id="title-screen" class="screen">
-        <div class="game-logo">無機化学<br>カードゲーム</div>
-        <div class="menu-btn" style="background: linear-gradient(90deg, #3498db, #2980b9); border:none;" onclick="showDeckSelect()">CPU対戦</div>
-        <div class="menu-btn" style="opacity:0.5">対人戦 (準備中)</div>
-        <div class="menu-btn" style="opacity:0.5">カード図鑑 (準備中)</div>
-    </div>
+<div id="error-display"></div>
 
-    <div id="deck-select-screen" class="screen hidden">
-        <div class="deck-header">デッキを選択してください</div>
-        <div class="deck-grid" id="deck-grid"></div>
-        <div class="back-btn menu-btn" onclick="showTitle()">戻る</div>
-    </div>
+<div id="title-screen" class="screen">
+    <div class="logo">CHEM-VERSE</div>
+    <div class="menu-btn" onclick="showDeck()" style="background:linear-gradient(90deg,#3498db,#2980b9);border:none;">CPU対戦</div>
+    <div class="menu-btn" style="opacity:0.5">対人戦 (準備中)</div>
+    <div class="menu-btn" style="opacity:0.5">カード図鑑 (準備中)</div>
+</div>
 
-    <div id="game-board">
-        <div id="enemy-hand-area"></div>
-        <div id="enemy-field"></div>
-        <div id="info-area">
-            <div class="leader" onclick="attackLeader('enemy')">
-                <div class="avatar" style="font-size:24px;">🤖</div>
-                <div class="leader-name" id="enemy-name">CPU</div>
-                <div id="enemy-hp" class="hp-circle">25</div>
-            </div>
-            <div style="text-align:center">
-                <div id="turn-display" style="font-size:12px; color:#aaa;">ターン1</div>
-                <div id="mp-display" style="font-size:14px; font-weight:bold; color:var(--success);">MP 1/1</div>
-            </div>
-            <button id="btn-end-turn" onclick="endTurn()">ターン終了</button>
-            <div class="leader" onclick="attackLeader('player')">
-                <div id="player-hp" class="hp-circle">25</div>
-                <div class="leader-name">あなた</div>
-                <div class="avatar" style="font-size:24px;">🧑‍🔬</div>
-            </div>
+<div id="deck-screen" class="screen hidden">
+    <div class="deck-header">デッキを選択してください</div>
+    <div class="d-grid" id="d-grid"></div>
+    <div class="back-btn" onclick="showTitle()">戻る</div>
+</div>
+
+<div id="board">
+    <div id="e-hand"></div>
+    <div id="e-field"></div>
+    <div id="info">
+        <div class="ldr" onclick="atkLdr('enemy')">
+            <div style="font-size:24px">🤖</div><div class="ldr-n" id="e-name">CPU</div><div id="e-hp" class="hp">25</div>
         </div>
-        <div id="craftable-list"></div>
-        <div id="player-field"></div>
-        <div id="player-hand-area"></div>
-        <div id="cancel-btn" onclick="cancelAttack()">❌ 攻撃キャンセル</div>
+        <div style="text-align:center">
+            <div id="turn-disp" style="font-size:12px;color:#aaa">ターン1</div>
+            <div id="mp-disp" style="font-size:14px;font-weight:bold;color:var(--succ)">MP 1/1</div>
+        </div>
+        <button id="end-btn" onclick="endTurn()">終了</button>
+        <div class="ldr" onclick="atkLdr('player')">
+            <div id="p-hp" class="hp">25</div><div class="ldr-n">あなた</div><div style="font-size:24px">🧑‍🔬</div>
+        </div>
+    </div>
+    <div id="hint-list"></div>
+    <div id="p-field"></div>
+    <div id="p-hand"></div>
+    <div id="cancel-btn" onclick="cancelAtk()">❌ キャンセル</div>
+    
+    <div id="det-pan" onclick="this.style.display='none'">
+        <div style="text-align:right;font-size:20px">×</div>
+        <div id="det-sym" style="font-size:40px;font-weight:bold;color:var(--pri);text-align:center"></div>
+        <div id="det-name" style="font-size:18px;font-weight:bold;text-align:center;margin-bottom:10px"></div>
+        <div id="det-st" style="text-align:center;font-size:18px;margin-bottom:10px"></div>
+        <div id="det-desc" style="font-size:12px;line-height:1.5;color:#ccc;max-height:150px;overflow-y:auto"></div>
+        <div style="text-align:center;margin-top:15px;font-size:10px;color:#666">(タップして閉じる)</div>
+    </div>
+</div>
+
+<div class="acts" id="acts" style="display:none">
+    <button class="g-btn b-dr" onclick="actDraw()">＋ ドロー</button>
+    <button class="g-btn b-sy" onclick="actSyn()">⚗️ 合成</button>
+</div>
+
+<div id="sk-mod">
+    <h3>技を選択してください</h3>
+    <div id="sk-list"></div>
+    <button class="menu-btn" style="width:auto;padding:10px 20px" onclick="document.getElementById('sk-mod').style.display='none';cancelAtk()">キャンセル</button>
+</div>
+
+<div id="res-scr">
+    <div class="res-tit" id="res-tit">VICTORY</div>
+    <div style="margin-bottom:30px;font-weight:bold" id="res-msg">勝利！</div>
+    <div class="menu-btn" onclick="showTitle()">タイトルへ戻る</div>
+</div>
+
+<div id="msg"></div>
+
+<script>
+window.onerror = function(msg, url, line) {
+    document.getElementById('error-display').style.display = 'block';
+    document.getElementById('error-display').innerText = `Error: ${msg} (Line: ${line})`;
+};
+
+const MAX_H=10, MAX_F=5, INI_HP=25;
+
+const EL = {
+    H:{s:'H',n:'水素',r:'N',c:'art-H'}, He:{s:'He',n:'ヘリウム',r:'SR',c:'art-gas'}, Li:{s:'Li',n:'リチウム',r:'R',c:'art-met'},
+    B:{s:'B',n:'ホウ素',r:'R',c:'art-sol'}, C:{s:'C',n:'炭素',r:'N',c:'art-sol'}, N:{s:'N',n:'窒素',r:'N',c:'art-gas'},
+    O:{s:'O',n:'酸素',r:'N',c:'art-gas'}, F:{s:'F',n:'フッ素',r:'SR',c:'art-tox'}, Ne:{s:'Ne',n:'ネオン',r:'SR',c:'art-gas'},
+    Na:{s:'Na',n:'ナトリウム',r:'N',c:'art-met'}, Mg:{s:'Mg',n:'マグネシウム',r:'R',c:'art-met'}, Al:{s:'Al',n:'アルミニウム',r:'R',c:'art-met'},
+    Si:{s:'Si',n:'ケイ素',r:'R',c:'art-sol'}, P:{s:'P',n:'リン',r:'R',c:'art-sol'}, S:{s:'S',n:'硫黄',r:'R',c:'art-sol'},
+    Cl:{s:'Cl',n:'塩素',r:'N',c:'art-Cl'}, Ar:{s:'Ar',n:'アルゴン',r:'SR',c:'art-gas'}, K:{s:'K',n:'カリウム',r:'N',c:'art-met'},
+    Ca:{s:'Ca',n:'カルシウム',r:'R',c:'art-met'}, Ti:{s:'Ti',n:'チタン',r:'SR',c:'art-met'}, V:{s:'V',n:'バナジウム',r:'SR',c:'art-met'},
+    Cr:{s:'Cr',n:'クロム',r:'SR',c:'art-met'}, Mn:{s:'Mn',n:'マンガン',r:'R',c:'art-met'}, Fe:{s:'Fe',n:'鉄',r:'N',c:'art-met'},
+    Ni:{s:'Ni',n:'ニッケル',r:'R',c:'art-met'}, Cu:{s:'Cu',n:'銅',r:'N',c:'art-met'}, Zn:{s:'Zn',n:'亜鉛',r:'R',c:'art-met'},
+    Ag:{s:'Ag',n:'銀',r:'SR',c:'art-met'}, Cd:{s:'Cd',n:'カドミウム',r:'R',c:'art-tox'}, Sn:{s:'Sn',n:'スズ',r:'R',c:'art-met'},
+    Ba:{s:'Ba',n:'バリウム',r:'R',c:'art-met'}, W:{s:'W',n:'タングステン',r:'SSR',c:'art-met'}, Pt:{s:'Pt',n:'プラチナ',r:'SSR',c:'art-met'},
+    Au:{s:'Au',n:'金',r:'SSR',c:'art-Au'}, Hg:{s:'Hg',n:'水銀',r:'SR',c:'art-liq'}, Pb:{s:'Pb',n:'鉛',r:'R',c:'art-met'}
+};
+
+const REC = [
+    {i:['H','Cl'], p:{s:'HCl',n:'塩化水素',r:'R',a:5,h:1,c:'art-tox',sk:[{n:'強酸腐食',p:5,d:'高火力'}]}},
+    {i:['H','F'], p:{s:'HF',n:'フッ化水素',r:'SR',a:4,h:2,ab:'toxic',c:'art-tox',sk:[{n:'ガラス腐食',p:4,d:'攻撃'},{n:'猛毒',p:0,t:'toxic',d:'必殺'}]}},
+    {i:['Na','H'], p:{s:'NaH',n:'水素化Na',r:'R',a:3,h:1,ab:'storm',c:'art-sol',sk:[{n:'還元作用',p:3,d:'疾走'}]}},
+    {i:['H','H','O'], p:{s:'H2O',n:'水',r:'N',a:1,h:4,c:'art-liq',sk:[{n:'水流',p:1,d:'攻撃'},{n:'加水分解',p:3,t:'heal',d:'HP3回復'}]}},
+    {i:['Ag','Cl'], p:{s:'AgCl',n:'塩化銀',r:'SR',a:1,h:6,ab:'ward',c:'art-sol',sk:[{n:'白色沈殿',p:0,t:'guard',d:'守護'}]}},
+    {i:['Fe','O'], p:{s:'FeO',n:'酸化鉄(II)',r:'N',a:3,h:5,c:'art-sol',sk:[{n:'黒錆',p:3,d:'通常攻撃'}]}},
+    {i:['Fe','O','O'], p:{s:'Fe2O3',n:'赤錆',r:'R',a:2,h:8,ab:'ward',c:'art-sol',sk:[{n:'不動態',p:2,d:'高耐久'}]}},
+    {i:['Cu','O'], p:{s:'CuO',n:'酸化銅(II)',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'黒色粉末',p:3,d:'攻撃'}]}},
+    {i:['Zn','Cu'], p:{s:'Brass',n:'黄銅',r:'R',a:4,h:5,c:'art-met',sk:[{n:'合金アタック',p:4,d:'攻撃'}]}},
+    {i:['Hg','Zn'], p:{s:'Amalgam',n:'亜鉛アマルガム',r:'SR',a:3,h:6,ab:'ward',c:'art-met',sk:[{n:'アマルガム化',p:3,d:'守護'}]}},
+    {i:['C','O'], p:{s:'CO',n:'一酸化炭素',r:'R',a:1,h:2,ab:'toxic',c:'art-gas',sk:[{n:'不完全燃焼',p:1,d:'攻撃'},{n:'ヘモグロビン結合',p:0,t:'toxic',d:'必殺'}]}},
+    {i:['H','S'], p:{s:'H2S',n:'硫化水素',r:'R',a:2,h:3,ab:'toxic',c:'art-gas',sk:[{n:'腐卵臭',p:2,d:'攻撃'},{n:'硫化',p:0,t:'toxic',d:'必殺'}]}},
+    {i:['Cl','Cl'], p:{s:'Cl2',n:'塩素ガス',r:'R',a:3,h:3,c:'art-gas',sk:[{n:'酸化作用',p:3,d:'攻撃'},{n:'毒ガス散布',p:2,t:'aoe',d:'全体2ダメ'}]}},
+    {i:['S','O','O'], p:{s:'SO2',n:'二酸化硫黄',r:'N',a:2,h:4,c:'art-gas',sk:[{n:'酸性雨',p:1,t:'aoe',d:'全体1ダメ'}]}},
+    {i:['Cd','S'], p:{s:'CdS',n:'硫化カドミウム',r:'SR',a:2,h:5,ab:'toxic',c:'art-tox',sk:[{n:'イタイイタイ',p:0,t:'toxic',d:'猛毒'}]}},
+    {i:['Na','O','H'], p:{s:'NaOH',n:'水酸化Na',r:'R',a:3,h:3,c:'art-sol',sk:[{n:'潮解',p:3,d:'攻撃'},{n:'中和熱',p:2,t:'aoe_heal',d:'全体2ダメ/2回復'}]}},
+    {i:['Al','O','O'], p:{s:'Al2O3',n:'アルミナ',r:'R',a:2,h:7,ab:'ward',c:'art-sol',sk:[{n:'アルマイト',p:2,d:'守護'}]}},
+    {i:['Cl','Na'], p:{s:'NaCl',n:'塩化Na',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'塩味',p:3,d:'通常攻撃'}]}},
+    {i:['Ca','O','H','H'], p:{s:'Ca(OH)2',n:'消石灰',r:'N',a:1,h:6,ab:'ward',c:'art-sol',sk:[{n:'石灰水',p:1,d:'攻撃'},{n:'中和反応',p:4,t:'heal',d:'HP4回復'}]}},
+    {i:['C','C','C'], p:{s:'Diamond',n:'ダイヤモンド',r:'SSR',a:4,h:10,ab:'ward',c:'art-Au',sk:[{n:'最強硬度',p:4,d:'鉄壁'}]}},
+    {i:['Al','O','O','Cr'], p:{s:'Ruby',n:'ルビー',r:'SR',a:5,h:8,c:'art-sol',sk:[{n:'深紅の輝き',p:5,d:'高ステータス'}]}},
+    {i:['Al','O','Ti'], p:{s:'Sapphire',n:'サファイア',r:'SR',a:4,h:9,c:'art-sol',sk:[{n:'青玉',p:4,d:'高耐久'}]}},
+    {i:['Si','O','O'], p:{s:'SiO2',n:'石英',r:'N',a:3,h:6,c:'art-sol',sk:[{n:'結晶化',p:2,t:'aoe',d:'全体2ダメ'}]}},
+    {i:['Au'], p:{s:'Au',n:'金',r:'SSR',a:6,h:6,c:'art-Au',sk:[{n:'不変の輝き',p:6,d:'高火力'}]}},
+    {i:['Pt'], p:{s:'Pt',n:'プラチナ',r:'SSR',a:5,h:7,c:'art-met',sk:[{n:'触媒作用',p:5,d:'攻撃'}]}},
+    {i:['W'], p:{s:'W',n:'タングステン',r:'SSR',a:7,h:8,ab:'ward',c:'art-met',sk:[{n:'融点3422℃',p:7,d:'攻撃'}]}},
+    {i:['Ti'], p:{s:'Ti',n:'チタン',r:'SR',a:4,h:5,c:'art-met',sk:[{n:'高強度',p:4,d:'攻撃'}]}},
+    {i:['He','He'], p:{s:'He',n:'ヘリウム',r:'SR',a:2,h:2,ab:'stealth',c:'art-gas',sk:[{n:'不活性',p:2,d:'潜伏'}]}},
+    {i:['Ne','Ne'], p:{s:'Ne',n:'ネオン',r:'SR',a:3,h:3,ab:'stealth',c:'art-gas',sk:[{n:'ネオンサイン',p:3,d:'潜伏'}]}},
+    {i:['Ar','Ar'], p:{s:'Ar',n:'アルゴン',r:'SR',a:4,h:4,ab:'stealth',c:'art-gas',sk:[{n:'フィラメント',p:4,d:'潜伏'}]}},
+    {i:['H','Cl','N','O','O','O'], p:{s:'AquaRegia',n:'王水',r:'SSR',a:0,h:0,type:'spell',c:'art-liq',sk:[{n:'金溶かし',p:99,t:'toxic',d:'確定除去'}]}},
+    {i:['H','H','S','O','O','O','O'], p:{s:'H2SO4',n:'濃硫酸',r:'SR',a:0,h:0,type:'spell',c:'art-liq',sk:[{n:'脱水作用',p:5,t:'aoe',d:'全体5ダメ'}]}},
+    {i:['K','Mn','O','O','O','O'], p:{s:'KMnO4',n:'過マンガン酸K',r:'SR',a:0,h:0,type:'spell',c:'art-sol',sk:[{n:'強力酸化',p:7,t:'dmg',d:'7ダメ'}]}}
+];
+
+const DECKS = {
+    aggro: {n:'超速攻', d:'低コスト高火力', e:['H','H','Cl','F','Na','O'], r:['HCl','HF','NaH','H2O']},
+    counter: {n:'カウンター', d:'守って反撃', e:['Ag','Cl','Fe','O','Cu','Zn','Hg'], r:['AgCl','FeO','Fe2O3','Brass','Amalgam','CuO']},
+    toxic: {n:'害悪(毒)', d:'必殺で即死', e:['C','O','S','H','Cl','Cd'], r:['CO','H2S','Cl2','SO2','CdS']},
+    control: {n:'コントロール', d:'回復と支配', e:['Al','O','H','Na','Cl','Ca'], r:['Al2O3','NaOH','H2O','NaCl','Ca(OH)2']},
+    gemstone: {n:'宝石', d:'最強の硬度', e:['C','C','C','Al','O','Si','Cr','Ti'], r:['Diamond','Ruby','Sapphire','SiO2']},
+    heavy: {n:'重金属', d:'後半最強', e:['Au','Pt','W','Ti'], r:['Au','Pt','W','Ti']},
+    noble: {n:'貴ガス', d:'潜伏攻撃', e:['He','He','Ne','Ne','Ar','Ar'], r:['He','Ne','Ar']},
+    hazard: {n:'危険物', d:'除去スペル', e:['H','Cl','N','O','S','K','Mn'], r:['AquaRegia','H2SO4','KMnO4']}
+};
+
+let gs = {hp:INI_HP, eHp:INI_HP, hand:[], field:[], eHand:[], eField:[], turn:1, mp:1, maxMp:1, myTurn:true, sel:[], atk:null, pPool:[], ePool:[], pRec:[], eRec:[]};
+
+window.onload = () => {
+    try {
+        const g = document.getElementById('d-grid');
+        for(let k in DECKS) {
+            const d = document.createElement('div'); d.className='d-card';
+            d.innerHTML = `<div class="d-title">${DECKS[k].n}</div><div class="d-desc">${DECKS[k].d}</div>`;
+            d.onclick = () => start(k);
+            g.appendChild(d);
+        }
+        showTitle();
+    } catch(e) { document.getElementById('error-display').style.display='block'; document.getElementById('error-display').innerText=e; }
+};
+
+function showTitle() { hide(); document.getElementById('title-screen').style.display='flex'; }
+function showDeck() { hide(); document.getElementById('deck-screen').style.display='block'; }
+function hide() { document.querySelectorAll('.screen').forEach(e=>e.style.display='none'); document.getElementById('board').style.display='none'; document.getElementById('acts').style.display='none'; document.getElementById('res-scr').style.display='none'; }
+
+function start(key) {
+    try {
+        gs = {hp:INI_HP, eHp:INI_HP, hand:[], field:[], eHand:[], eField:[], turn:1, mp:1, maxMp:1, myTurn:true, sel:[], atk:null};
+        gs.pPool = DECKS[key].e.map(s => EL[s]);
+        gs.pRec = REC.filter(r => DECKS[key].r.includes(r.p.s));
         
-        <div id="detail-panel" onclick="this.style.display='none'">
-            <div class="detail-close">×</div>
-            <div class="detail-sym" id="det-sym" style="font-size:40px; font-weight:bold; color:var(--primary); text-align:center;"></div>
-            <div class="detail-name" id="det-name" style="font-size:18px; font-weight:bold; text-align:center; margin-bottom:10px;"></div>
-            <div style="text-align:center; margin-bottom:10px; font-weight:bold; font-size:16px;" id="det-stats"></div>
-            <div style="font-size:12px; color:#ccc; max-height:200px; overflow-y:auto;" id="det-skills"></div>
-            <div style="text-align:center; margin-top:15px; font-size:10px; color:#666;">(タップして閉じる)</div>
-        </div>
-    </div>
+        const eks = Object.keys(DECKS); const ek = eks[Math.floor(Math.random()*eks.length)];
+        gs.ePool = DECKS[ek].e.map(s=>EL[s]);
+        gs.eRec = REC.filter(r => DECKS[ek].r.includes(r.p.s));
+        
+        document.getElementById('e-name').innerText = `CPU (${DECKS[ek].n.split('(')[0]})`;
+        hide(); document.getElementById('board').style.display='flex'; document.getElementById('acts').style.display='flex';
+        
+        for(let i=0; i<5; i++) { draw(true); draw(false); }
+        upd(); msg("バトル開始！");
+    } catch(e) { alert("Start Error: "+e); }
+}
 
-    <div class="action-overlay" id="action-btns" style="display:none;">
-        <button class="game-btn btn-draw" onclick="actionDraw()">＋ ドロー</button>
-        <button class="game-btn btn-syn" onclick="actionSynthesize()">⚗️ 合成</button>
-    </div>
+function draw(isP) {
+    const p = isP ? gs.pPool : gs.ePool;
+    const c = { ...p[Math.floor(Math.random()*p.length)], id:Math.random(), type:'el' };
+    if(isP) { if(gs.hand.length<MAX_H) gs.hand.push(c); } else { if(gs.eHand.length<MAX_H) gs.eHand.push(c); }
+}
 
-    <div id="skill-modal">
-        <h3>技を選択してください</h3>
-        <div id="skill-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="game-btn" style="background:#7f8c8d; margin-top:20px;" onclick="document.getElementById('skill-modal').style.display='none'; cancelAttack();">キャンセル</button>
-    </div>
+function actDraw() { if(!gs.myTurn||gs.mp<1){msg("MP不足");return;} gs.mp--; draw(true); upd(); }
 
-    <div id="result-screen" class="hidden">
-        <div class="result-title" id="res-title">VICTORY</div>
-        <div style="margin-bottom:30px; font-weight:bold;" id="res-msg">勝利！</div>
-        <div class="menu-btn" onclick="showTitle()">タイトルへ戻る</div>
-    </div>
+function actSyn() {
+    if(!gs.myTurn || gs.sel.length<1) return;
+    if(gs.sel.length===1) { // Single elem recipe check (Au etc)
+        const c = gs.hand.find(x=>x.id===gs.sel[0]);
+        const r = gs.pRec.find(x=>x.i.length===1 && x.i[0]===c.s);
+        if(r) { doSyn(r); return; }
+    }
+    const sl = gs.hand.filter(c=>gs.sel.includes(c.id));
+    const sy = sl.map(c=>c.s).sort();
+    const r = gs.pRec.find(x=>JSON.stringify(x.i.sort())===JSON.stringify(sy));
+    if(r) doSyn(r); else { msg("反応しません"); gs.sel=[]; upd(); }
+}
 
-    <div id="msg-box"></div>
+function doSyn(r) {
+    if(r.p.type==='spell') {
+        gs.hand = gs.hand.filter(c=>!gs.sel.includes(c.id)); gs.sel=[];
+        if(gs.eField.length>0) { gs.eField[0].cur-=99; msg("敵を破壊！"); } else { gs.eHp-=5; msg("リーダーダメ！"); }
+        chk(); upd(); return;
+    }
+    if(gs.field.length>=MAX_FIELD) { msg("満員"); return; }
+    gs.hand = gs.hand.filter(c=>!gs.sel.includes(c.id)); gs.sel=[];
+    const u = { ...r.p, id:Math.random(), max:r.p.h, cur:r.p.h, can:r.p.ab==='storm', type:'unit' };
+    gs.field.push(u); msg("召喚！"); upd();
+}
 
-    <script>
-        const MAX_HAND = 10; 
-        const MAX_FIELD = 5;
-        const INITIAL_HP = 25;
+function hClick(id) {
+    if(!gs.myTurn) return;
+    const c = gs.hand.find(x=>x.id===id); shDet(c);
+    if(gs.sel.includes(id)) gs.sel=gs.sel.filter(x=>x!==id); else gs.sel.push(id);
+    upd();
+}
 
-        // データ定義
-        const ELEM = {
-            H: { symbol: 'H', name: '水素', rarity: 'N', css: 'art-H' },
-            He: { symbol: 'He', name: 'ヘリウム', rarity: 'SR', css: 'art-gas' },
-            Li: { symbol: 'Li', name: 'リチウム', rarity: 'R', css: 'art-metal' },
-            Be: { symbol: 'Be', name: 'ベリリウム', rarity: 'R', css: 'art-metal' },
-            B: { symbol: 'B', name: 'ホウ素', rarity: 'R', css: 'art-solid' },
-            C: { symbol: 'C', name: '炭素', rarity: 'N', css: 'art-solid' },
-            N: { symbol: 'N', name: '窒素', rarity: 'N', css: 'art-gas' },
-            O: { symbol: 'O', name: '酸素', rarity: 'N', css: 'art-gas' },
-            F: { symbol: 'F', name: 'フッ素', rarity: 'SR', css: 'art-toxic' },
-            Ne: { symbol: 'Ne', name: 'ネオン', rarity: 'SR', css: 'art-gas' },
-            Na: { symbol: 'Na', name: 'ナトリウム', rarity: 'N', css: 'art-metal' },
-            Mg: { symbol: 'Mg', name: 'マグネシウム', rarity: 'R', css: 'art-metal' },
-            Al: { symbol: 'Al', name: 'アルミニウム', rarity: 'R', css: 'art-metal' },
-            Si: { symbol: 'Si', name: 'ケイ素', rarity: 'R', css: 'art-solid' },
-            P: { symbol: 'P', name: 'リン', rarity: 'R', css: 'art-solid' },
-            S: { symbol: 'S', name: '硫黄', rarity: 'R', css: 'art-solid' },
-            Cl: { symbol: 'Cl', name: '塩素', rarity: 'N', css: 'art-Cl' },
-            Ar: { symbol: 'Ar', name: 'アルゴン', rarity: 'SR', css: 'art-gas' },
-            K: { symbol: 'K', name: 'カリウム', rarity: 'N', css: 'art-metal' },
-            Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R', css: 'art-metal' },
-            Ti: { symbol: 'Ti', name: 'チタン', rarity: 'SR', css: 'art-metal' },
-            V: { symbol: 'V', name: 'バナジウム', rarity: 'SR', css: 'art-metal' },
-            Cr: { symbol: 'Cr', name: 'クロム', rarity: 'SR', css: 'art-metal' },
-            Mn: { symbol: 'Mn', name: 'マンガン', rarity: 'R', css: 'art-metal' },
-            Fe: { symbol: 'Fe', name: '鉄', rarity: 'N', css: 'art-metal' },
-            Ni: { symbol: 'Ni', name: 'ニッケル', rarity: 'R', css: 'art-metal' },
-            Cu: { symbol: 'Cu', name: '銅', rarity: 'N', css: 'art-metal' },
-            Zn: { symbol: 'Zn', name: '亜鉛', rarity: 'R', css: 'art-metal' },
-            Ga: { symbol: 'Ga', name: 'ガリウム', rarity: 'SR', css: 'art-metal' },
-            Ge: { symbol: 'Ge', name: 'ゲルマニウム', rarity: 'SR', css: 'art-metal' },
-            Ag: { symbol: 'Ag', name: '銀', rarity: 'SR', css: 'art-metal' },
-            Cd: { symbol: 'Cd', name: 'カドミウム', rarity: 'R', css: 'art-toxic' },
-            Sn: { symbol: 'Sn', name: 'スズ', rarity: 'R', css: 'art-metal' },
-            Ba: { symbol: 'Ba', name: 'バリウム', rarity: 'R', css: 'art-metal' },
-            W:  { symbol: 'W', name: 'タングステン', rarity: 'SSR', css: 'art-metal' },
-            Pt: { symbol: 'Pt', name: 'プラチナ', rarity: 'SSR', css: 'art-metal' },
-            Au: { symbol: 'Au', name: '金', rarity: 'SSR', css: 'art-Au' },
-            Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR', css: 'art-liquid' },
-            Pb: { symbol: 'Pb', name: '鉛', rarity: 'R', css: 'art-metal' }
-        };
+function fClick(id, isP) {
+    if(!gs.myTurn) return;
+    if(isP) {
+        const u = gs.field.find(x=>x.id===id); shDet(u);
+        if(u&&u.can) { gs.atk=u; document.body.classList.add('targeting'); upd(); }
+    } else if(gs.atk) {
+        const t = gs.eField.find(x=>x.id===id);
+        if(t.ab==='stealth') { msg("潜伏中"); return; }
+        prepAtk(gs.atk, t, 'unit');
+    } else {
+        shDet(gs.eField.find(x=>x.id===id));
+    }
+}
 
-        const RECIPES = [
-            { ingredients: ['H', 'Cl'], product: { symbol: 'HCl', name: '塩化水素', rarity:'R', atk: 5, hp: 1, css:'art-toxic', skills: [{name:'強酸腐食', power:5, desc:'高火力攻撃'}] }},
-            { ingredients: ['H', 'F'], product: { symbol: 'HF', name: 'フッ化水素', rarity:'SR', atk: 4, hp: 2, ability:'toxic', css:'art-toxic', skills: [{name:'ガラス腐食', power:4, desc:'攻撃'}, {name:'猛毒', power:0, type:'toxic', desc:'必殺'}] }},
-            { ingredients: ['Na', 'H'], product: { symbol: 'NaH', name: '水素化Na', rarity:'R', atk: 3, hp: 1, ability:'storm', css:'art-solid', skills: [{name:'還元作用', power:3, desc:'疾走'}] }},
-            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', rarity:'N', atk: 1, hp: 4, css:'art-liquid', skills: [{name:'水流', power:1, desc:'攻撃'}, {name:'加水分解', power:3, type:'heal', desc:'HP3回復'}] }},
-            { ingredients: ['Ag', 'Cl'], product: { symbol: 'AgCl', name: '塩化銀', rarity:'SR', atk: 1, hp: 6, ability:'ward', css:'art-solid', skills: [{name:'白色沈殿', power:0, type:'guard', desc:'守護'}] }},
-            { ingredients: ['Fe', 'O'], product: { symbol: 'FeO', name: '酸化鉄(II)', rarity:'N', atk: 3, hp: 5, css:'art-solid', skills: [{name:'黒錆', power:3, desc:'通常攻撃'}] }},
-            { ingredients: ['Fe', 'O', 'O'], product: { symbol: 'Fe2O3', name: '赤錆', rarity:'R', atk: 2, hp: 8, ability:'ward', css:'art-solid', skills: [{name:'不動態', power:2, desc:'高耐久'}] }},
-            { ingredients: ['Cu', 'O'], product: { symbol: 'CuO', name: '酸化銅(II)', rarity:'N', atk: 3, hp: 4, css:'art-solid', skills: [{name:'黒色粉末', power:3, desc:'攻撃'}] }},
-            { ingredients: ['Zn', 'Cu'], product: { symbol: 'Brass', name: '黄銅', rarity:'R', atk: 4, hp: 5, css:'art-metal', skills: [{name:'合金アタック', power:4, desc:'攻撃'}] }},
-            { ingredients: ['Hg', 'Zn'], product: { symbol: 'Amalgam', name: '亜鉛アマルガム', rarity:'SR', atk: 3, hp: 6, ability:'ward', css:'art-metal', skills: [{name:'アマルガム化', power:3, desc:'守護'}] }},
-            { ingredients: ['C', 'O'], product: { symbol: 'CO', name: '一酸化炭素', rarity:'R', atk: 1, hp: 2, ability:'toxic', css:'art-gas', skills: [{name:'不完全燃焼', power:1, desc:'攻撃'}, {name:'ヘモグロビン結合', power:0, type:'toxic', desc:'必殺'}] }},
-            { ingredients: ['H', 'S'], product: { symbol: 'H2S', name: '硫化水素', rarity:'R', atk: 2, hp: 3, ability:'toxic', css:'art-gas', skills: [{name:'腐卵臭', power:2, desc:'攻撃'}, {name:'硫化', power:0, type:'toxic', desc:'必殺'}] }},
-            { ingredients: ['Cl', 'Cl'], product: { symbol: 'Cl2', name: '塩素ガス', rarity:'R', atk: 3, hp: 3, css:'art-gas', skills: [{name:'酸化作用', power:3, desc:'攻撃'}, {name:'毒ガス散布', power:2, type:'aoe', desc:'全体2ダメ'}] }},
-            { ingredients: ['S', 'O', 'O'], product: { symbol: 'SO2', name: '二酸化硫黄', rarity:'N', atk: 2, hp: 4, css:'art-gas', skills: [{name:'酸性雨', power:1, type:'aoe', desc:'全体1ダメ'}] }},
-            { ingredients: ['Na', 'O', 'H'], product: { symbol: 'NaOH', name: '水酸化Na', rarity:'R', atk: 3, hp: 3, css:'art-solid', skills: [{name:'潮解', power:3, desc:'攻撃'}, {name:'中和熱', power:2, type:'aoe_heal', desc:'全体2ダメ/2回復'}] }},
-            { ingredients: ['Al', 'O', 'O'], product: { symbol: 'Al2O3', name: 'アルミナ', rarity:'R', atk: 2, hp: 7, ability:'ward', css:'art-solid', skills: [{name:'アルマイト', power:2, desc:'守護'}] }},
-            { ingredients: ['C', 'C', 'C'], product: { symbol: 'Diamond', name: 'ダイヤモンド', rarity:'SSR', atk: 4, hp: 10, ability:'ward', css:'art-Au', skills: [{name:'最強硬度', power:4, desc:'鉄壁'}] }},
-            { ingredients: ['Au'], product: { symbol: 'Au', name: '金', rarity:'SSR', atk: 6, hp: 6, css:'art-Au', skills: [{name:'不変の輝き', power:6, desc:'高火力'}] }},
-            { ingredients: ['He', 'He'], product: { symbol: 'He', name: 'ヘリウム', rarity:'SR', atk: 2, hp: 2, ability:'stealth', css:'art-gas', skills: [{name:'不活性', power:2, desc:'潜伏'}] }},
-            { ingredients: ['H', 'Cl', 'N', 'O', 'O', 'O'], product: { symbol: 'AquaRegia', name: '王水', rarity:'SSR', atk: 0, hp: 0, type:'spell', css:'art-liquid', skills: [{name:'金溶かし', power:99, type:'toxic', desc:'確定除去'}] }},
-        ];
+function atkLdr(s) { if(s==='enemy'&&gs.atk) prepAtk(gs.atk, 'ldr', 'ldr'); }
 
-        const DECKS = {
-            aggro: { name: '超速攻', desc: '低コスト高火力', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
-            counter: { name: 'カウンター', desc: '守って反撃', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
-            toxic: { name: '害悪毒', desc: '必殺で即死', elements: ['C', 'O', 'S', 'H', 'Cl'], recipes: ['CO', 'H2S', 'Cl2', 'SO2'] },
-            control: { name: 'コントロール', desc: '回復と支配', elements: ['Al', 'O', 'H', 'Na', 'Cl'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl'] },
-            gemstone: { name: '宝石', desc: '最強の硬度', elements: ['C', 'C', 'C'], recipes: ['Diamond'] },
-            heavy: { name: '重金属', desc: '後半最強', elements: ['Au', 'Pt', 'W'], recipes: ['Au'] },
-            noble: { name: '貴ガス', desc: '潜伏攻撃', elements: ['He', 'He', 'Ne', 'Ne'], recipes: ['He'] },
-            hazard: { name: '危険物', desc: '除去スペル', elements: ['H', 'Cl', 'N', 'O', 'S'], recipes: ['AquaRegia'] }
-        };
+function prepAtk(a, t, type) {
+    if(type==='ldr' || (type==='unit'&&t.ab!=='ward')) {
+        if(gs.eField.some(u=>u.ab==='ward'&&u.ab!=='stealth')) { msg("守護あり"); cancelAtk(); return; }
+    }
+    if(a.sk.length>1) openSk(a,t); else exeSk(a,t,a.sk[0]);
+}
 
-        let gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
+function openSk(a,t) {
+    const m=document.getElementById('sk-mod'), l=document.getElementById('sk-list'); l.innerHTML='';
+    a.sk.forEach(s=>{
+        const b=document.createElement('div'); b.className='sk-btn';
+        b.innerHTML=`${s.n} (威力:${s.p})<br><span style='font-size:10px'>${s.d}</span>`;
+        b.onclick=()=>{exeSk(a,t,s);m.style.display='none';}; l.appendChild(b);
+    }); m.style.display='flex';
+}
 
-        // --- 初期化 ---
-        window.onload = () => {
-            const grid = document.getElementById('deck-grid');
-            if(grid) {
-                for(let key in DECKS) {
-                    const d = document.createElement('div'); d.className='deck-card';
-                    d.innerHTML = `<div class="deck-title">${DECKS[key].name}</div><div class="deck-desc">${DECKS[key].desc}</div>`;
-                    d.onclick = () => startGame(key);
-                    grid.appendChild(d);
-                }
-            }
-            showTitle();
-        };
-
-        function showTitle() { hideAll(); document.getElementById('title-screen').style.display='flex'; }
-        function showDeckSelect() { hideAll(); document.getElementById('deck-select-screen').style.display='block'; }
-        function hideAll() { 
-            document.querySelectorAll('.screen').forEach(e=>e.style.display='none'); 
-            document.getElementById('game-board').style.display='none'; 
-            document.getElementById('action-btns').style.display='none'; 
-            document.getElementById('result-screen').style.display='none';
+function exeSk(a,t,s) {
+    let log=s.n;
+    if(s.t==='aoe') { gs.eField.forEach(u=>u.cur-=s.p); gs.eHp-=s.p; }
+    else if(s.t==='aoe_heal') { gs.eField.forEach(u=>u.cur-=s.p); gs.hp+=s.p; }
+    else if(s.t==='heal') gs.hp+=s.p;
+    else {
+        let d=s.p; if(t==='ldr') gs.eHp-=d;
+        else {
+            if(s.t==='toxic'&&d>0) t.cur=-99; else t.cur-=d;
+            if(t.cur<=0 && t.ab==='toxic' && t.a>0) a.cur=-99; else a.cur-=t.a; // counter
         }
+    }
+    a.can=false; msg(log); cancelAtk(); chk(); upd();
+}
 
-        function startGame(key) {
-            try {
-                gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
-                gs.playerPool = DECKS[key].elements.map(s => ELEM[s]);
-                gs.playerRecipes = RECIPES.filter(r => DECKS[key].recipes.includes(r.product.symbol));
+function cancelAtk() { gs.atk=null; document.body.classList.remove('targeting'); upd(); }
+function chk() {
+    gs.field=gs.field.filter(u=>u.cur>0); gs.eField=gs.eField.filter(u=>u.cur>0);
+    if(gs.eHp<=0) res(true); else if(gs.hp<=0) res(false);
+}
+function res(w) {
+    document.getElementById('res-scr').style.display='flex';
+    const t=document.getElementById('res-tit'), m=document.getElementById('res-msg');
+    if(w){t.innerText="VICTORY";t.className="res-tit res-w";m.innerText="勝利！";}
+    else{t.innerText="DEFEAT";t.className="res-tit res-l";m.innerText="敗北...";}
+}
 
-                const keys = Object.keys(DECKS);
-                const cpuKey = keys[Math.floor(Math.random()*keys.length)];
-                gs.enemyPool = DECKS[cpuKey].elements.map(s=>ELEM[s]);
-                gs.enemyRecipes = RECIPES.filter(r => DECKS[cpuKey].recipes.includes(r.product.symbol));
-                
-                document.getElementById('enemy-name').innerText = `CPU (${DECKS[cpuKey].name})`;
+function endTurn() { gs.myTurn=false; cancelAtk(); upd(); msg("敵ターン"); setTimeout(cpu,1000); }
 
-                hideAll();
-                document.getElementById('game-board').style.display='flex';
-                document.getElementById('action-btns').style.display='flex';
-                
-                for(let i=0; i<5; i++) { draw(true); draw(false); }
-                updateView();
-                msg("バトル開始！");
-            } catch(e) {
-                console.error(e);
-                alert("エラーが発生しました: " + e.message);
+async function cpu() {
+    if(gs.maxMp<10) gs.maxMp++; gs.mp=gs.maxMp; draw(false); upd(); await new Promise(r=>setTimeout(r,500));
+    // CPU Syn
+    let act=true;
+    while(act && gs.eField.length<MAX_FIELD) {
+        act=false; const h=gs.eHand.map(c=>c.s);
+        for(let r of gs.eRec) {
+            if(r.p.type==='spell') continue;
+            let ing=[...r.i], th=[...h], ok=true;
+            for(let x of ing) { let idx=th.indexOf(x); if(idx<0){ok=false;break;} th.splice(idx,1); }
+            if(ok) {
+                for(let x of r.i) { let idx=gs.eHand.findIndex(c=>c.s===x); gs.eHand.splice(idx,1); }
+                const u={...r.p, id:Math.random(), max:r.p.h, cur:r.p.h, can:false, type:'unit'};
+                gs.eField.push(u); msg("CPU召喚"); upd(); await new Promise(r=>setTimeout(r,800));
+                act=true; break;
             }
         }
-
-        function draw(isPlayer) {
-            const pool = isPlayer ? gs.playerPool : gs.enemyPool;
-            const card = { ...pool[Math.floor(Math.random()*pool.length)], id: Math.random(), type:'element' };
-            if(isPlayer) { if(gs.hand.length<10) gs.hand.push(card); }
-            else { if(gs.enemyHand.length<10) gs.enemyHand.push(card); }
+    }
+    // CPU Atk
+    gs.eField.forEach(u=>u.can=true);
+    for(let u of gs.eField) {
+        if(!u.can) continue;
+        let grd=gs.field.find(g=>g.ab==='ward'&&g.ab!=='stealth');
+        let t=grd||'ldr';
+        if(t==='ldr') { gs.hp-=u.sk[0].p; msg("CPU攻撃->Ldr"); }
+        else {
+            let d=u.sk[0].p; if(u.sk[0].t==='toxic'&&d>0) t.cur=-99; else t.cur-=d;
+            u.cur-=t.a; msg("CPU攻撃->Unit");
         }
+        chk(); upd(); await new Promise(r=>setTimeout(r,800));
+    }
+    gs.turn++; gs.myTurn=true; gs.field.forEach(u=>u.can=true); draw(true); msg("自ターン"); upd();
+}
 
-        function actionDraw() {
-            if(!gs.isPlayerTurn || gs.mp<1) { msg("MP不足"); return; }
-            gs.mp--; draw(true); updateView();
-        }
-
-        function actionSynthesize() {
-            if(!gs.isPlayerTurn || gs.selected.length<1) return;
-            const sel = gs.hand.filter(c=>gs.selected.includes(c.id));
-            const syms = sel.map(c=>c.symbol).sort();
-            const rec = gs.playerRecipes.find(r=>JSON.stringify(r.ingredients.sort())===JSON.stringify(syms));
-            if(rec) processSynth(rec);
-            else { msg("反応しません"); gs.selected=[]; updateView(); }
-        }
-
-        function processSynth(rec) {
-            if(rec.product.type==='spell') {
-                gs.hand = gs.hand.filter(c=>!gs.selected.includes(c.id)); gs.selected=[];
-                if(gs.enemyField.length>0) { gs.enemyField[0].currentHp-=99; msg("敵を破壊！"); }
-                else { gs.enemyHp-=5; msg("リーダーにダメージ！"); }
-                checkEnd(); updateView(); return;
+function upd() {
+    document.getElementById('turn-disp').innerText=`Turn ${gs.turn}`;
+    document.getElementById('mp-disp').innerText=`MP ${gs.mp}/${gs.maxMp}`;
+    document.getElementById('player-hp').innerText=gs.hp; document.getElementById('enemy-hp').innerText=gs.eHp;
+    document.getElementById('cancel-btn').style.display=gs.atk?'block':'none';
+    
+    rend(document.getElementById('p-hand'), gs.hand, 'h', true);
+    rend(document.getElementById('p-field'), gs.field, 'f', true);
+    rend(document.getElementById('e-field'), gs.eField, 'f', false);
+    const eh=document.getElementById('e-hand'); eh.innerHTML='';
+    gs.eHand.forEach(()=>{ const d=document.createElement('div'); d.className='card'; d.style.background='#444'; d.style.width='30px'; d.style.height='45px'; eh.appendChild(d); });
+    
+    // Hint
+    const hl=document.getElementById('craftable-list'); hl.innerHTML='';
+    if(gs.myTurn) {
+        gs.pRec.forEach(r=>{
+            let h=gs.hand.map(c=>c.s), ok=true;
+            for(let x of r.i) { let idx=h.indexOf(x); if(idx<0){ok=false;break;} h.splice(idx,1); }
+            if(ok) {
+                const b=document.createElement('div'); b.className='hnt-btn';
+                b.innerHTML=`<div style="color:var(--acc);font-weight:bold">✨ ${r.p.n}</div>`;
+                b.onclick=()=>{ gs.sel=[]; let th=[...gs.hand]; r.i.forEach(x=>{ let idx=th.findIndex(c=>c.s===x); gs.sel.push(th[idx].id); th.splice(idx,1); }); upd(); };
+                hl.appendChild(b);
             }
-            if(gs.field.length>=MAX_FIELD) { msg("満員です"); return; }
-            gs.hand = gs.hand.filter(c=>!gs.selected.includes(c.id)); gs.selected=[];
-            const u = { ...rec.product, id:Math.random(), maxHp:rec.product.hp, currentHp:rec.product.hp, canAttack:rec.product.ability==='storm', type:'unit' };
-            gs.field.push(u);
-            msg("召喚！"); updateView();
+        });
+    }
+}
+
+function rend(el, l, t, isP) {
+    el.innerHTML='';
+    l.forEach(c=>{
+        const d=document.createElement('div'); d.className='card'; d.setAttribute('data-r',c.r);
+        let art=c.c||'art-sol';
+        if(c.type==='el') d.innerHTML=`<div class="c-art ${art} css-art"></div><div class="c-info"><div class="c-sym" style="display:block;margin-top:5px;position:static">${c.s}</div><div class="c-name">${c.n}</div></div>`;
+        else {
+            let bdg=`<div class="badges">`;
+            if(c.ab==='ward') bdg+=`<div class="bdg bdg-w">🛡️</div>`;
+            if(c.ab==='toxic') bdg+=`<div class="bdg bdg-t">☠️</div>`;
+            if(c.ab==='storm') bdg+=`<div class="bdg bdg-s">⚡</div>`;
+            bdg+=`</div>`;
+            d.innerHTML=`${bdg}<div class="c-art ${art} css-art"></div><div class="c-info"><div class="c-sym" style="display:block;color:var(--pri);position:static">${c.s}</div><div class="c-name">${c.n}</div><div class="stats"><span class="stat-atk">⚔️${c.a}</span><span class="stat-hp">❤️${c.cur}</span></div></div>`;
         }
+        if(t==='h'&&gs.sel.includes(c.id)) d.classList.add('sel');
+        if(t==='f'&&c.can&&isP) d.classList.add('atk');
+        if(t==='f'&&!isP&&gs.atk) d.classList.add('tgt');
+        d.onclick=(e)=>{e.stopPropagation(); if(t==='h') hClick(c.id); else fClick(c.id,isP); };
+        el.appendChild(d);
+    });
+}
 
-        function onHandClick(id) {
-            if(!gs.isPlayerTurn) return;
-            const c = gs.hand.find(x=>x.id===id); showDetail(c);
-            if(gs.selected.includes(id)) gs.selected = gs.selected.filter(x=>x!==id);
-            else gs.selected.push(id);
-            updateView();
-        }
+function shDet(c) {
+    if(!c)return;
+    const p=document.getElementById('det-pan'); p.style.display='flex';
+    document.getElementById('det-sym').innerText=c.s; document.getElementById('det-name').innerText=c.n;
+    if(c.type!=='el') {
+        document.getElementById('det-st').innerHTML=`⚔️${c.a} <span style="margin-left:10px;color:var(--succ)">❤️${c.cur}/${c.max}</span>`;
+        document.getElementById('det-desc').innerHTML=c.sk.map(s=>`<div><b>【${s.n}】</b> ${s.d}</div>`).join('');
+    } else {
+        document.getElementById('det-st').innerText=''; document.getElementById('det-desc').innerText='合成素材';
+    }
+}
 
-        function onFieldClick(id, isPlayer) {
-            if(!gs.isPlayerTurn) return;
-            if(isPlayer) {
-                const u = gs.field.find(x=>x.id===id); showDetail(u);
-                if(u && u.canAttack) { gs.attacker = u; document.body.classList.add('targeting'); updateView(); }
-            } else if(gs.attacker) {
-                const target = gs.enemyField.find(x=>x.id===id);
-                if(target.ability==='stealth') { msg("潜伏中！"); return; }
-                prepareAttack(gs.attacker, target, 'unit');
-            } else {
-                const u = gs.enemyField.find(x=>x.id===id); showDetail(u);
-            }
-        }
-
-        function attackLeader(side) {
-            if(side==='enemy' && gs.attacker) prepareAttack(gs.attacker, 'leader', 'leader');
-        }
-
-        function prepareAttack(atk, tgt, type) {
-            if(type==='leader' || (type==='unit' && tgt.ability!=='ward')) {
-                const guards = gs.enemyField.filter(u=>u.ability==='ward' && u.ability!=='stealth');
-                if(guards.length>0) { msg("守護に阻まれた！"); cancelAttack(); return; }
-            }
-            if(atk.skills.length>1) openSkillModal(atk, tgt);
-            else executeSkill(atk, tgt, atk.skills[0]);
-        }
-
-        function openSkillModal(atk, tgt) {
-            const m = document.getElementById('skill-modal');
-            const l = document.getElementById('skill-list'); l.innerHTML='';
-            atk.skills.forEach(s => {
-                const b = document.createElement('div'); b.className='skill-btn';
-                b.innerHTML=`<div>${s.name} (威力:${s.power})</div><div style="font-size:10px; color:#555">${s.desc}</div>`;
-                b.onclick=()=>{ executeSkill(atk, tgt, s); m.style.display='none'; };
-                l.appendChild(b);
-            });
-            m.style.display='flex';
-        }
-
-        function executeSkill(atk, tgt, skill) {
-            let log = `${skill.name}!`;
-            if(skill.type==='aoe') {
-                gs.enemyField.forEach(u=>u.currentHp-=skill.power); gs.enemyHp-=skill.power;
-            } else if(skill.type==='aoe_heal') {
-                gs.enemyField.forEach(u=>u.currentHp-=skill.power); gs.hp+=skill.power;
-            } else if(skill.type==='heal') {
-                gs.hp+=skill.power;
-            } else {
-                const dmg = skill.power;
-                if(tgt==='leader') gs.enemyHp-=dmg;
-                else {
-                    const cnt = tgt.atk;
-                    if(skill.type==='toxic' && dmg>0) tgt.currentHp=-99; else tgt.currentHp-=dmg;
-                    atk.currentHp-=cnt;
-                }
-            }
-            atk.canAttack=false; msg(log); cancelAttack(); checkEnd(); updateView();
-        }
-
-        function cancelAttack() { gs.attacker=null; document.body.classList.remove('targeting'); updateView(); }
-
-        function checkEnd() {
-            gs.field = gs.field.filter(u=>u.currentHp>0);
-            gs.enemyField = gs.enemyField.filter(u=>u.currentHp>0);
-            if(gs.enemyHp<=0) showResult(true);
-            else if(gs.hp<=0) showResult(false);
-        }
-
-        function showResult(isWin) {
-            const sc = document.getElementById('result-screen');
-            const tit = document.getElementById('res-title');
-            const ms = document.getElementById('res-msg');
-            sc.style.display = 'flex';
-            if(isWin) { tit.innerText="VICTORY"; tit.className="result-title res-win"; ms.innerText="あなたの勝利！"; }
-            else { tit.innerText="DEFEAT"; tit.className="result-title res-lose"; ms.innerText="敗北しました..."; }
-        }
-
-        function endTurn() {
-            gs.isPlayerTurn=false; cancelAttack(); updateView(); msg("敵のターン");
-            setTimeout(cpuTurn, 1000);
-        }
-
-        async function cpuTurn() {
-            if(gs.maxMp<10) gs.maxMp++; gs.mp=gs.maxMp;
-            draw(false); updateView(); await sleep(500);
-            // 簡易CPU
-            let acted=true;
-            while(acted && gs.enemyField.length<MAX_FIELD) {
-                acted=false;
-                const hand = gs.enemyHand.map(c=>c.symbol);
-                for(let r of gs.enemyRecipes) {
-                    if(r.product.type==='spell') continue;
-                    let ing=[...r.ingredients], tHand=[...hand], ok=true;
-                    for(let i of ing) {
-                        let idx=tHand.indexOf(i); if(idx===-1){ok=false;break;} tHand.splice(idx,1);
-                    }
-                    if(ok) {
-                        for(let i of r.ingredients) {
-                            let idx=gs.enemyHand.findIndex(c=>c.symbol===i); gs.enemyHand.splice(idx,1);
-                        }
-                        const u={...r.product, id:Math.random(), maxHp:r.product.hp, currentHp:r.product.hp, canAttack:false, type:'unit'};
-                        gs.enemyField.push(u); msg(`CPU召喚: ${u.name}`);
-                        await sleep(800); updateView(); acted=true; break;
-                    }
-                }
-            }
-            gs.enemyField.forEach(u=>u.canAttack=true);
-            for(let u of gs.enemyField) {
-                if(!u.canAttack) continue;
-                const guards=gs.field.filter(g=>g.ability==='ward' && g.ability!=='stealth');
-                let tgt='leader'; if(guards.length>0) tgt=guards[0];
-                if(tgt==='leader') { gs.hp-=u.skills[0].power; msg("CPU攻撃"); }
-                else { 
-                    const dmg=u.skills[0].power; 
-                    if(u.skills[0].type==='toxic' && dmg>0) tgt.currentHp=-99; else tgt.currentHp-=dmg;
-                    u.currentHp-=tgt.atk; msg(`CPU攻撃 -> ${tgt.name}`);
-                }
-                checkEnd(); updateView(); await sleep(800);
-            }
-            gs.turn++; gs.isPlayerTurn=true; gs.field.forEach(u=>u.canAttack=true);
-            draw(true); msg("あなたのターン"); updateView();
-        }
-        const sleep = m => new Promise(r => setTimeout(r, m));
-
-        function updateView() {
-            document.getElementById('turn-display').innerText = `ターン ${gs.turn}`;
-            document.getElementById('mp-display').innerText = `MP ${gs.mp}/${gs.maxMp}`;
-            document.getElementById('player-hp').innerText = gs.hp;
-            document.getElementById('enemy-hp').innerText = gs.enemyHp;
-            document.getElementById('cancel-btn').style.display = gs.attacker ? 'block' : 'none';
-
-            render(document.getElementById('player-hand-area'), gs.hand, 'hand', true);
-            render(document.getElementById('player-field'), gs.field, 'field', true);
-            render(document.getElementById('enemy-field'), gs.enemyField, 'field', false);
-            
-            const eh = document.getElementById('enemy-hand-area'); eh.innerHTML='';
-            gs.enemyHand.forEach(()=>{
-                const d=document.createElement('div'); d.className='card'; d.style.background='#444'; d.style.width='30px'; d.style.height='45px';
-                eh.appendChild(d);
-            });
-            updateHint();
-        }
-
-        function render(el, list, type, isPlayer) {
-            el.innerHTML='';
-            list.forEach(c => {
-                const d = document.createElement('div'); d.className='card';
-                d.setAttribute('data-rarity', c.rarity);
-                let art = c.css || 'art-solid';
-                let content = '';
-                if(c.type==='element') {
-                    content = `<div class="card-art-area ${art} css-art"></div><div class="card-info-area"><div class="card-symbol" style="position:static; display:block; margin-top:5px;">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
-                } else {
-                    let badges = `<div class="ability-container">`;
-                    if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡️</div>`;
-                    if(c.ability === 'toxic') badges += `<div class="badge badge-toxic">☠️</div>`;
-                    if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
-                    badges += `</div>`;
-                    content = `${badges}<div class="card-art-area ${art} css-art"></div><div class="card-info-area"><div class="card-symbol" style="color:var(--primary); position:static; display:block;">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div></div>`;
-                }
-                d.innerHTML = content;
-                
-                if(type==='hand' && gs.selected.includes(c.id)) d.classList.add('selected');
-                if(type==='field' && c.canAttack && isPlayer) d.classList.add('can-attack');
-                if(type==='field' && !isPlayer && gs.attacker) d.classList.add('valid-target');
-
-                d.onclick = (e) => { e.stopPropagation(); if(type==='hand') onHandClick(c.id); else onFieldClick(c.id, isPlayer); };
-                el.appendChild(d);
-            });
-        }
-
-        function updateHint() {
-            const list = document.getElementById('craftable-list'); list.innerHTML='';
-            if(!gs.isPlayerTurn) return;
-            gs.playerRecipes.forEach(r => {
-                const handSym = gs.hand.map(c=>c.symbol);
-                let possible = true;
-                for(let ing of r.ingredients) {
-                    const idx = handSym.indexOf(ing);
-                    if(idx===-1) { possible=false; break; }
-                    handSym.splice(idx,1);
-                }
-                if(possible) {
-                    const b = document.createElement('div'); b.className='craft-btn';
-                    b.innerText = `✨ ${r.product.name}`;
-                    b.onclick = () => {
-                        gs.selected = []; const tempHand=[...gs.hand];
-                        r.ingredients.forEach(ing => {
-                            const idx = tempHand.findIndex(x=>x.symbol===ing);
-                            if(idx!==-1) { gs.selected.push(tempHand[idx].id); tempHand.splice(idx,1); }
-                        });
-                        updateView();
-                    };
-                    list.appendChild(b);
-                }
-            });
-        }
-
-        function showDetail(c) {
-            const p = document.getElementById('detail-panel'); p.style.display='flex';
-            document.getElementById('det-sym').innerText = c.symbol;
-            document.getElementById('det-name').innerText = c.name;
-            const skillsDiv = document.getElementById('det-skills'); skillsDiv.innerHTML='';
-            if(c.type!=='element') {
-                document.getElementById('det-stats').innerHTML = `⚔️${c.atk} <span style="margin-left:10px; color:var(--success)">❤️${c.currentHp}/${c.maxHp}</span>`;
-                c.skills.forEach(s => {
-                    skillsDiv.innerHTML += `<div class="skill-item"><div style="font-weight:bold; color:var(--accent)">${s.name} (威力:${s.power})</div><div style="font-size:11px;">${s.desc}</div></div>`;
-                });
-            } else {
-                document.getElementById('det-stats').innerText = '';
-                skillsDiv.innerText = '合成素材';
-            }
-        }
-
-        function msg(t) { const b=document.getElementById('msg-box'); b.innerText=t; b.style.opacity=1; setTimeout(()=>b.style.opacity=0,1500); }
-
-    </script>
+function msg(t) { const b=document.getElementById('msg'); b.innerText=t; b.style.opacity=1; setTimeout(()=>b.style.opacity=0,1500); }
+</script>
 </body>
 </html>
