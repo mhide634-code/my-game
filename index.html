@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: CSS Art</title>
+    <title>Chem-Verse: JP Complete</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,7 +12,6 @@
             --primary: #3498db;
             --danger: #e74c3c;
             --success: #2ecc71;
-            /* レアリティ色 */
             --rare-n: #95a5a6;
             --rare-r: #3498db;
             --rare-sr: #9b59b6;
@@ -31,148 +30,165 @@
             width: 100vw;
         }
 
-        /* --- CSS ART (プログラムで絵を描く) --- */
-        .css-art {
-            width: 100%; height: 100%; position: relative;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
+        /* --- 共通コンポーネント --- */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            z-index: 100; transition: opacity 0.3s;
         }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* --- CSSアート (画像なしでイラスト表現) --- */
+        .css-art { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         
-        /* 水素 (H): ふわふわ雲 */
-        .art-H { background: linear-gradient(to top, #89f7fe, #66a6ff); }
-        .art-H::after {
-            content: '( •ω• )'; font-size: 14px; color: #555;
-            position: absolute; width: 40px; height: 30px;
-            background: white; border-radius: 50%;
-            box-shadow: 10px 5px 0 white, -10px 5px 0 white;
-            display: flex; justify-content: center; align-items: center;
-            padding-top: 5px;
-        }
+        /* 気体: ふわふわ */
+        .art-gas { background: linear-gradient(to top, #89f7fe, #66a6ff); }
+        .art-gas::after { content: '☁️'; font-size: 24px; filter: drop-shadow(0 0 5px white); animation: float 3s infinite ease-in-out; }
+        
+        /* 液体: うるうる */
+        .art-liquid { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
+        .art-liquid::after { content: '💧'; font-size: 24px; animation: bounce 2s infinite; }
+        
+        /* 固体: ごつごつ */
+        .art-solid { background: linear-gradient(to bottom, #e6b980, #eacda3); }
+        .art-solid::after { content: '🪨'; font-size: 24px; }
+        
+        /* 金属: キラキラ */
+        .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .art-metal::after { content: '✨'; font-size: 24px; text-shadow: 0 0 5px white; }
+        
+        /* 毒: どろどろ */
+        .art-toxic { background: linear-gradient(to bottom, #f093fb, #f5576c); }
+        .art-toxic::after { content: '☠️'; font-size: 24px; filter: drop-shadow(0 0 5px purple); }
 
-        /* 塩素 (Cl): 毒ガスお化け */
-        .art-Cl { background: linear-gradient(to top, #d4fc79, #96e6a1); }
-        .art-Cl::after {
-            content: '☠️'; font-size: 24px;
-            filter: drop-shadow(0 0 5px green);
-            animation: float 2s infinite ease-in-out;
-        }
-
-        /* 金 (Au): キラキラ延べ棒 */
+        /* 個別アート */
+        .art-H { background: linear-gradient(to top, #a1c4fd, #c2e9fb); }
+        .art-H::after { content: '( •ω• )'; font-size: 14px; color: #555; background: white; padding: 5px; border-radius: 50%; box-shadow: 0 0 10px white; }
+        
         .art-Au { background: radial-gradient(circle, #ffd700, #b8860b); }
-        .art-Au::after {
-            content: '✨'; font-size: 30px;
-            text-shadow: 0 0 10px gold;
-        }
-
-        /* 酸素 (O): 透明な泡 */
-        .art-O { background: linear-gradient(to top, #a1c4fd, #c2e9fb); }
-        .art-O::before {
-            content: ''; position: absolute; width: 20px; height: 20px;
-            border: 2px solid rgba(255,255,255,0.8); border-radius: 50%;
-            top: 20%; left: 30%;
-        }
-        .art-O::after {
-            content: ''; position: absolute; width: 10px; height: 10px;
-            border: 2px solid rgba(255,255,255,0.6); border-radius: 50%;
-            bottom: 30%; right: 30%;
-        }
-
-        /* 汎用: 金属 */
-        .art-metal-gen { background: linear-gradient(45deg, #bdc3c7, #2c3e50); }
-        .art-metal-gen::after { content: '⚙️'; font-size: 24px; opacity: 0.7; }
-
-        /* 汎用: 液体 */
-        .art-liquid-gen { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
-        .art-liquid-gen::after { content: '💧'; font-size: 24px; }
-
-        /* 汎用: 固体 */
-        .art-solid-gen { background: linear-gradient(to bottom, #e6b980, #eacda3); }
-        .art-solid-gen::after { content: '🪨'; font-size: 24px; }
-
-        /* 汎用: 毒 */
-        .art-toxic-gen { background: linear-gradient(to bottom, #f093fb, #f5576c); }
-        .art-toxic-gen::after { content: '😈'; font-size: 24px; }
+        .art-Au::after { content: '💰'; font-size: 28px; }
 
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
+        /* --- タイトル画面 --- */
+        #title-screen { background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%); }
+        .game-logo { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--accent); text-shadow: 0 0 20px var(--accent); margin-bottom: 10px; text-align: center; }
+        .menu-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; margin: 10px; transition: 0.2s; }
+        .menu-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
 
-        /* --- UI & LAYOUT (前回のまま) --- */
-        .screen { position: absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background: #1a1a1d; z-index:100; transition:0.3s; }
-        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+        /* --- デッキ選択 --- */
+        #deck-select-screen { padding: 20px; box-sizing: border-box; display: block; overflow-y: auto; }
+        .deck-header { text-align: center; font-size: 20px; margin-bottom: 20px; color: var(--accent); }
+        .deck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 60px; }
+        .deck-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 15px; border-radius: 12px; cursor: pointer; min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; }
+        .deck-title { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+        .deck-desc { font-size: 10px; color: #ccc; }
+        .back-btn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; padding: 10px 30px; border-radius: 20px; z-index: 200; }
+
+        /* --- ゲームボード (縦レイアウト) --- */
+        #game-board { display: none; flex-direction: column; height: 100vh; position: relative; background: #111; }
         
-        #title-screen { background: radial-gradient(circle, #2c3e50, #000); }
-        .game-logo { font-family:'Orbitron', sans-serif; font-size:36px; color:var(--accent); text-shadow:0 0 15px var(--accent); margin-bottom:10px; text-align:center;}
-        .menu-btn { background:rgba(255,255,255,0.1); border:1px solid #aaa; color:white; padding:15px 40px; border-radius:30px; font-weight:bold; margin:10px; cursor:pointer; }
+        #enemy-hand-area { height: 10%; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 2px; }
+        #enemy-field { height: 23%; border-bottom: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
         
-        #deck-select-screen { padding:20px; display:block; overflow-y:auto; }
-        .deck-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding-bottom:50px; }
-        .deck-card { background:rgba(255,255,255,0.1); border:1px solid #555; padding:15px; border-radius:10px; cursor:pointer; }
-        .deck-title { color:var(--accent); font-weight:bold; margin-bottom:5px; }
-        .deck-desc { font-size:10px; color:#ccc; }
-
-        #game-board { display:none; flex-direction:column; height:100vh; background:#111; }
-        #enemy-hand-area { height:10%; background:rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center; }
-        #enemy-field { height:23%; border-bottom:1px solid #333; display:flex; justify-content:center; align-items:center; }
-        #info-area { height:12%; background:#222; display:flex; justify-content:space-between; align-items:center; padding:0 10px; z-index:10; box-shadow:0 0 10px black; }
-        #player-field { height:23%; border-top:1px solid #333; display:flex; justify-content:center; align-items:center; }
-        #player-hand-area { height:32%; background:rgba(255,255,255,0.05); display:flex; align-items:center; overflow-x:auto; padding-left:10px; }
-
-        /* カード */
-        .card { 
-            width:70px; height:100px; background:#222; border-radius:8px; 
-            border:2px solid #555; margin:3px; position:relative; flex-shrink:0; 
-            box-shadow:0 4px 8px rgba(0,0,0,0.5); overflow:hidden; transition:0.1s;
+        #info-area {
+            height: 12%; background: rgba(20,20,30,0.9);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 10px; z-index: 10; border-top: 1px solid #333; border-bottom: 1px solid #333;
         }
+
+        #player-field { height: 23%; border-top: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
+        
+        #player-hand-area { 
+            height: 32%; background: rgba(0,0,0,0.2);
+            overflow-x: auto; display: flex; align-items: center; 
+            padding-left: 10px; gap: 8px;
+        }
+
+        /* --- カードデザイン --- */
+        .card {
+            width: 70px; height: 100px; background: #222; color: #fff;
+            border-radius: 8px; position: relative; flex-shrink: 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 2px solid #555;
+            transition: transform 0.1s; overflow: hidden;
+        }
+        /* レアリティ演出 */
         .card[data-rarity="N"] { border-color: var(--rare-n); }
-        .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow:0 0 5px var(--rare-r); }
-        .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow:0 0 8px var(--rare-sr); }
-        .card[data-rarity="SSR"] { border-color: var(--rare-ssr); box-shadow:0 0 12px var(--rare-ssr); animation:holo 3s infinite; }
-        @keyframes holo { 0% { filter:brightness(1); } 50% { filter:brightness(1.3); } 100% { filter:brightness(1); } }
+        .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow: 0 0 5px var(--rare-r); }
+        .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 8px var(--rare-sr); }
+        .card[data-rarity="SSR"] { border-color: var(--rare-ssr); box-shadow: 0 0 10px var(--rare-ssr); animation: holo 3s infinite linear; }
+        @keyframes holo { 0% { filter: brightness(1); } 50% { filter: brightness(1.3); } 100% { filter: brightness(1); } }
 
-        .card-art-area { width:100%; height:55%; position:relative; }
-        .card-info-area { height:45%; background:rgba(0,0,0,0.8); padding:2px; display:flex; flex-direction:column; justify-content:space-between; }
-        .card-symbol { font-size:14px; font-weight:bold; color:var(--primary); text-align:center; }
-        .card-name { font-size:9px; text-align:center; white-space:nowrap; overflow:hidden; }
-        .stats { display:flex; justify-content:space-between; font-size:10px; font-weight:bold; padding:0 2px; }
-        .stat-atk { color:#e67e22; } .stat-hp { color:#2ecc71; }
+        .card-art-area { width: 100%; height: 55%; position: relative; }
+        .card-info-area { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .card-symbol { font-size: 14px; font-weight: bold; color: var(--primary); text-align: center; text-shadow: 0 0 2px black; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; display: none; } /* アートがあるのでシンボルは隠すか控えめに */
+        .card-name { font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
+        
+        .stats { display: flex; justify-content: space-between; padding: 0 2px; font-weight: bold; font-size: 10px; margin-bottom: 2px; }
+        .stat-atk { color: #e67e22; } .stat-hp { color: #2ecc71; }
 
-        .card.selected { transform:translateY(-15px); border-color:var(--accent); box-shadow:0 0 15px var(--accent); z-index:10; }
-        .card.can-attack { border-color:var(--success); box-shadow:0 0 10px var(--success); }
-        .card.attacking { transform:scale(1.2); z-index:100; border-color:var(--danger); box-shadow:0 0 20px var(--danger); }
+        /* バッジ */
+        .ability-container { position: absolute; top: 2px; right: 2px; display: flex; gap: 1px; z-index: 5; }
+        .badge { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .badge-ward { background: #3498db; } .badge-toxic { background: #8e44ad; } .badge-storm { background: #f1c40f; } .badge-stealth { background: #95a5a6; }
+
+        .card.selected { transform: translateY(-15px); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); z-index: 10; }
+        .card.can-attack { border-color: var(--success); box-shadow: 0 0 10px var(--success); }
+        .card.attacking { transform: scale(1.2); border-color: var(--danger); box-shadow: 0 0 20px var(--danger); z-index: 100; }
 
         /* UI */
-        .leader { text-align:center; width:60px; } .leader-name { font-size:10px; color:var(--accent); }
-        .hp-circle { width:35px; height:35px; border-radius:50%; background:#c0392b; border:2px solid white; color:white; font-weight:bold; line-height:35px; margin:0 auto; }
-        .action-overlay { position:absolute; bottom:35%; right:10px; display:flex; flex-direction:column; gap:10px; z-index:50; }
-        .game-btn { padding:10px 15px; border-radius:20px; border:none; font-weight:bold; color:white; font-size:12px; box-shadow:0 4px 5px rgba(0,0,0,0.5); }
-        .btn-draw { background:#27ae60; } .btn-syn { background:#e67e22; }
-        #cancel-btn { display:none; position:absolute; top:60%; left:50%; transform:translate(-50%,-50%); background:#c0392b; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; z-index:200; }
+        .leader { text-align: center; width: 70px; }
+        .leader-name { font-size: 10px; color: var(--accent); font-weight: bold; }
+        .hp-circle { width: 38px; height: 38px; line-height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c0392b, #900); border: 2px solid white; font-weight: bold; margin: 0 auto; box-shadow: 0 0 5px red; font-size: 16px; }
+        
+        .action-overlay { position: absolute; bottom: 35%; right: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+        .game-btn { padding: 10px 16px; border-radius: 20px; border: none; font-weight: bold; color: white; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); cursor: pointer; }
+        .btn-draw { background: linear-gradient(to right, #27ae60, #2ecc71); } 
+        .btn-syn { background: linear-gradient(to right, #f39c12, #e67e22); color: #222; }
+        #btn-end-turn { padding: 6px 12px; font-size: 11px; background: #e67e22; border-radius: 15px; border: none; color: white; font-weight: bold; }
+        #btn-end-turn:disabled { background: #555; color: #888; }
 
-        #msg-box { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); padding:15px 30px; border:2px solid white; border-radius:10px; font-weight:bold; font-size:20px; pointer-events:none; opacity:0; transition:0.3s; z-index:5000; white-space:nowrap; }
-
-        #skill-modal { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:4000; flex-direction:column; justify-content:center; align-items:center; }
-        .skill-btn { background:white; color:#333; padding:15px; margin:5px; border-radius:8px; width:80%; max-width:300px; font-weight:bold; cursor:pointer; }
+        #cancel-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 200; box-shadow: 0 0 10px var(--danger); cursor: pointer; }
 
         /* 詳細パネル */
-        #detail-panel { position:absolute; top:15%; left:50%; transform:translateX(-50%); width:80%; max-width:300px; background:rgba(20,20,30,0.95); border:2px solid var(--accent); border-radius:10px; padding:20px; display:none; flex-direction:column; color:white; z-index:3000; }
+        #detail-panel { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 320px; background: rgba(20,20,30,0.95); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; color: white; z-index: 3000; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .detail-close { position: absolute; top: 5px; right: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
+        .detail-sym { font-size: 40px; font-weight: bold; color: var(--primary); text-align: center; }
+        .detail-name { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 5px; }
+        .skill-item { margin-bottom: 10px; border-left: 3px solid var(--accent); padding-left: 10px; background: rgba(255,255,255,0.05); padding: 8px; }
         
-        #craftable-list { position:absolute; bottom:38%; left:10px; display:flex; flex-direction:column; gap:5px; pointer-events:none; z-index:40; }
-        .craft-btn { background:rgba(0,0,0,0.9); border:1px solid var(--accent); color:white; padding:5px 10px; border-radius:5px; pointer-events:auto; font-size:12px; }
+        #craftable-list { position: absolute; bottom: 38%; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none; }
+        .craft-btn { background: rgba(0,0,0,0.9); border: 1px solid var(--accent); color: white; padding: 8px 12px; border-radius: 8px; pointer-events: auto; display: flex; flex-direction: column; min-width: 120px; box-shadow: 0 0 5px var(--accent); font-size: 12px; }
+
+        #skill-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 4000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .skill-btn { background: white; color: #333; padding: 15px; border-radius: 8px; border-left: 8px solid var(--primary); width: 100%; max-width: 300px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
+
+        #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border: 2px solid white; border-radius: 10px; font-weight: bold; font-size: 20px; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; white-space: nowrap; }
+
+        /* リザルト */
+        #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 6000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .result-title { font-size: 48px; font-weight: bold; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .res-win { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
+        .res-lose { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
 
     </style>
 </head>
 <body>
 
-    <div id="start-screen" class="screen">
-        <h1 class="game-logo">CHEM-VERSE</h1>
-        <div class="menu-btn" onclick="showDeckSelect()">CPUバトル</div>
+    <div id="title-screen" class="screen">
+        <div class="game-logo">無機化学<br>カードゲーム</div>
+        <div class="menu-btn" style="background: linear-gradient(90deg, #3498db, #2980b9); border:none;" onclick="showDeckSelect()">CPU対戦</div>
         <div class="menu-btn" style="opacity:0.5">対人戦 (準備中)</div>
+        <div class="menu-btn" style="opacity:0.5">カード図鑑 (準備中)</div>
     </div>
 
     <div id="deck-select-screen" class="screen hidden">
-        <h2 style="color:var(--accent)">デッキ選択</h2>
+        <div class="deck-header">デッキを選択してください</div>
         <div class="deck-grid" id="deck-grid"></div>
-        <div class="menu-btn" onclick="showTitle()">戻る</div>
+        <div class="back-btn menu-btn" onclick="showTitle()">戻る</div>
     </div>
 
     <div id="game-board">
@@ -188,8 +204,8 @@
                 <div id="turn-display" style="font-size:12px; color:#aaa;">ターン1</div>
                 <div id="mp-display" style="font-size:14px; font-weight:bold; color:var(--success);">MP 1/1</div>
             </div>
-            <button class="game-btn" style="background:#e67e22" id="btn-end" onclick="endTurn()">終了</button>
-            <div class="leader">
+            <button id="btn-end-turn" onclick="endTurn()">ターン終了</button>
+            <div class="leader" onclick="attackLeader('player')">
                 <div id="player-hp" class="hp-circle">25</div>
                 <div class="leader-name">あなた</div>
                 <div class="avatar">🧑‍🔬</div>
@@ -199,87 +215,108 @@
         <div id="player-field"></div>
         <div id="player-hand-area"></div>
         <div id="cancel-btn" onclick="cancelAttack()">❌ 攻撃キャンセル</div>
-        
-        <div id="detail-panel" onclick="this.style.display='none'">
-            <div style="text-align:right; font-size:20px;">×</div>
-            <div id="det-sym" style="font-size:40px; font-weight:bold; color:var(--primary); text-align:center;"></div>
-            <div id="det-name" style="font-size:18px; font-weight:bold; text-align:center; margin-bottom:10px;"></div>
-            <div id="det-stats" style="text-align:center; font-size:18px; margin-bottom:10px;"></div>
-            <div id="det-desc" style="font-size:12px; line-height:1.5; color:#ccc;"></div>
-            <div style="text-align:center; margin-top:20px; font-size:10px; color:#666;">(タップで閉じる)</div>
-        </div>
     </div>
 
-    <div class="action-overlay" id="action-btns">
+    <div class="action-overlay" id="action-btns" style="display:none;">
         <button class="game-btn btn-draw" onclick="actionDraw()">＋ ドロー</button>
         <button class="game-btn btn-syn" onclick="actionSynthesize()">⚗️ 合成</button>
     </div>
 
+    <div id="detail-panel" onclick="this.style.display='none'">
+        <div class="detail-close">×</div>
+        <div class="detail-sym" id="det-sym"></div>
+        <div class="detail-name" id="det-name"></div>
+        <div style="text-align:center; margin-bottom:10px; font-weight:bold; font-size:16px;" id="det-stats"></div>
+        <div style="font-size:12px; color:#ccc; max-height:200px; overflow-y:auto;" id="det-skills"></div>
+        <div style="text-align:center; margin-top:15px; font-size:10px; color:#666;">(タップして閉じる)</div>
+    </div>
+
     <div id="skill-modal">
-        <h3>技を選択</h3>
+        <h3>技を選択してください</h3>
         <div id="skill-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
         <button class="game-btn" style="background:#777; margin-top:20px;" onclick="document.getElementById('skill-modal').style.display='none'; cancelAttack();">キャンセル</button>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <div class="result-title" id="res-title">VICTORY</div>
+        <div style="margin-bottom:30px; font-weight:bold;" id="res-msg">勝利！</div>
+        <div class="menu-btn" onclick="showTitle()">タイトルへ戻る</div>
     </div>
 
     <div id="msg-box"></div>
 
     <script>
-        // データ (CSSクラス art-H などに対応)
+        // --- データ定義 (CSSアートクラス付き) ---
         const ELEM = {
             H: { symbol: 'H', name: '水素', rarity: 'N', css: 'art-H' },
             He: { symbol: 'He', name: 'ヘリウム', rarity: 'SR', css: 'art-gas' },
-            Li: { symbol: 'Li', name: 'リチウム', rarity: 'R', css: 'art-metal-gen' },
-            C: { symbol: 'C', name: '炭素', rarity: 'N', css: 'art-solid-gen' },
+            Li: { symbol: 'Li', name: 'リチウム', rarity: 'R', css: 'art-metal' },
+            B: { symbol: 'B', name: 'ホウ素', rarity: 'R', css: 'art-solid' },
+            C: { symbol: 'C', name: '炭素', rarity: 'N', css: 'art-solid' },
             N: { symbol: 'N', name: '窒素', rarity: 'N', css: 'art-gas' },
-            O: { symbol: 'O', name: '酸素', rarity: 'N', css: 'art-O' },
-            F: { symbol: 'F', name: 'フッ素', rarity: 'SR', css: 'art-toxic-gen' },
+            O: { symbol: 'O', name: '酸素', rarity: 'N', css: 'art-gas' },
+            F: { symbol: 'F', name: 'フッ素', rarity: 'SR', css: 'art-toxic' },
             Ne: { symbol: 'Ne', name: 'ネオン', rarity: 'SR', css: 'art-gas' },
-            Na: { symbol: 'Na', name: 'ナトリウム', rarity: 'N', css: 'art-metal-gen' },
-            Mg: { symbol: 'Mg', name: 'マグネシウム', rarity: 'R', css: 'art-metal-gen' },
-            Al: { symbol: 'Al', name: 'アルミニウム', rarity: 'R', css: 'art-metal-gen' },
-            Si: { symbol: 'Si', name: 'ケイ素', rarity: 'R', css: 'art-solid-gen' },
-            P: { symbol: 'P', name: 'リン', rarity: 'R', css: 'art-solid-gen' },
-            S: { symbol: 'S', name: '硫黄', rarity: 'R', css: 'art-solid-gen' },
-            Cl: { symbol: 'Cl', name: '塩素', rarity: 'N', css: 'art-Cl' },
+            Na: { symbol: 'Na', name: 'ナトリウム', rarity: 'N', css: 'art-metal' },
+            Mg: { symbol: 'Mg', name: 'マグネシウム', rarity: 'R', css: 'art-metal' },
+            Al: { symbol: 'Al', name: 'アルミニウム', rarity: 'R', css: 'art-metal' },
+            Si: { symbol: 'Si', name: 'ケイ素', rarity: 'R', css: 'art-solid' },
+            P: { symbol: 'P', name: 'リン', rarity: 'R', css: 'art-solid' },
+            S: { symbol: 'S', name: '硫黄', rarity: 'R', css: 'art-solid' },
+            Cl: { symbol: 'Cl', name: '塩素', rarity: 'N', css: 'art-toxic' },
             Ar: { symbol: 'Ar', name: 'アルゴン', rarity: 'SR', css: 'art-gas' },
-            K: { symbol: 'K', name: 'カリウム', rarity: 'N', css: 'art-metal-gen' },
-            Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R', css: 'art-metal-gen' },
-            Fe: { symbol: 'Fe', name: '鉄', rarity: 'N', css: 'art-metal-gen' },
-            Cu: { symbol: 'Cu', name: '銅', rarity: 'N', css: 'art-metal-gen' },
-            Zn: { symbol: 'Zn', name: '亜鉛', rarity: 'R', css: 'art-metal-gen' },
-            Ag: { symbol: 'Ag', name: '銀', rarity: 'SR', css: 'art-metal-gen' },
-            Cd: { symbol: 'Cd', name: 'カドミウム', rarity: 'R', css: 'art-toxic-gen' },
+            K: { symbol: 'K', name: 'カリウム', rarity: 'N', css: 'art-metal' },
+            Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R', css: 'art-metal' },
+            Ti: { symbol: 'Ti', name: 'チタン', rarity: 'SR', css: 'art-metal' },
+            Cr: { symbol: 'Cr', name: 'クロム', rarity: 'SR', css: 'art-metal' },
+            Mn: { symbol: 'Mn', name: 'マンガン', rarity: 'R', css: 'art-metal' },
+            Fe: { symbol: 'Fe', name: '鉄', rarity: 'N', css: 'art-metal' },
+            Ni: { symbol: 'Ni', name: 'ニッケル', rarity: 'R', css: 'art-metal' },
+            Cu: { symbol: 'Cu', name: '銅', rarity: 'N', css: 'art-metal' },
+            Zn: { symbol: 'Zn', name: '亜鉛', rarity: 'R', css: 'art-metal' },
+            Ag: { symbol: 'Ag', name: '銀', rarity: 'SR', css: 'art-metal' },
+            Cd: { symbol: 'Cd', name: 'カドミウム', rarity: 'R', css: 'art-toxic' },
+            Sn: { symbol: 'Sn', name: 'スズ', rarity: 'R', css: 'art-metal' },
+            Ba: { symbol: 'Ba', name: 'バリウム', rarity: 'R', css: 'art-metal' },
+            W:  { symbol: 'W', name: 'タングステン', rarity: 'SSR', css: 'art-metal' },
+            Pt: { symbol: 'Pt', name: 'プラチナ', rarity: 'SSR', css: 'art-metal' },
             Au: { symbol: 'Au', name: '金', rarity: 'SSR', css: 'art-Au' },
-            Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR', css: 'art-liquid-gen' },
-            Pt: { symbol: 'Pt', name: 'プラチナ', rarity: 'SSR', css: 'art-metal-gen' },
-            W: { symbol: 'W', name: 'タングステン', rarity: 'SSR', css: 'art-metal-gen' },
-            Ti: { symbol: 'Ti', name: 'チタン', rarity: 'SR', css: 'art-metal-gen' }
+            Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR', css: 'art-liquid' },
+            Pb: { symbol: 'Pb', name: '鉛', rarity: 'R', css: 'art-metal' }
         };
 
         const RECIPES = [
-            { ingredients: ['H', 'Cl'], product: { symbol: 'HCl', name: '塩化水素', rarity:'R', atk: 5, hp: 1, css:'art-toxic-gen', skills: [{name:'強酸腐食', power:5, desc:'高火力'}] }},
-            { ingredients: ['H', 'F'], product: { symbol: 'HF', name: 'フッ化水素', rarity:'SR', atk: 4, hp: 2, ability:'toxic', css:'art-toxic-gen', skills: [{name:'ガラス腐食', power:4, desc:'攻撃'}, {name:'猛毒', power:0, type:'toxic', desc:'必殺'}] }},
-            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', rarity:'N', atk: 1, hp: 4, css:'art-liquid-gen', skills: [{name:'水流', power:1, desc:'攻撃'}, {name:'加水分解', power:3, type:'heal', desc:'HP3回復'}] }},
-            { ingredients: ['Ag', 'Cl'], product: { symbol: 'AgCl', name: '塩化銀', rarity:'SR', atk: 1, hp: 6, ability:'ward', css:'art-solid-gen', skills: [{name:'白色沈殿', power:0, type:'guard', desc:'守護'}] }},
-            { ingredients: ['Fe', 'O', 'O'], product: { symbol: 'Fe2O3', name: '赤錆', rarity:'R', atk: 2, hp: 8, ability:'ward', css:'art-solid-gen', skills: [{name:'不動態', power:2, desc:'高耐久'}] }},
-            { ingredients: ['C', 'O'], product: { symbol: 'CO', name: '一酸化炭素', rarity:'R', atk: 1, hp: 2, ability:'toxic', css:'art-gas', skills: [{name:'猛毒ガス', power:0, type:'toxic', desc:'必殺'}] }},
-            { ingredients: ['H', 'S'], product: { symbol: 'H2S', name: '硫化水素', rarity:'R', atk: 2, hp: 3, ability:'toxic', css:'art-Cl', skills: [{name:'腐卵臭', power:0, type:'toxic', desc:'必殺'}] }},
-            { ingredients: ['Cl', 'Cl'], product: { symbol: 'Cl2', name: '塩素ガス', rarity:'R', atk: 3, hp: 3, css:'art-Cl', skills: [{name:'毒ガス散布', power:2, type:'aoe', desc:'全体2ダメ'}] }},
-            { ingredients: ['Na', 'O', 'H'], product: { symbol: 'NaOH', name: '水酸化Na', rarity:'R', atk: 3, hp: 3, css:'art-solid-gen', skills: [{name:'潮解', power:3, desc:'攻撃'}, {name:'中和熱', power:2, type:'aoe_heal', desc:'全体2ダメ/2回復'}] }},
+            { ingredients: ['H', 'Cl'], product: { symbol: 'HCl', name: '塩化水素', rarity:'R', atk: 5, hp: 1, css:'art-toxic', skills: [{name:'強酸腐食', power:5, desc:'高火力攻撃'}] }},
+            { ingredients: ['H', 'F'], product: { symbol: 'HF', name: 'フッ化水素', rarity:'SR', atk: 4, hp: 2, ability:'toxic', css:'art-toxic', skills: [{name:'ガラス腐食', power:4, desc:'攻撃'}, {name:'猛毒', power:0, type:'toxic', desc:'必殺'}] }},
+            { ingredients: ['Na', 'H'], product: { symbol: 'NaH', name: '水素化Na', rarity:'R', atk: 3, hp: 1, ability:'storm', css:'art-solid', skills: [{name:'還元作用', power:3, desc:'疾走'}] }},
+            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', rarity:'N', atk: 1, hp: 4, css:'art-liquid', skills: [{name:'水流', power:1, desc:'攻撃'}, {name:'加水分解', power:3, type:'heal', desc:'HP3回復'}] }},
+            { ingredients: ['Ag', 'Cl'], product: { symbol: 'AgCl', name: '塩化銀', rarity:'SR', atk: 1, hp: 6, ability:'ward', css:'art-solid', skills: [{name:'白色沈殿', power:0, type:'guard', desc:'守護'}] }},
+            { ingredients: ['Fe', 'O'], product: { symbol: 'FeO', name: '酸化鉄(II)', rarity:'N', atk: 3, hp: 5, css:'art-solid', skills: [{name:'黒錆', power:3, desc:'通常攻撃'}] }},
+            { ingredients: ['Fe', 'O', 'O'], product: { symbol: 'Fe2O3', name: '赤錆', rarity:'R', atk: 2, hp: 8, ability:'ward', css:'art-solid', skills: [{name:'不動態', power:2, desc:'高耐久'}] }},
+            { ingredients: ['Cu', 'O'], product: { symbol: 'CuO', name: '酸化銅(II)', rarity:'N', atk: 3, hp: 4, css:'art-solid', skills: [{name:'黒色粉末', power:3, desc:'攻撃'}] }},
+            { ingredients: ['Zn', 'Cu'], product: { symbol: 'Brass', name: '黄銅', rarity:'R', atk: 4, hp: 5, css:'art-metal', skills: [{name:'合金アタック', power:4, desc:'攻撃'}] }},
+            { ingredients: ['Hg', 'Zn'], product: { symbol: 'Amalgam', name: '亜鉛アマルガム', rarity:'SR', atk: 3, hp: 6, ability:'ward', css:'art-metal', skills: [{name:'アマルガム化', power:3, desc:'守護'}] }},
+            { ingredients: ['C', 'O'], product: { symbol: 'CO', name: '一酸化炭素', rarity:'R', atk: 1, hp: 2, ability:'toxic', css:'art-gas', skills: [{name:'不完全燃焼', power:1, desc:'攻撃'}, {name:'ヘモグロビン結合', power:0, type:'toxic', desc:'必殺'}] }},
+            { ingredients: ['H', 'S'], product: { symbol: 'H2S', name: '硫化水素', rarity:'R', atk: 2, hp: 3, ability:'toxic', css:'art-gas', skills: [{name:'腐卵臭', power:2, desc:'攻撃'}, {name:'硫化', power:0, type:'toxic', desc:'必殺'}] }},
+            { ingredients: ['Cl', 'Cl'], product: { symbol: 'Cl2', name: '塩素ガス', rarity:'R', atk: 3, hp: 3, css:'art-gas', skills: [{name:'酸化作用', power:3, desc:'攻撃'}, {name:'毒ガス散布', power:2, type:'aoe', desc:'全体2ダメ'}] }},
+            { ingredients: ['S', 'O', 'O'], product: { symbol: 'SO2', name: '二酸化硫黄', rarity:'N', atk: 2, hp: 4, css:'art-gas', skills: [{name:'酸性雨', power:1, type:'aoe', desc:'全体1ダメ'}] }},
+            { ingredients: ['Na', 'O', 'H'], product: { symbol: 'NaOH', name: '水酸化Na', rarity:'R', atk: 3, hp: 3, css:'art-solid', skills: [{name:'潮解', power:3, desc:'攻撃'}, {name:'中和熱', power:2, type:'aoe_heal', desc:'全体2ダメ/2回復'}] }},
+            { ingredients: ['Al', 'O', 'O'], product: { symbol: 'Al2O3', name: 'アルミナ', rarity:'R', atk: 2, hp: 7, ability:'ward', css:'art-solid', skills: [{name:'アルマイト', power:2, desc:'守護'}] }},
             { ingredients: ['C', 'C', 'C'], product: { symbol: 'Diamond', name: 'ダイヤモンド', rarity:'SSR', atk: 4, hp: 10, ability:'ward', css:'art-Au', skills: [{name:'最強硬度', power:4, desc:'鉄壁'}] }},
             { ingredients: ['Au'], product: { symbol: 'Au', name: '金', rarity:'SSR', atk: 6, hp: 6, css:'art-Au', skills: [{name:'不変の輝き', power:6, desc:'高火力'}] }},
-            { ingredients: ['H', 'Cl', 'N', 'O', 'O', 'O'], product: { symbol: 'AquaRegia', name: '王水', rarity:'SSR', atk: 0, hp: 0, type:'spell', css:'art-liquid-gen', skills: [{name:'金溶かし', power:99, type:'toxic', desc:'確定除去'}] }},
-            // 他のレシピも同様にCSSクラスを割り当てて使用（省略時はgen）
+            { ingredients: ['He', 'He'], product: { symbol: 'He', name: 'ヘリウム', rarity:'SR', atk: 2, hp: 2, ability:'stealth', css:'art-gas', skills: [{name:'不活性', power:2, desc:'潜伏'}] }},
+            { ingredients: ['H', 'Cl', 'N', 'O', 'O', 'O'], product: { symbol: 'AquaRegia', name: '王水', rarity:'SSR', atk: 0, hp: 0, type:'spell', css:'art-liquid', skills: [{name:'金溶かし', power:99, type:'toxic', desc:'確定除去'}] }},
         ];
 
         const DECKS = {
-            aggro: { name: '超速攻', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'H2O'] },
-            counter: { name: 'カウンター', elements: ['Ag', 'Cl', 'Fe', 'O'], recipes: ['AgCl', 'Fe2O3'] },
-            toxic: { name: '害悪毒', elements: ['C', 'O', 'S', 'H', 'Cl'], recipes: ['CO', 'H2S', 'Cl2'] },
-            control: { name: 'コントロール', elements: ['Na', 'O', 'H', 'Al'], recipes: ['NaOH'] },
-            gemstone: { name: '宝石', elements: ['C', 'C', 'C'], recipes: ['Diamond'] },
-            heavy: { name: '重金属', elements: ['Au', 'Pt', 'W'], recipes: ['Au'] },
-            hazard: { name: '危険物', elements: ['H', 'Cl', 'N', 'O'], recipes: ['AquaRegia'] }
+            aggro: { name: '超速攻', desc: '低コスト高火力', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
+            counter: { name: 'カウンター', desc: '守って反撃', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
+            toxic: { name: '害悪毒', desc: '必殺で即死', elements: ['C', 'O', 'S', 'H', 'Cl'], recipes: ['CO', 'H2S', 'Cl2', 'SO2'] },
+            control: { name: 'コントロール', desc: '回復と支配', elements: ['Al', 'O', 'H', 'Na', 'Cl'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl'] },
+            gemstone: { name: '宝石', desc: '最強の硬度', elements: ['C', 'C', 'C'], recipes: ['Diamond'] },
+            heavy: { name: '重金属', desc: '後半最強', elements: ['Au', 'Pt', 'W'], recipes: ['Au'] },
+            noble: { name: '貴ガス', desc: '潜伏攻撃', elements: ['He', 'He', 'Ne', 'Ne'], recipes: ['He'] },
+            hazard: { name: '危険物', desc: '除去スペル', elements: ['H', 'Cl', 'N', 'O', 'S'], recipes: ['AquaRegia'] }
         };
 
         let gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
@@ -289,21 +326,26 @@
             const grid = document.getElementById('deck-grid');
             for(let key in DECKS) {
                 const d = document.createElement('div'); d.className='deck-card';
-                d.innerHTML = `<div class="deck-title">${DECKS[key].name}</div><div class="deck-desc">デッキを選択</div>`;
+                d.innerHTML = `<div class="deck-title">${DECKS[key].name}</div><div class="deck-desc">${DECKS[key].desc}</div>`;
                 d.onclick = () => startGame(key);
                 grid.appendChild(d);
             }
             showTitle();
         };
 
-        function showTitle() { hideAll(); document.getElementById('start-screen').style.display='flex'; }
+        function showTitle() { hideAll(); document.getElementById('title-screen').style.display='flex'; }
         function showDeckSelect() { hideAll(); document.getElementById('deck-select-screen').style.display='block'; }
-        function hideAll() { document.querySelectorAll('.screen').forEach(e=>e.style.display='none'); document.getElementById('game-board').style.display='none'; document.getElementById('action-btns').style.display='none'; }
+        function hideAll() { 
+            document.querySelectorAll('.screen').forEach(e=>e.style.display='none'); 
+            document.getElementById('game-board').style.display='none'; 
+            document.getElementById('action-btns').style.display='none'; 
+            document.getElementById('result-screen').style.display='none';
+        }
 
         function startGame(key) {
             gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
             gs.pool = DECKS[key].elements.map(s => ELEM[s]);
-            gs.recipes = RECIPES; // 簡易化のため全レシピ有効
+            gs.recipes = RECIPES; 
             gs.enemyPool = DECKS[Object.keys(DECKS)[Math.floor(Math.random()*Object.keys(DECKS).length)]].elements.map(s=>ELEM[s]);
             
             hideAll();
@@ -329,13 +371,6 @@
 
         function actionSynthesize() {
             if(!gs.isPlayerTurn || gs.selected.length<1) return;
-            // 単体金属
-            if(gs.selected.length===1) {
-                const c = gs.hand.find(x=>x.id===gs.selected[0]);
-                const rec = gs.recipes.find(r=>r.ingredients.length===1 && r.ingredients[0]===c.symbol);
-                if(rec) { processSynth(rec); return; }
-            }
-            // 複数
             const sel = gs.hand.filter(c=>gs.selected.includes(c.id));
             const syms = sel.map(c=>c.symbol).sort();
             const rec = gs.recipes.find(r=>JSON.stringify(r.ingredients.sort())===JSON.stringify(syms));
@@ -344,7 +379,6 @@
         }
 
         function processSynth(rec) {
-            // スペル
             if(rec.product.type==='spell') {
                 gs.hand = gs.hand.filter(c=>!gs.selected.includes(c.id)); gs.selected=[];
                 // 簡易効果
@@ -373,28 +407,57 @@
                 const u = gs.field.find(x=>x.id===id); showDetail(u);
                 if(u && u.canAttack) { gs.attacker = u; document.body.classList.add('targeting'); updateView(); }
             } else if(gs.attacker) {
-                // 攻撃
                 const target = gs.enemyField.find(x=>x.id===id);
-                attack(gs.attacker, target);
+                if(target.ability==='stealth') { msg("潜伏中！"); return; }
+                prepareAttack(gs.attacker, target, 'unit');
             } else {
                 const u = gs.enemyField.find(x=>x.id===id); showDetail(u);
             }
         }
 
         function attackLeader(side) {
-            if(side==='enemy' && gs.attacker) attack(gs.attacker, 'leader');
+            if(side==='enemy' && gs.attacker) prepareAttack(gs.attacker, 'leader', 'leader');
         }
 
-        function attack(atk, def) {
-            // 守護チェック省略(簡易版)
-            if(def==='leader') {
-                gs.enemyHp -= atk.atk;
-            } else {
-                def.currentHp -= atk.atk;
-                atk.currentHp -= def.atk;
+        function prepareAttack(atk, tgt, type) {
+            if(type==='leader' || (type==='unit' && tgt.ability!=='ward')) {
+                const guards = gs.enemyField.filter(u=>u.ability==='ward' && u.ability!=='stealth');
+                if(guards.length>0) { msg("守護に阻まれた！"); cancelAttack(); return; }
             }
-            atk.canAttack = false;
-            cancelAttack(); checkEnd(); updateView();
+            if(atk.skills.length>1) openSkillModal(atk, tgt);
+            else executeSkill(atk, tgt, atk.skills[0]);
+        }
+
+        function openSkillModal(atk, tgt) {
+            const m = document.getElementById('skill-modal');
+            const l = document.getElementById('skill-list'); l.innerHTML='';
+            atk.skills.forEach(s => {
+                const b = document.createElement('div'); b.className='skill-btn';
+                b.innerHTML=`<div>${s.name} (威力:${s.power})</div><div style="font-size:10px; color:#555">${s.desc}</div>`;
+                b.onclick=()=>{ executeSkill(atk, tgt, s); m.style.display='none'; };
+                l.appendChild(b);
+            });
+            m.style.display='flex';
+        }
+
+        function executeSkill(atk, tgt, skill) {
+            let log = `${skill.name}!`;
+            if(skill.type==='aoe') {
+                gs.enemyField.forEach(u=>u.currentHp-=skill.power); gs.enemyHp-=skill.power;
+            } else if(skill.type==='aoe_heal') {
+                gs.enemyField.forEach(u=>u.currentHp-=skill.power); gs.hp+=skill.power;
+            } else if(skill.type==='heal') {
+                gs.hp+=skill.power;
+            } else {
+                const dmg = skill.power;
+                if(tgt==='leader') gs.enemyHp-=dmg;
+                else {
+                    const cnt = tgt.atk;
+                    if(skill.type==='toxic' && dmg>0) tgt.currentHp=-99; else tgt.currentHp-=dmg;
+                    atk.currentHp-=cnt;
+                }
+            }
+            atk.canAttack=false; msg(log); cancelAttack(); checkEnd(); updateView();
         }
 
         function cancelAttack() { gs.attacker=null; document.body.classList.remove('targeting'); updateView(); }
@@ -402,8 +465,17 @@
         function checkEnd() {
             gs.field = gs.field.filter(u=>u.currentHp>0);
             gs.enemyField = gs.enemyField.filter(u=>u.currentHp>0);
-            if(gs.enemyHp<=0) alert("勝利！");
-            if(gs.hp<=0) alert("敗北...");
+            if(gs.enemyHp<=0) showResult(true);
+            else if(gs.hp<=0) showResult(false);
+        }
+
+        function showResult(isWin) {
+            const sc = document.getElementById('result-screen');
+            const tit = document.getElementById('res-title');
+            const ms = document.getElementById('res-msg');
+            sc.style.display = 'flex';
+            if(isWin) { tit.innerText="VICTORY"; tit.className="result-title res-win"; ms.innerText="あなたの勝利！"; }
+            else { tit.innerText="DEFEAT"; tit.className="result-title res-lose"; ms.innerText="敗北しました..."; }
         }
 
         function endTurn() {
@@ -413,17 +485,45 @@
 
         async function cpuTurn() {
             if(gs.maxMp<10) gs.maxMp++; gs.mp=gs.maxMp;
-            draw(false); updateView();
-            // 簡易CPU: 攻撃のみ
+            draw(false); updateView(); await sleep(500);
+            // 簡易CPU
+            let acted=true;
+            while(acted && gs.enemyField.length<MAX_FIELD) {
+                acted=false;
+                const hand = gs.enemyHand.map(c=>c.symbol);
+                for(let r of gs.recipes) {
+                    if(r.product.type==='spell') continue;
+                    let ing=[...r.ingredients], tHand=[...hand], ok=true;
+                    for(let i of ing) {
+                        let idx=tHand.indexOf(i); if(idx===-1){ok=false;break;} tHand.splice(idx,1);
+                    }
+                    if(ok) {
+                        for(let i of r.ingredients) {
+                            let idx=gs.enemyHand.findIndex(c=>c.symbol===i); gs.enemyHand.splice(idx,1);
+                        }
+                        const u={...r.product, id:Math.random(), maxHp:r.product.hp, currentHp:r.product.hp, canAttack:false, type:'unit'};
+                        gs.enemyField.push(u); msg(`CPU召喚: ${u.name}`);
+                        await sleep(800); updateView(); acted=true; break;
+                    }
+                }
+            }
             gs.enemyField.forEach(u=>u.canAttack=true);
             for(let u of gs.enemyField) {
-                if(gs.hp>0) { gs.hp -= u.atk; msg("CPU攻撃"); await new Promise(r=>setTimeout(r,500)); updateView(); }
+                if(!u.canAttack) continue;
+                const guards=gs.field.filter(g=>g.ability==='ward' && g.ability!=='stealth');
+                let tgt='leader'; if(guards.length>0) tgt=guards[0];
+                if(tgt==='leader') { gs.hp-=u.skills[0].power; msg("CPU攻撃"); }
+                else { 
+                    const dmg=u.skills[0].power; 
+                    if(u.skills[0].type==='toxic' && dmg>0) tgt.currentHp=-99; else tgt.currentHp-=dmg;
+                    u.currentHp-=tgt.atk; msg(`CPU攻撃 -> ${tgt.name}`);
+                }
+                checkEnd(); updateView(); await sleep(800);
             }
-            checkEnd();
-            gs.turn++; gs.isPlayerTurn=true; 
-            gs.field.forEach(u=>u.canAttack=true);
+            gs.turn++; gs.isPlayerTurn=true; gs.field.forEach(u=>u.canAttack=true);
             draw(true); msg("あなたのターン"); updateView();
         }
+        const sleep = m => new Promise(r => setTimeout(r, m));
 
         function updateView() {
             document.getElementById('turn-display').innerText = `ターン ${gs.turn}`;
@@ -435,7 +535,7 @@
             render(document.getElementById('player-hand-area'), gs.hand, 'hand', true);
             render(document.getElementById('player-field'), gs.field, 'field', true);
             render(document.getElementById('enemy-field'), gs.enemyField, 'field', false);
-            // 敵手札
+            
             const eh = document.getElementById('enemy-hand-area'); eh.innerHTML='';
             gs.enemyHand.forEach(()=>{
                 const d=document.createElement('div'); d.className='card'; d.style.background='#444'; d.style.width='30px'; d.style.height='45px';
@@ -448,18 +548,21 @@
             el.innerHTML='';
             list.forEach(c => {
                 const d = document.createElement('div'); d.className='card';
-                // CSS Art
-                let artClass = c.css || 'art-solid-gen';
+                d.setAttribute('data-rarity', c.rarity);
+                let art = c.css || 'art-solid';
+                let content = '';
                 if(c.type==='element') {
-                    d.innerHTML = `<div class="card-art-area ${artClass} css-art"></div><div class="card-info-area"><div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
+                    content = `<div class="card-art-area ${art} css-art"></div><div class="card-info-area"><div class="card-symbol" style="position:static; display:block; margin-top:5px;">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
                 } else {
                     let badges = `<div class="ability-container">`;
                     if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡️</div>`;
                     if(c.ability === 'toxic') badges += `<div class="badge badge-toxic">☠️</div>`;
                     if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
+                    if(c.ability === 'stealth') badges += `<div class="badge badge-stealth">👁️</div>`;
                     badges += `</div>`;
-                    d.innerHTML = `${badges}<div class="card-art-area ${artClass} css-art"></div><div class="card-info-area"><div class="card-symbol" style="color:var(--primary)">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div></div>`;
+                    content = `${badges}<div class="card-art-area ${art} css-art"></div><div class="card-info-area"><div class="card-symbol" style="position:static; display:block; color:var(--primary);">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div></div>`;
                 }
+                d.innerHTML = content;
                 
                 if(type==='hand' && gs.selected.includes(c.id)) d.classList.add('selected');
                 if(type==='field' && c.canAttack && isPlayer) d.classList.add('can-attack');
@@ -482,8 +585,8 @@
                     handSym.splice(idx,1);
                 }
                 if(possible) {
-                    const b = document.createElement('div'); b.className='craft-btn';
-                    b.innerText = `✨ ${r.product.name}`;
+                    const b = document.createElement('div'); b.className='craft-hint-btn';
+                    b.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">✨ ${r.product.name}</div><div style="font-size:10px; color:#ccc;">合成可能</div>`;
                     b.onclick = () => {
                         gs.selected = []; const tempHand=[...gs.hand];
                         r.ingredients.forEach(ing => {
@@ -501,12 +604,15 @@
             const p = document.getElementById('detail-panel'); p.style.display='flex';
             document.getElementById('det-sym').innerText = c.symbol;
             document.getElementById('det-name').innerText = c.name;
+            const skillsDiv = document.getElementById('det-skills'); skillsDiv.innerHTML='';
             if(c.type!=='element') {
                 document.getElementById('det-stats').innerHTML = `⚔️${c.atk} <span style="margin-left:10px; color:var(--success)">❤️${c.currentHp}/${c.maxHp}</span>`;
-                document.getElementById('det-desc').innerText = (c.skills||[]).map(s=>`【${s.name}】${s.desc}`).join('\n');
+                c.skills.forEach(s => {
+                    skillsDiv.innerHTML += `<div class="skill-item"><div style="font-weight:bold; color:var(--accent)">${s.name} (威力:${s.power})</div><div style="font-size:11px;">${s.desc}</div></div>`;
+                });
             } else {
                 document.getElementById('det-stats').innerText = '';
-                document.getElementById('det-desc').innerText = '合成素材';
+                skillsDiv.innerText = '合成素材';
             }
         }
 
