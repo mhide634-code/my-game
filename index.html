@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: Complete</title>
+    <title>Chem-Verse: Ultimate</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,42 +13,51 @@
         }
         body { font-family:'M PLUS Rounded 1c', sans-serif; background:var(--bg-color); color:white; margin:0; user-select:none; overflow:hidden; height:100vh; width:100vw; -webkit-tap-highlight-color:transparent; }
         
-        /* --- 共通 --- */
+        /* --- 画面制御 --- */
         .screen { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg,#0f0c29,#302b63,#24243e); z-index:100; transition:0.3s; }
         .hidden { display:none!important; opacity:0; pointer-events:none; }
         .scrollable { overflow-y:auto; -webkit-overflow-scrolling:touch; justify-content:flex-start; padding:20px; }
 
         /* --- CSSアート (イラスト) --- */
-        .art-frame { width:100%; height:100%; position:relative; overflow:hidden; display:flex; justify-content:center; align-items:center; background:#000; }
-        .art-gas { background:linear-gradient(to tr,#89f7fe,#66a6ff); } .art-gas::after { content:'☁️'; font-size:30px; filter:drop-shadow(0 0 5px white); animation:float 3s infinite; }
-        .art-liq { background:linear-gradient(to b,#4facfe,#00f2fe); } .art-liq::after { content:'💧'; font-size:30px; animation:bounce 2s infinite; }
-        .art-sol { background:linear-gradient(to b,#e6b980,#eacda3); } .art-sol::after { content:'🪨'; font-size:30px; }
-        .art-met { background:linear-gradient(135deg,#bdc3c7,#2c3e50); } .art-met::after { content:'✨'; font-size:30px; text-shadow:0 0 5px white; }
-        .art-tox { background:linear-gradient(to b,#f093fb,#f5576c); } .art-tox::after { content:'☠️'; font-size:30px; filter:drop-shadow(0 0 5px purple); }
-        .art-fir { background:linear-gradient(to t,#e74c3c,#f1c40f); } .art-fir::after { content:'🔥'; font-size:30px; animation:bounce 0.5s infinite; }
-        .art-gol { background:radial-gradient(circle,#ffd700,#b8860b); } .art-gol::after { content:'💎'; font-size:30px; filter:drop-shadow(0 0 5px gold); }
+        .art-frame { width:100%; height:100%; position:relative; overflow:hidden; display:flex; justify-content:center; align-items:center; background:#111; }
+        .art-gas { background:linear-gradient(to tr,#89f7fe,#66a6ff); } .art-gas::after { content:'☁️'; font-size:24px; filter:drop-shadow(0 0 5px white); animation:float 3s infinite; }
+        .art-liq { background:linear-gradient(to b,#4facfe,#00f2fe); } .art-liq::after { content:'💧'; font-size:24px; animation:bounce 2s infinite; }
+        .art-sol { background:linear-gradient(to b,#e6b980,#eacda3); } .art-sol::after { content:'🪨'; font-size:24px; }
+        .art-met { background:linear-gradient(135deg,#bdc3c7,#2c3e50); } .art-met::after { content:'✨'; font-size:24px; text-shadow:0 0 5px white; }
+        .art-tox { background:linear-gradient(to b,#f093fb,#f5576c); } .art-tox::after { content:'☠️'; font-size:24px; filter:drop-shadow(0 0 5px purple); }
+        .art-fir { background:linear-gradient(to t,#e74c3c,#f1c40f); } .art-fir::after { content:'🔥'; font-size:24px; animation:bounce 0.5s infinite; }
+        .art-gol { background:radial-gradient(circle,#ffd700,#b8860b); } .art-gol::after { content:'💎'; font-size:24px; filter:drop-shadow(0 0 5px gold); }
+        /* 個別アート */
+        .art-H { background:linear-gradient(to t,#a1c4fd,#c2e9fb); } .art-H::after{ content:'(•ω•)'; font-size:10px; background:white; color:#333; padding:2px; border-radius:10px; }
+        .art-Au { background:radial-gradient(circle,#ffd700,#b8860b); } .art-Au::after{ content:'💰'; font-size:24px; }
         @keyframes float { 50%{transform:translateY(-5px);} } @keyframes bounce { 50%{transform:scale(1.1);} }
 
-        /* --- カードデザイン (TCG風) --- */
+        /* --- カードデザイン --- */
         .card {
-            width:85px; height:120px; background:var(--card-bg); border-radius:6px;
+            width:75px; height:110px; background:var(--card-bg); border-radius:6px;
             border:2px solid var(--card-frame); box-shadow:0 4px 8px rgba(0,0,0,0.5);
-            display:flex; flex-direction:column; padding:3px; position:relative; flex-shrink:0; margin:2px;
+            display:flex; flex-direction:column; padding:2px; position:relative; flex-shrink:0; margin:2px;
             transition:transform 0.1s;
         }
-        .card[data-r="N"] { border-color:var(--rare-n); } .card[data-r="R"] { border-color:var(--rare-r); box-shadow:0 0 5px var(--rare-r); }
+        /* レアリティ演出 */
+        .card[data-r="N"] { border-color:var(--rare-n); } 
+        .card[data-r="R"] { border-color:var(--rare-r); box-shadow:0 0 5px var(--rare-r); }
         .card[data-r="SR"] { border-color:var(--rare-sr); box-shadow:0 0 8px var(--rare-sr); background:linear-gradient(135deg,#2c3e50,#4a235a); }
-        .card[data-r="SSR"] { border-color:var(--rare-ssr); box-shadow:0 0 10px var(--rare-ssr); background:linear-gradient(135deg,#f1c40f,#e67e22); }
+        .card[data-r="SSR"] { border-color:var(--rare-ssr); box-shadow:0 0 10px var(--rare-ssr); background:linear-gradient(135deg,#f1c40f,#e67e22); animation:holo 3s infinite linear; }
+        @keyframes holo { 0%{filter:brightness(1);} 50%{filter:brightness(1.2);} 100%{filter:brightness(1);} }
+
+        .c-head { display:flex; justify-content:space-between; font-size:8px; font-weight:bold; color:#eee; margin-bottom:1px; padding:0 2px; }
+        .c-art-box { width:100%; height:55px; border:1px solid #555; border-radius:2px; overflow:hidden; margin-bottom:1px; position:relative; }
+        .c-text { flex-grow:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); font-size:7px; padding:2px; color:#ddd; overflow:hidden; line-height:1.2; display:flex; align-items:center; justify-content:center; text-align:center;}
+        .c-stats { position:absolute; bottom:2px; width:94%; display:flex; justify-content:space-between; font-weight:900; font-size:9px; left:3%; }
+        .st-a { background:#e67e22; padding:0 3px; border-radius:3px; border:1px solid #fff; }
+        .st-h { background:#27ae60; padding:0 3px; border-radius:3px; border:1px solid #fff; }
         
-        .c-head { display:flex; justify-content:space-between; font-size:9px; font-weight:bold; color:#eee; margin-bottom:2px; padding:0 2px; }
-        .c-art-box { width:100%; height:55px; border:1px solid #555; border-radius:2px; overflow:hidden; margin-bottom:2px; }
-        .c-text { flex-grow:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); font-size:8px; padding:2px; color:#ddd; overflow:hidden; line-height:1.2; }
-        .c-stats { position:absolute; bottom:2px; width:92%; display:flex; justify-content:space-between; font-weight:900; font-size:11px; }
-        .st-a { background:#e67e22; padding:0 4px; border-radius:4px; border:1px solid #fff; }
-        .st-h { background:#27ae60; padding:0 4px; border-radius:4px; border:1px solid #fff; }
-        
-        /* 状態 */
-        .card.selected { transform:translateY(-15px) scale(1.05); border-color:var(--accent); z-index:100; box-shadow:0 0 15px var(--accent); }
+        .badges { position:absolute; top:20px; right:2px; display:flex; flex-direction:column; gap:1px; z-index:5; }
+        .bdg { width:12px; height:12px; border-radius:50%; font-size:8px; display:flex; align-items:center; justify-content:center; border:1px solid white; }
+        .bdg-w { background:var(--primary); } .bdg-t { background:#8e44ad; } .bdg-s { background:var(--accent); } .bdg-st { background:var(--rare-n); }
+
+        .card.selected { transform:translateY(-15px) scale(1.1); border-color:var(--accent); z-index:100; box-shadow:0 0 15px var(--accent); }
         .card.can-attack { border-color:var(--success); box-shadow:0 0 10px var(--success); }
         .card.attacking { border-color:var(--danger); transform:scale(1.2); z-index:200; box-shadow:0 0 20px var(--danger); }
         .valid-target { animation:pulse 0.8s infinite; border-color:var(--danger)!important; }
@@ -59,17 +68,16 @@
         .logo { font-family:'Orbitron'; font-size:40px; color:var(--accent); text-shadow:0 0 15px var(--accent); margin-bottom:10px; text-align:center; }
         .menu-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; padding:15px 40px; border-radius:30px; font-weight:bold; margin:10px; cursor:pointer; width:200px; text-align:center; }
         .menu-btn.primary { background:linear-gradient(90deg,var(--primary),#2980b9); border:none; }
-        .menu-btn:active { transform:scale(0.95); }
-
+        
         .d-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding-bottom:60px; width:100%; max-width:600px; }
         .d-card { background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; cursor:pointer; min-height:80px; border:1px solid #555; }
         .back-btn { position:fixed; bottom:20px; background:#333; padding:10px 30px; border-radius:20px; cursor:pointer; z-index:200; }
 
-        #board { display:none; flex-direction:column; height:100vh; background:#111; }
+        #board { display:none; flex-direction:column; height:100vh; background:#111; position:relative; }
         #info { height:12%; background:#222; display:flex; justify-content:space-between; align-items:center; padding:0 10px; border-y:1px solid #333; }
         .area { display:flex; justify-content:center; align-items:center; }
         #e-hand { height:8%; background:rgba(0,0,0,0.3); } #e-field { height:24%; border-bottom:2px solid #333; }
-        #p-field { height:24%; border-top:2px solid #333; } #p-hand { height:32%; background:rgba(0,0,0,0.2); overflow-x:auto; justify-content:flex-start; padding:0 10px; }
+        #p-field { height:24%; border-top:2px solid #333; } #p-hand { height:32%; background:rgba(0,0,0,0.2); overflow-x:auto; justify-content:flex-start; padding:0 10px; gap:5px;}
         
         .ldr { text-align:center; } .hp { width:35px; height:35px; border-radius:50%; background:#c0392b; border:2px solid white; line-height:35px; font-weight:bold; margin:0 auto; font-size:14px; }
         .acts { position:absolute; bottom:34%; right:10px; display:flex; flex-direction:column; gap:10px; z-index:50; }
@@ -81,10 +89,14 @@
 
         /* モーダル類 */
         #msg-box { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); padding:15px 30px; border-radius:10px; border:2px solid white; font-size:20px; font-weight:bold; pointer-events:none; opacity:0; transition:0.3s; z-index:5000; white-space:nowrap; }
-        #det-pan { position:absolute; top:15%; left:50%; transform:translateX(-50%); width:85%; max-width:300px; background:rgba(20,20,30,0.95); border:2px solid var(--accent); border-radius:12px; padding:20px; display:none; flex-direction:column; z-index:3000; box-shadow:0 0 30px black; }
+        
+        #det-pan { position:absolute; top:10%; left:50%; transform:translateX(-50%); width:85%; max-width:300px; background:rgba(20,20,30,0.98); border:2px solid var(--accent); border-radius:12px; padding:20px; display:none; flex-direction:column; z-index:3000; box-shadow:0 0 40px black; }
+        .big-art { width:100%; height:150px; border:2px solid #555; border-radius:8px; margin:10px 0; }
+        
         #skill-modal { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:4000; flex-direction:column; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; }
         .sk-btn { background:white; color:#333; padding:15px; width:100%; max-width:300px; margin-bottom:10px; border-radius:8px; font-weight:bold; cursor:pointer; border-left:5px solid var(--primary); }
-        #res-scr { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:6000; display:flex; flex-direction:column; align-items:center; justify-content:center; display:none; }
+        
+        #res-scr { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:6000; display:flex; flex-direction:column; align-items:center; justify-content:center; display:none; }
         .res-tit { font-size:40px; font-weight:bold; font-family:'Orbitron'; margin-bottom:20px; }
         
         #craft-list { position:absolute; bottom:36%; left:10px; display:flex; flex-direction:column; gap:5px; z-index:40; pointer-events:none; }
@@ -142,9 +154,10 @@
         <span id="dt-sym" style="font-size:30px;font-weight:bold;color:var(--primary)"></span>
         <span id="dt-name" style="font-size:18px;font-weight:bold;margin-left:10px"></span>
     </div>
-    <div id="dt-art" class="art-frame" style="height:120px; margin:10px 0; border-radius:8px;"></div>
+    <div class="art-frame big-art"><div id="dt-art" class="css-art"></div></div>
     <div id="dt-st" style="display:flex;justify-content:center;gap:20px;font-size:18px;font-weight:bold"></div>
     <div id="dt-desc" style="font-size:12px;color:#ccc;margin-top:10px;max-height:100px;overflow-y:auto"></div>
+    <div style="text-align:center;margin-top:10px;font-size:10px;color:#666">(タップして閉じる)</div>
 </div>
 
 <div id="skill-modal">
@@ -159,7 +172,6 @@
 </div>
 
 <div id="msg-box"></div>
-
 <script>
 // --- データ ---
 const EL = {
@@ -172,7 +184,8 @@ const EL = {
     Fe:{s:'Fe',n:'鉄',r:'N',c:'art-met'}, Cu:{s:'Cu',n:'銅',r:'N',c:'art-met'}, Zn:{s:'Zn',n:'亜鉛',r:'R',c:'art-met'},
     Ag:{s:'Ag',n:'銀',r:'SR',c:'art-met'}, Cd:{s:'Cd',n:'カドミウム',r:'R',c:'art-tox'}, Au:{s:'Au',n:'金',r:'SSR',c:'art-gol'},
     Hg:{s:'Hg',n:'水銀',r:'SR',c:'art-liq'}, Pt:{s:'Pt',n:'プラチナ',r:'SSR',c:'art-met'}, W:{s:'W',n:'タングステン',r:'SSR',c:'art-met'},
-    Ti:{s:'Ti',n:'チタン',r:'SR',c:'art-met'}, Cr:{s:'Cr',n:'クロム',r:'SR',c:'art-met'}, Mn:{s:'Mn',n:'マンガン',r:'R',c:'art-met'}
+    Ti:{s:'Ti',n:'チタン',r:'SR',c:'art-met'}, Cr:{s:'Cr',n:'クロム',r:'SR',c:'art-met'}, Mn:{s:'Mn',n:'マンガン',r:'R',c:'art-met'},
+    Sn:{s:'Sn',n:'スズ',r:'R',c:'art-met'}, Ba:{s:'Ba',n:'バリウム',r:'R',c:'art-met'}, Pb:{s:'Pb',n:'鉛',r:'R',c:'art-met'}
 };
 
 const REC = [
@@ -192,18 +205,34 @@ const REC = [
     {i:['C','C','C'],p:{s:'Diamond',n:'ダイヤ',r:'SSR',a:4,h:10,ab:'wrd',c:'art-gol',sk:[{n:'硬度10',p:4,d:'鉄壁'}]}},
     {i:['Au'],p:{s:'Au',n:'金',r:'SSR',a:6,h:6,c:'art-gol',sk:[{n:'輝き',p:6,d:'高火力'}]}},
     {i:['He','He'],p:{s:'He',n:'ヘリウム',r:'SR',a:2,h:2,ab:'stl',c:'art-gas',sk:[{n:'不活性',p:2,d:'潜伏'}]}},
-    {i:['H','Cl','N','O','O','O'],p:{s:'AquaRegia',n:'王水',r:'SSR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'溶解',p:99,t:'tox',d:'除去'}]}}
+    {i:['H','Cl','N','O','O','O'],p:{s:'AquaRegia',n:'王水',r:'SSR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'溶解',p:99,t:'tox',d:'除去'}]}},
+    {i:['Cu','O'],p:{s:'CuO',n:'酸化銅',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'黒粉',p:3,d:'攻撃'}]}},
+    {i:['Zn','Cu'],p:{s:'Brass',n:'黄銅',r:'R',a:4,h:5,c:'art-met',sk:[{n:'合金',p:4,d:'攻撃'}]}},
+    {i:['Hg','Zn'],p:{s:'Amalgam',n:'アマルガム',r:'SR',a:3,h:6,ab:'wrd',c:'art-liq',sk:[{n:'合金化',p:3,d:'守護'}]}},
+    {i:['Cd','S'],p:{s:'CdS',n:'硫化Cd',r:'SR',a:2,h:5,ab:'tox',c:'art-tox',sk:[{n:'イタイイタイ',p:0,t:'tox',d:'猛毒'}]}},
+    {i:['Cl','Na'],p:{s:'NaCl',n:'塩化Na',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'塩味',p:3,d:'通常'}]}},
+    {i:['Ca','O','H','H'],p:{s:'Ca(OH)2',n:'消石灰',r:'N',a:1,h:6,ab:'wrd',c:'art-sol',sk:[{n:'中和',p:4,t:'heal',d:'回復'}]}},
+    {i:['Al','O','O','Cr'],p:{s:'Ruby',n:'ルビー',r:'SR',a:5,h:8,c:'art-sol',sk:[{n:'深紅',p:5,d:'攻撃'}]}},
+    {i:['Al','O','Ti'],p:{s:'Sapphire',n:'サファイア',r:'SR',a:4,h:9,c:'art-sol',sk:[{n:'青玉',p:4,d:'攻撃'}]}},
+    {i:['Si','O','O'],p:{s:'SiO2',n:'石英',r:'N',a:3,h:6,c:'art-sol',sk:[{n:'結晶',p:2,t:'aoe',d:'全体2ダメ'}]}},
+    {i:['Pt'],p:{s:'Pt',n:'プラチナ',r:'SSR',a:5,h:7,c:'art-met',sk:[{n:'触媒',p:5,d:'攻撃'}]}},
+    {i:['W'],p:{s:'W',n:'タングステン',r:'SSR',a:7,h:8,ab:'wrd',c:'art-met',sk:[{n:'融点',p:7,d:'攻撃'}]}},
+    {i:['Ti'],p:{s:'Ti',n:'チタン',r:'SR',a:4,h:5,c:'art-met',sk:[{n:'強度',p:4,d:'攻撃'}]}},
+    {i:['Ne','Ne'],p:{s:'Ne',n:'ネオン',r:'SR',a:3,h:3,ab:'stl',c:'art-gas',sk:[{n:'発光',p:3,d:'潜伏'}]}},
+    {i:['Ar','Ar'],p:{s:'Ar',n:'アルゴン',r:'SR',a:4,h:4,ab:'stl',c:'art-gas',sk:[{n:'保護',p:4,d:'潜伏'}]}},
+    {i:['H','H','S','O','O','O','O'],p:{s:'H2SO4',n:'濃硫酸',r:'SR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'脱水',p:5,t:'aoe',d:'全体5ダメ'}]}},
+    {i:['K','Mn','O','O','O','O'],p:{s:'KMnO4',n:'過マンガン酸K',r:'SR',a:0,h:0,tp:'spl',c:'art-sol',sk:[{n:'酸化',p:7,t:'dmg',d:'7ダメ'}]}}
 ];
 
 const DECKS = {
     aggro:{n:'超速攻',d:'高火力・低耐久',e:['H','H','Cl','F','Na','O'],r:['HCl','HF','NaH','H2O']},
-    counter:{n:'カウンター',d:'守って反撃',e:['Ag','Cl','Fe','O','Cu','Zn'],r:['AgCl','FeO','Fe2O3']},
-    toxic:{n:'害悪',d:'必殺で即死',e:['C','O','S','H','Cl'],r:['CO','H2S','Cl2','SO2']},
-    control:{n:'コントロール',d:'回復と支配',e:['Al','O','H','Na','Cl','Ca'],r:['Al2O3','NaOH','H2O']},
-    gemstone:{n:'宝石',d:'最強の硬度',e:['C','C','C','Al','O'],r:['Diamond']},
-    heavy:{n:'重金属',d:'後半最強',e:['Au','Pt','W','Ti'],r:['Au']},
-    noble:{n:'貴ガス',d:'潜伏攻撃',e:['He','He','Ne','Ne'],r:['He']},
-    hazard:{n:'危険物',d:'除去スペル',e:['H','Cl','N','O','S'],r:['AquaRegia']}
+    counter:{n:'カウンター',d:'守って反撃',e:['Ag','Cl','Fe','O','Cu','Zn','Hg'],r:['AgCl','FeO','Fe2O3','Brass','Amalgam','CuO']},
+    toxic:{n:'害悪',d:'必殺で即死',e:['C','O','S','H','Cl','Cd'],r:['CO','H2S','Cl2','SO2','CdS']},
+    control:{n:'コントロール',d:'回復と支配',e:['Al','O','H','Na','Cl','Ca'],r:['Al2O3','NaOH','H2O','NaCl','Ca(OH)2']},
+    gemstone:{n:'宝石',d:'最強の硬度',e:['C','C','C','Al','O','Si','Cr','Ti'],r:['Diamond','Ruby','Sapphire','SiO2']},
+    heavy:{n:'重金属',d:'後半最強',e:['Au','Pt','W','Ti'],r:['Au','Pt','W','Ti']},
+    noble:{n:'貴ガス',d:'潜伏攻撃',e:['He','He','Ne','Ne','Ar','Ar'],r:['He','Ne','Ar']},
+    hazard:{n:'危険物',d:'除去スペル',e:['H','Cl','N','O','S','K','Mn'],r:['AquaRegia','H2SO4','KMnO4']}
 };
 
 let gs={hp:25,ehp:25,h:[],f:[],eh:[],ef:[],tn:1,mp:1,mmp:1,my:true,sel:[],atk:null};
@@ -218,9 +247,7 @@ window.onload = () => {
     }
     // 図鑑生成
     const lg=document.getElementById('lib-grid');
-    // 元素
     for(let k in ELEM) addLibCard(ELEM[k], 'el');
-    // ユニット
     REC.forEach(r=>addLibCard(r.p, 'unit'));
 };
 function addLibCard(d, type){
@@ -360,7 +387,7 @@ async function cpu(){
         let t='ldr', grd=gs.f.find(g=>g.ab==='wrd'&&g.ab!=='stl'); if(grd)t=grd;
         if(t==='ldr') gs.hp-=u.sk[0].p;
         else { let d=u.sk[0].p; if(u.sk[0].t==='tox'&&d>0)t.cur=-99;else t.cur-=d; u.cur-=t.a; }
-        msg("CPU攻撃"); chk(); upd(); await sleep(800);
+        chk(); upd(); await sleep(800);
     }
     gs.tn++; gs.my=true; gs.f.forEach(u=>u.can=true); draw(true); msg("自ターン"); upd();
 }
@@ -371,10 +398,12 @@ function upd(){
     document.getElementById('turn-disp').innerText=`T${gs.tn}`; document.getElementById('mp-disp').innerText=`MP${gs.mp}/${gs.mmp}`;
     document.getElementById('p-hp').innerText=gs.hp; document.getElementById('e-hp').innerText=gs.ehp;
     document.getElementById('cancel-btn').style.display=gs.atk?'block':'none';
+    
     rend(document.getElementById('p-hand'), gs.h, 'h', true);
     rend(document.getElementById('p-field'), gs.f, 'f', true);
     rend(document.getElementById('e-field'), gs.ef, 'f', false);
-    const eh=document.getElementById('e-hand'); eh.innerHTML=''; gs.eh.forEach(()=>{
+    const eh=document.getElementById('e-hand'); eh.innerHTML='';
+    gs.eh.forEach(()=>{
         const d=document.createElement('div'); d.className='card'; d.style.background='#555'; d.style.width='30px'; d.style.height='45px'; eh.appendChild(d);
     });
     // Hint
@@ -423,7 +452,7 @@ function createCardUI(c, isEl, isSel, isCan, isTgt){
 function showDet(c, isEl){
     const p=document.getElementById('det-pan'); p.style.display='flex';
     document.getElementById('dt-sym').innerText=c.s; document.getElementById('dt-name').innerText=c.n;
-    document.getElementById('dt-art').className=`art-frame css-art ${c.c||'art-sol'}`;
+    document.getElementById('dt-art').className=`css-art ${c.c||'art-sol'}`;
     const st=document.getElementById('dt-st'), ds=document.getElementById('dt-desc');
     if(isEl){ st.innerText=""; ds.innerText=`レアリティ: ${c.r}\n合成素材`; }
     else{
