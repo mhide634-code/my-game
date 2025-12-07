@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: Complete</title>
+    <title>Chem-Verse: Complete Art</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -38,6 +38,57 @@
             z-index: 100; transition: opacity 0.3s;
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* --- CSS Art (ここを追加！) --- */
+        .css-art { 
+            width: 100%; height: 100%; position: relative; 
+            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; font-size: 24px;
+        }
+        
+        /* 気体: ふわふわ */
+        .art-gas { background: linear-gradient(to top, #89f7fe, #66a6ff); }
+        .art-gas::after { 
+            content: '☁️'; filter: drop-shadow(0 0 5px white); 
+            animation: float 3s infinite ease-in-out; 
+        }
+        
+        /* 液体: うるうる */
+        .art-liquid { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
+        .art-liquid::after { 
+            content: '💧'; animation: bounce 2s infinite; 
+        }
+        
+        /* 固体: ごつごつ */
+        .art-solid { background: linear-gradient(to bottom, #e6b980, #eacda3); }
+        .art-solid::after { content: '🪨'; }
+        
+        /* 金属: キラキラ */
+        .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .art-metal::after { 
+            content: '✨'; text-shadow: 0 0 5px white; 
+        }
+        
+        /* 毒: どろどろ */
+        .art-toxic { background: linear-gradient(to bottom, #f093fb, #f5576c); }
+        .art-toxic::after { 
+            content: '☠️'; filter: drop-shadow(0 0 5px purple); 
+        }
+
+        /* 個別アート (例) */
+        .art-H { background: linear-gradient(to top, #a1c4fd, #c2e9fb); }
+        .art-H::after { 
+            content: '( •ω• )'; font-size: 14px; color: #555; 
+            background: white; padding: 5px; border-radius: 50%; 
+            box-shadow: 0 0 10px white; 
+        }
+        
+        .art-Au { background: radial-gradient(circle, #ffd700, #b8860b); }
+        .art-Au::after { content: '💰'; font-size: 28px; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
 
         /* --- 1. タイトル画面 --- */
         #title-screen {
@@ -129,14 +180,16 @@
         .card[data-rarity="SSR"] { border-color: var(--rare-ssr); box-shadow: 0 0 12px var(--rare-ssr); animation: holo 3s infinite linear; }
         @keyframes holo { 0% { filter: brightness(1); } 50% { filter: brightness(1.2); } 100% { filter: brightness(1); } }
 
-        .card-art { width: 100%; height: 55%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; position: relative; }
-        .art-gas { background: linear-gradient(135deg, #bdc3c7, #2c3e50); color:#333; }
-        .art-liquid { background: linear-gradient(135deg, #4facfe, #00f2fe); color:#004e92; }
-        .art-solid { background: linear-gradient(135deg, #e6b980, #eacda3); color:#5d4037; }
-        .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); color:#5d4037; }
-        .art-toxic { background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; }
+        /* --- イラスト表示エリア --- */
+        .card-art-area { 
+            width: 100%; height: 55%; 
+            position: relative; 
+            /* ここにCSSアートが入る */
+        }
+        /* -------------------------- */
 
-        .card-info { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-info-area { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
+        
         .card-symbol { font-size: 14px; font-weight: bold; text-align: center; color:var(--accent); }
         .card-name { font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .stats { display: flex; justify-content: space-between; padding: 0 2px; font-weight: bold; font-size: 10px; margin-bottom: 2px; }
@@ -149,6 +202,7 @@
 
         .card.selected { border-color: var(--accent); transform: translateY(-15px); box-shadow: 0 0 15px var(--accent); z-index: 10; }
         .card.can-attack { border-color: var(--success); box-shadow: 0 0 10px var(--success); }
+        .card.attacking { border-color: var(--danger); box-shadow: 0 0 10px var(--danger); transform: scale(1.2); z-index: 100; }
         
         /* UIパーツ */
         .leader { text-align: center; width: 70px; }
@@ -204,7 +258,7 @@
         .skill-list { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
         .skill-btn { background: #fff; color: #333; padding: 15px; border-radius: 8px; border-left: 8px solid var(--primary); position: relative; font-weight: bold; }
         
-        #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 8px; border: 2px solid white; font-size: 20px; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; text-align: center; white-space: nowrap; }
+        #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border: 2px solid white; border-radius: 10px; font-weight: bold; font-size: 20px; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; text-align: center; white-space: nowrap; }
         body.targeting .card { border-style: dashed; }
         .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger) !important; box-shadow: 0 0 10px var(--danger); }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
@@ -329,14 +383,13 @@
     <div id="msg-box"></div>
 
     <script>
-        // --- 設定・データ ---
         const MAX_HAND = 10; 
         const MAX_FIELD = 5;
         const INITIAL_HP = 25;
 
-        // 全元素定義
+        // --- データ定義 (CSS Art クラス付与) ---
         const ELEM = {
-            H: { symbol: 'H', name: '水素', rarity: 'N', artClass: 'art-gas' },
+            H: { symbol: 'H', name: '水素', rarity: 'N', artClass: 'art-H' },
             He: { symbol: 'He', name: 'ヘリウム', rarity: 'SR', artClass: 'art-gas' },
             Li: { symbol: 'Li', name: 'リチウム', rarity: 'R', artClass: 'art-metal' },
             Be: { symbol: 'Be', name: 'ベリリウム', rarity: 'R', artClass: 'art-metal' },
@@ -372,83 +425,52 @@
             Ba: { symbol: 'Ba', name: 'バリウム', rarity: 'R', artClass: 'art-metal' },
             W:  { symbol: 'W', name: 'タングステン', rarity: 'SSR', artClass: 'art-metal' },
             Pt: { symbol: 'Pt', name: 'プラチナ', rarity: 'SSR', artClass: 'art-metal' },
-            Au: { symbol: 'Au', name: '金', rarity: 'SSR', artClass: 'art-metal' },
-            Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR', artClass: 'art-toxic' },
+            Au: { symbol: 'Au', name: '金', rarity: 'SSR', artClass: 'art-Au' },
+            Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR', artClass: 'art-liquid' },
             Pb: { symbol: 'Pb', name: '鉛', rarity: 'R', artClass: 'art-metal' }
         };
 
         const RECIPES = [
-            // 速攻
             { ingredients: ['H', 'Cl'], product: { symbol: 'HCl', name: '塩化水素', rarity:'R', atk: 5, hp: 1, artClass:'art-toxic', skills: [{name:'強酸腐食', power:5, desc:'高火力の酸攻撃'}] }},
-            { ingredients: ['H', 'F'], product: { symbol: 'HF', name: 'フッ化水素', rarity:'SR', atk: 4, hp: 2, ability:'toxic', artClass:'art-toxic', skills: [{name:'ガラス腐食', power:4, desc:'通常攻撃'}, {name:'猛毒', power:0, type:'toxic', desc:'触れると危険(必殺)'}] }},
-            { ingredients: ['Na', 'H'], product: { symbol: 'NaH', name: '水素化Na', rarity:'R', atk: 3, hp: 1, ability:'storm', artClass:'art-solid', skills: [{name:'還元作用', power:3, desc:'疾走:即攻撃可能'}] }},
-            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', rarity:'N', atk: 1, hp: 4, artClass:'art-liquid', skills: [{name:'水流', power:1, desc:'攻撃'}, {name:'加水分解', power:3, type:'heal', desc:'リーダーを3回復'}] }},
-            // カウンター
-            { ingredients: ['Ag', 'Cl'], product: { symbol: 'AgCl', name: '塩化銀', rarity:'SR', atk: 1, hp: 6, ability:'ward', artClass:'art-solid', skills: [{name:'感光', power:1, desc:'攻撃'}, {name:'白色沈殿', power:0, type:'guard', desc:'守護:壁になる'}] }},
+            { ingredients: ['H', 'F'], product: { symbol: 'HF', name: 'フッ化水素', rarity:'SR', atk: 4, hp: 2, ability:'toxic', artClass:'art-toxic', skills: [{name:'ガラス腐食', power:4, desc:'攻撃'}, {name:'猛毒', power:0, type:'toxic', desc:'必殺'}] }},
+            { ingredients: ['Na', 'H'], product: { symbol: 'NaH', name: '水素化Na', rarity:'R', atk: 3, hp: 1, ability:'storm', artClass:'art-solid', skills: [{name:'還元作用', power:3, desc:'疾走'}] }},
+            { ingredients: ['H', 'H', 'O'], product: { symbol: 'H2O', name: '水', rarity:'N', atk: 1, hp: 4, artClass:'art-liquid', skills: [{name:'水流', power:1, desc:'攻撃'}, {name:'加水分解', power:3, type:'heal', desc:'HP3回復'}] }},
+            { ingredients: ['Ag', 'Cl'], product: { symbol: 'AgCl', name: '塩化銀', rarity:'SR', atk: 1, hp: 6, ability:'ward', artClass:'art-solid', skills: [{name:'白色沈殿', power:0, type:'guard', desc:'守護'}] }},
             { ingredients: ['Fe', 'O'], product: { symbol: 'FeO', name: '酸化鉄(II)', rarity:'N', atk: 3, hp: 5, artClass:'art-solid', skills: [{name:'黒錆', power:3, desc:'通常攻撃'}] }},
-            { ingredients: ['Fe', 'O', 'O'], product: { symbol: 'Fe2O3', name: '赤錆(不動態)', rarity:'R', atk: 2, hp: 8, ability:'ward', artClass:'art-solid', skills: [{name:'不動態皮膜', power:2, desc:'高い防御力で守る'}] }},
-            { ingredients: ['Cu', 'O'], product: { symbol: 'CuO', name: '酸化銅(II)', rarity:'N', atk: 3, hp: 4, artClass:'art-solid', skills: [{name:'黒色粉末', power:3, desc:'通常攻撃'}] }},
-            { ingredients: ['Zn', 'Cu'], product: { symbol: 'Brass', name: '黄銅', rarity:'R', atk: 4, hp: 5, artClass:'art-metal', skills: [{name:'合金アタック', power:4, desc:'安定した強さ'}] }},
-            { ingredients: ['Hg', 'Zn'], product: { symbol: 'Amalgam', name: '亜鉛アマルガム', rarity:'SR', atk: 3, hp: 6, ability:'ward', artClass:'art-metal', skills: [{name:'アマルガム化', power:3, desc:'守護を持つ合金'}] }},
-            // 害悪
-            { ingredients: ['C', 'O'], product: { symbol: 'CO', name: '一酸化炭素', rarity:'R', atk: 1, hp: 2, ability:'toxic', artClass:'art-gas', skills: [{name:'不完全燃焼', power:1, desc:'攻撃'}, {name:'ヘモグロビン結合', power:0, type:'toxic', desc:'必殺:即死させる'}] }},
-            { ingredients: ['H', 'S'], product: { symbol: 'H2S', name: '硫化水素', rarity:'R', atk: 2, hp: 3, ability:'toxic', artClass:'art-gas', skills: [{name:'腐卵臭', power:2, desc:'攻撃'}, {name:'硫化', power:0, type:'toxic', desc:'必殺攻撃'}] }},
-            { ingredients: ['Cl', 'Cl'], product: { symbol: 'Cl2', name: '塩素ガス', rarity:'R', atk: 3, hp: 3, artClass:'art-gas', skills: [{name:'酸化作用', power:3, desc:'攻撃'}, {name:'毒ガス散布', power:2, type:'aoe', desc:'敵全体に2ダメージ'}] }},
-            { ingredients: ['S', 'O', 'O'], product: { symbol: 'SO2', name: '二酸化硫黄', rarity:'N', atk: 2, hp: 4, artClass:'art-gas', skills: [{name:'漂白', power:2, desc:'攻撃'}, {name:'酸性雨', power:1, type:'aoe', desc:'敵全体に1ダメージ'}] }},
-            { ingredients: ['Cd', 'S'], product: { symbol: 'CdS', name: '硫化カドミウム', rarity:'SR', atk: 2, hp: 5, ability:'toxic', artClass:'art-toxic', skills: [{name:'イタイイタイ', power:0, type:'toxic', desc:'猛毒:触れると即死'}] }},
-            // コントロール
-            { ingredients: ['Na', 'O', 'H'], product: { symbol: 'NaOH', name: '水酸化Na', rarity:'R', atk: 3, hp: 3, artClass:'art-solid', skills: [{name:'潮解', power:3, desc:'攻撃'}, {name:'中和熱', power:2, type:'aoe_heal', desc:'敵全体2ダメ/自分2回復'}] }},
-            { ingredients: ['Al', 'O', 'O'], product: { symbol: 'Al2O3', name: 'アルミナ', rarity:'R', atk: 2, hp: 7, ability:'ward', artClass:'art-solid', skills: [{name:'アルマイト', power:2, desc:'酸化被膜バリア'}] }},
-            { ingredients: ['Cl', 'Na'], product: { symbol: 'NaCl', name: '塩化Na', rarity:'N', atk: 3, hp: 4, artClass:'art-solid', skills: [{name:'塩味', power:3, desc:'通常攻撃'}] }},
-            { ingredients: ['Ca', 'O', 'H', 'H'], product: { symbol: 'Ca(OH)2', name: '消石灰', rarity:'N', atk: 1, hp: 6, ability:'ward', artClass:'art-solid', skills: [{name:'石灰水', power:1, desc:'攻撃'}, {name:'中和反応', power:4, type:'heal', desc:'HP4回復'}] }},
-            // 宝石
-            { ingredients: ['C', 'C', 'C'], product: { symbol: 'Diamond', name: 'ダイヤモンド', rarity:'SSR', atk: 4, hp: 10, ability:'ward', artClass:'art-solid', skills: [{name:'モース硬度10', power:4, desc:'最強の硬度'}] }},
-            { ingredients: ['Al', 'O', 'O', 'Cr'], product: { symbol: 'Ruby', name: 'ルビー', rarity:'SR', atk: 5, hp: 8, artClass:'art-solid', skills: [{name:'深紅の輝き', power:5, desc:'高ステータス'}] }},
-            { ingredients: ['Al', 'O', 'Ti'], product: { symbol: 'Sapphire', name: 'サファイア', rarity:'SR', atk: 4, hp: 9, artClass:'art-solid', skills: [{name:'青玉', power:4, desc:'高耐久'}] }},
-            { ingredients: ['Si', 'O', 'O'], product: { symbol: 'SiO2', name: '石英(水晶)', rarity:'N', atk: 3, hp: 6, artClass:'art-solid', skills: [{name:'圧電効果', power:3, desc:'攻撃'}, {name:'結晶化', power:2, type:'aoe', desc:'全体2ダメージ'}] }},
-            // 重金属
-            { ingredients: ['Au'], product: { symbol: 'Au', name: '金', rarity:'SSR', atk: 6, hp: 6, artClass:'art-metal', skills: [{name:'不変の輝き', power:6, desc:'王水以外無敵の攻撃'}] }},
-            { ingredients: ['Pt'], product: { symbol: 'Pt', name: 'プラチナ', rarity:'SSR', atk: 5, hp: 7, artClass:'art-metal', skills: [{name:'触媒作用', power:5, desc:'反応を促進する一撃'}] }},
-            { ingredients: ['W'], product: { symbol: 'W', name: 'タングステン', rarity:'SSR', atk: 7, hp: 8, ability:'ward', artClass:'art-metal', skills: [{name:'融点3422℃', power:7, desc:'熱に強い一撃'}] }},
-            { ingredients: ['Ti'], product: { symbol: 'Ti', name: 'チタン', rarity:'SR', atk: 4, hp: 5, artClass:'art-metal', skills: [{name:'高強度', power:4, desc:'軽くて強い'}] }},
-            // 貴ガス
-            { ingredients: ['He', 'He'], product: { symbol: 'He', name: 'ヘリウム', rarity:'SR', atk: 2, hp: 2, ability:'stealth', artClass:'art-gas', skills: [{name:'不活性', power:2, desc:'潜伏攻撃'}] }},
-            { ingredients: ['Ne', 'Ne'], product: { symbol: 'Ne', name: 'ネオン', rarity:'SR', atk: 3, hp: 3, ability:'stealth', artClass:'art-gas', skills: [{name:'ネオンサイン', power:3, desc:'潜伏攻撃'}] }},
-            { ingredients: ['Ar', 'Ar'], product: { symbol: 'Ar', name: 'アルゴン', rarity:'SR', atk: 4, hp: 4, ability:'stealth', artClass:'art-gas', skills: [{name:'フィラメント保護', power:4, desc:'潜伏攻撃'}] }},
-            // 危険物
-            { ingredients: ['H', 'Cl', 'N', 'O', 'O', 'O'], product: { symbol: 'AquaRegia', name: '王水', rarity:'SSR', atk: 0, hp: 0, type:'spell', artClass:'art-liquid', skills: [{name:'金溶かし', power:99, type:'toxic', desc:'単体確定除去'}] }},
-            { ingredients: ['H', 'H', 'S', 'O', 'O', 'O', 'O'], product: { symbol: 'H2SO4', name: '濃硫酸', rarity:'SR', atk: 0, hp: 0, type:'spell', artClass:'art-liquid', skills: [{name:'脱水作用', power:5, type:'aoe', desc:'敵全体5ダメージ'}] }},
-            { ingredients: ['K', 'Mn', 'O', 'O', 'O', 'O'], product: { symbol: 'KMnO4', name: '過マンガン酸K', rarity:'SR', atk: 0, hp: 0, type:'spell', artClass:'art-solid', skills: [{name:'強力酸化', power:7, type:'damage', desc:'単体7ダメージ'}] }},
+            { ingredients: ['Fe', 'O', 'O'], product: { symbol: 'Fe2O3', name: '赤錆(不動態)', rarity:'R', atk: 2, hp: 8, ability:'ward', artClass:'art-solid', skills: [{name:'不動態', power:2, desc:'高耐久'}] }},
+            { ingredients: ['Cu', 'O'], product: { symbol: 'CuO', name: '酸化銅(II)', rarity:'N', atk: 3, hp: 4, artClass:'art-solid', skills: [{name:'黒色粉末', power:3, desc:'攻撃'}] }},
+            { ingredients: ['Zn', 'Cu'], product: { symbol: 'Brass', name: '黄銅', rarity:'R', atk: 4, hp: 5, artClass:'art-metal', skills: [{name:'合金アタック', power:4, desc:'攻撃'}] }},
+            { ingredients: ['Hg', 'Zn'], product: { symbol: 'Amalgam', name: '亜鉛アマルガム', rarity:'SR', atk: 3, hp: 6, ability:'ward', artClass:'art-metal', skills: [{name:'アマルガム化', power:3, desc:'守護'}] }},
+            { ingredients: ['C', 'O'], product: { symbol: 'CO', name: '一酸化炭素', rarity:'R', atk: 1, hp: 2, ability:'toxic', artClass:'art-gas', skills: [{name:'不完全燃焼', power:1, desc:'攻撃'}, {name:'ヘモグロビン結合', power:0, type:'toxic', desc:'必殺'}] }},
+            { ingredients: ['H', 'S'], product: { symbol: 'H2S', name: '硫化水素', rarity:'R', atk: 2, hp: 3, ability:'toxic', artClass:'art-gas', skills: [{name:'腐卵臭', power:2, desc:'攻撃'}, {name:'硫化', power:0, type:'toxic', desc:'必殺'}] }},
+            { ingredients: ['Cl', 'Cl'], product: { symbol: 'Cl2', name: '塩素ガス', rarity:'R', atk: 3, hp: 3, artClass:'art-gas', skills: [{name:'酸化作用', power:3, desc:'攻撃'}, {name:'毒ガス散布', power:2, type:'aoe', desc:'全体2ダメ'}] }},
+            { ingredients: ['S', 'O', 'O'], product: { symbol: 'SO2', name: '二酸化硫黄', rarity:'N', atk: 2, hp: 4, artClass:'art-gas', skills: [{name:'酸性雨', power:1, type:'aoe', desc:'全体1ダメ'}] }},
+            { ingredients: ['Na', 'O', 'H'], product: { symbol: 'NaOH', name: '水酸化Na', rarity:'R', atk: 3, hp: 3, artClass:'art-solid', skills: [{name:'潮解', power:3, desc:'攻撃'}, {name:'中和熱', power:2, type:'aoe_heal', desc:'全体2ダメ/2回復'}] }},
+            { ingredients: ['Al', 'O', 'O'], product: { symbol: 'Al2O3', name: 'アルミナ', rarity:'R', atk: 2, hp: 7, ability:'ward', artClass:'art-solid', skills: [{name:'アルマイト', power:2, desc:'守護'}] }},
+            { ingredients: ['C', 'C', 'C'], product: { symbol: 'Diamond', name: 'ダイヤモンド', rarity:'SSR', atk: 4, hp: 10, ability:'ward', artClass:'art-metal', skills: [{name:'最強硬度', power:4, desc:'鉄壁'}] }},
+            { ingredients: ['Au'], product: { symbol: 'Au', name: '金', rarity:'SSR', atk: 6, hp: 6, artClass:'art-Au', skills: [{name:'不変の輝き', power:6, desc:'高火力'}] }},
+            { ingredients: ['He', 'He'], product: { symbol: 'He', name: 'ヘリウム', rarity:'SR', atk: 2, hp: 2, ability:'stealth', artClass:'art-gas', skills: [{name:'不活性', power:2, desc:'潜伏'}] }},
+            { ingredients: ['H', 'Cl', 'N', 'O', 'O', 'O'], product: { symbol: 'AquaRegia', name: '王水', rarity:'SSR', atk: 0, hp: 0, type:'spell', artClass:'art-liquid', skills: [{name:'金溶かし', power:99, type:'toxic', desc:'確定除去'}] }},
         ];
 
         const DECKS = {
-            aggro: { name: '超速攻', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
-            counter: { name: 'カウンター', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
-            toxic: { name: '害悪(毒)', elements: ['C', 'O', 'S', 'H', 'Cl', 'Cd'], recipes: ['CO', 'H2S', 'Cl2', 'SO2', 'CdS'] },
-            control: { name: 'コントロール', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
-            gemstone: { name: '宝石', elements: ['C', 'Al', 'O', 'Si', 'Cr', 'Ti'], recipes: ['Diamond', 'Ruby', 'Sapphire', 'SiO2'] },
-            heavy: { name: '重金属', elements: ['Au', 'Pt', 'W', 'Ti', 'Fe'], recipes: ['Au', 'Pt', 'W', 'Ti'] },
-            noble: { name: '貴ガス', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] },
-            hazard: { name: '危険物', elements: ['H', 'Cl', 'N', 'O', 'S', 'K', 'Mn'], recipes: ['AquaRegia', 'H2SO4', 'KMnO4'] }
+            aggro: { name: '超速攻', desc: '低コスト高火力', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
+            counter: { name: 'カウンター', desc: '守って反撃', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
+            toxic: { name: '害悪(毒)', desc: '必殺で即死', elements: ['C', 'O', 'S', 'H', 'Cl', 'Cd'], recipes: ['CO', 'H2S', 'Cl2', 'SO2', 'CdS'] },
+            control: { name: 'コントロール', desc: '回復と支配', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
+            gemstone: { name: '宝石', desc: '最強の硬度', elements: ['C', 'C', 'C'], recipes: ['Diamond'] },
+            heavy: { name: '重金属', desc: '後半最強', elements: ['Au', 'Pt', 'W'], recipes: ['Au'] },
+            noble: { name: '貴ガス', desc: '潜伏攻撃', elements: ['He', 'He', 'Ne', 'Ne'], recipes: ['He'] },
+            hazard: { name: '危険物', desc: '除去スペル', elements: ['H', 'Cl', 'N', 'O', 'S'], recipes: ['AquaRegia'] }
         };
 
-        let gs = {
-            playerDeck: null, enemyDeck: null,
-            playerPool: [], enemyPool: [],
-            playerRecipes: [], enemyRecipes: [],
-            turn: 1, isPlayerTurn: true, mp: 1, maxMp: 1,
-            player: { hp: INITIAL_HP, hand: [], field: [] },
-            enemy: { hp: INITIAL_HP, hand: [], field: [], mp: 1, maxMp: 1 },
-            selectedHandIds: [], attackingUnit: null,
-        };
+        let gs = { hp: INITIAL_HP, enemyHp: INITIAL_HP, hand: [], field: [], enemyHand: [], enemyField: [], turn: 1, mp: 1, maxMp: 1, isPlayerTurn: true, selectedHandIds: [], attackingUnit: null };
 
-        // --- 初期化 ---
         window.onload = () => {
             initParticles();
             showTitle();
         };
 
-        // パーティクル生成
         function initParticles() {
             const container = document.getElementById('particles');
             if(!container) return;
@@ -463,7 +485,6 @@
             }
         }
 
-        // --- 画面遷移 ---
         function showTitle() { hideAll(); document.getElementById('title-screen').classList.remove('hidden'); }
         function showDeckSelect() { hideAll(); document.getElementById('deck-select-screen').classList.remove('hidden'); }
         function showGame() { 
@@ -494,7 +515,6 @@
             document.getElementById('confetti-container').innerHTML = '';
         }
 
-        /* --- ゲーム開始 --- */
         function startGame(playerDeckKey) {
             resetGame(playerDeckKey);
             showGame();
@@ -513,7 +533,7 @@
             gs.enemyPool = eConf.elements.map(sym => ELEM[sym]);
             gs.enemyRecipes = RECIPES.filter(r => eConf.recipes.includes(r.product.symbol));
             
-            document.getElementById('enemy-name').innerText = `CPU (${eConf.name})`;
+            document.getElementById('enemy-name').innerText = `CPU (${eConf.name.split('(')[0]})`;
 
             gs.turn = 1; gs.isPlayerTurn = true; gs.mp = 1; gs.maxMp = 1;
             gs.player = { hp: INITIAL_HP, hand: [], field: [] };
@@ -524,7 +544,6 @@
             document.getElementById('btn-end-turn').disabled = false;
         }
 
-        /* --- ゲームロジック --- */
         function drawCard(target) {
             const pool = (target === gs.enemy) ? gs.enemyPool : gs.playerPool;
             if (target.hand.length >= MAX_HAND) {
@@ -547,11 +566,6 @@
         function actionSynthesize() {
             if(!gs.isPlayerTurn) return;
             if(gs.selectedHandIds.length === 0) return;
-
-            // 貴ガスのみ2枚で合成
-            if(gs.selectedHandIds.length === 1) {
-                // 1枚合成は廃止(貴ガス調整のため) -> レシピ参照へ
-            }
 
             const selCards = gs.player.hand.filter(c => gs.selectedHandIds.includes(c.id));
             const symbols = selCards.map(c => c.symbol).sort();
@@ -587,7 +601,6 @@
             updateView();
         }
 
-        /* --- インタラクション --- */
         function onHandClick(id) {
             if(!gs.isPlayerTurn) return;
             const card = gs.player.hand.find(c => c.id === id);
@@ -814,7 +827,7 @@
                 
                 let content = '';
                 if(c.type === 'element') {
-                    content = `<div class="card-art ${c.artClass}">${c.symbol}</div><div class="card-info"><div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
+                    content = `<div class="card-art ${c.artClass} css-art"></div><div class="card-info"><div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
                 } else {
                     let badges = `<div class="ability-container">`;
                     if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡️</div>`;
@@ -822,7 +835,7 @@
                     if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
                     if(c.ability === 'stealth') badges += `<div class="badge badge-stealth">👁️</div>`;
                     badges += `</div>`;
-                    content = `${badges}<div class="card-art ${c.artClass}">${c.symbol}</div><div class="card-info"><div class="card-symbol" style="color:var(--primary)">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><div class="stat-box stat-atk">⚔️${c.atk}</div><div class="stat-box stat-hp">❤️${c.currentHp}</div></div></div>`;
+                    content = `${badges}<div class="card-art ${c.artClass} css-art"></div><div class="card-info"><div class="card-symbol" style="color:var(--primary)">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><span class="stat-atk">⚔️${c.atk}</span><span class="stat-hp">❤️${c.currentHp}</span></div></div>`;
                 }
                 div.innerHTML = content;
                 el.appendChild(div);
