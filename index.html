@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: JP Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <title>Chem-Verse: Complete</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #1a1a1d;
@@ -12,7 +12,6 @@
             --primary: #3498db;
             --danger: #e74c3c;
             --success: #2ecc71;
-            /* レアリティ色 */
             --rare-n: #95a5a6;
             --rare-r: #3498db;
             --rare-sr: #9b59b6;
@@ -20,65 +19,102 @@
         }
 
         body {
-            font-family: 'M PLUS Rounded 1c', sans-serif; /* 丸ゴシックで可愛く */
+            font-family: 'M PLUS Rounded 1c', sans-serif;
             background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(241, 196, 15, 0.1) 0%, transparent 40%);
             color: white;
             margin: 0;
             user-select: none;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* --- スタート画面 --- */
-        #start-screen {
+        /* --- 共通: 画面切り替え --- */
+        .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            z-index: 2000;
-            display: flex; flex-direction: column; align-items: center;
-            overflow-y: auto; padding: 20px 10px; box-sizing: border-box;
+            z-index: 100; transition: opacity 0.3s;
         }
-        h1 { margin: 20px 0; font-size: 28px; text-shadow: 0 0 10px var(--accent); color: var(--accent); text-align: center;}
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* --- 1. タイトル画面 --- */
+        #title-screen {
+            background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+            overflow: hidden;
+        }
         
+        /* 背景パーティクル */
+        .particle {
+            position: absolute; border-radius: 50%; background: rgba(255,255,255,0.5);
+            animation: floatUp linear infinite; z-index: 0;
+        }
+        @keyframes floatUp { from { transform: translateY(100vh) scale(0); opacity: 0; } to { transform: translateY(-10vh) scale(1); opacity: 1; } }
+
+        .game-logo {
+            font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--accent);
+            text-shadow: 0 0 20px var(--accent); margin-bottom: 10px; z-index: 10;
+            text-align: center; line-height: 1.2;
+        }
+        .game-sub-logo { font-size: 16px; color: #aaa; margin-bottom: 50px; z-index: 10; letter-spacing: 4px; }
+
+        .menu-container { display: flex; flex-direction: column; gap: 15px; width: 80%; max-width: 300px; z-index: 10; }
+        .menu-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 15px; border-radius: 30px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.2s; text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        .menu-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+        .menu-btn.primary { background: linear-gradient(90deg, var(--primary), #2980b9); border: none; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
+        .menu-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- 2. デッキ選択画面 --- */
+        #deck-select-screen { padding-top: 40px; justify-content: flex-start; }
+        .deck-header { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: var(--accent); }
         .deck-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-            width: 100%; max-width: 600px; padding-bottom: 40px;
+            width: 100%; max-width: 600px; padding: 0 15px 40px 15px;
+            box-sizing: border-box; overflow-y: auto;
         }
         .deck-card {
-            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
             padding: 15px; border-radius: 12px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: space-between;
-            min-height: 110px; transition: 0.2s;
+            min-height: 100px; transition: 0.2s; position: relative; overflow: hidden;
         }
-        .deck-card:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
-        .deck-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
-        .deck-desc { font-size: 11px; color: #ddd; line-height: 1.4; }
+        .deck-card::before {
+            content:''; position: absolute; top:0; left:0; width:4px; height:100%;
+            background: var(--accent);
+        }
+        .deck-card:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+        .deck-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .deck-desc { font-size: 10px; color: #aaa; line-height: 1.4; }
+        .back-btn { position: absolute; bottom: 20px; background: #333; padding: 10px 30px; border-radius: 20px; font-size: 14px; }
 
-        /* --- ゲームボード (レイアウトを戻しました) --- */
-        #game-board { display: none; flex-direction: column; height: 100vh; position: relative; }
+        /* --- 3. ゲームボード --- */
+        #game-board { display: none; flex-direction: column; height: 100vh; position: relative; background: #111; }
         
-        /* エリア設定 */
         #enemy-hand-area { height: 10%; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 2px; }
         #enemy-field { height: 23%; border-bottom: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
         
         #info-area {
-            height: 12%; background: rgba(0,0,0,0.5);
+            height: 12%; background: rgba(20,20,30,0.8);
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 10px; z-index: 10;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border-top: 1px solid #333; border-bottom: 1px solid #333;
         }
 
         #player-field { height: 23%; border-top: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
-        
         #player-hand-area { 
             height: 32%; background: rgba(0,0,0,0.2);
             overflow-x: auto; display: flex; align-items: center; 
             padding-left: 10px; gap: 6px;
         }
 
-        /* --- カードデザイン (ポケポケ風・豪華版) --- */
+        /* カードスタイル */
         .card {
             width: 70px; height: 100px;
             background: #222; color: #fff;
@@ -87,112 +123,69 @@
             border: 2px solid #555; flex-shrink: 0;
             transition: transform 0.1s; overflow: hidden;
         }
-        
-        /* レアリティ別の枠色と輝き */
         .card[data-rarity="N"] { border-color: var(--rare-n); }
         .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow: 0 0 5px var(--rare-r); }
         .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 8px var(--rare-sr); }
-        .card[data-rarity="SSR"] { 
-            border-color: var(--rare-ssr); 
-            box-shadow: 0 0 12px var(--rare-ssr);
-            animation: holo 3s infinite linear;
-        }
+        .card[data-rarity="SSR"] { border-color: var(--rare-ssr); box-shadow: 0 0 12px var(--rare-ssr); animation: holo 3s infinite linear; }
         @keyframes holo { 0% { filter: brightness(1); } 50% { filter: brightness(1.2); } 100% { filter: brightness(1); } }
 
-        /* カード内部レイアウト */
-        .card-art {
-            width: 100%; height: 55%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 20px; font-weight: bold; position: relative;
-        }
-        /* 属性ごとの背景グラデーション */
+        .card-art { width: 100%; height: 55%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; position: relative; }
         .art-gas { background: linear-gradient(135deg, #bdc3c7, #2c3e50); color:#333; }
         .art-liquid { background: linear-gradient(135deg, #4facfe, #00f2fe); color:#004e92; }
         .art-solid { background: linear-gradient(135deg, #e6b980, #eacda3); color:#5d4037; }
         .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); color:#5d4037; }
         .art-toxic { background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; }
 
-        .card-info {
-            height: 45%; background: rgba(30,30,30,0.95); padding: 2px;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
+        .card-info { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
         .card-symbol { font-size: 14px; font-weight: bold; text-align: center; color:var(--accent); }
         .card-name { font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .stats {
-            display: flex; justify-content: space-between; padding: 0 2px;
-            font-weight: bold; font-size: 10px; margin-bottom: 2px;
-        }
+        .stats { display: flex; justify-content: space-between; padding: 0 2px; font-weight: bold; font-size: 10px; margin-bottom: 2px; }
         .stat-box { padding: 1px 4px; border-radius: 3px; }
-        .stat-atk { background: #e67e22; }
-        .stat-hp { background: #27ae60; }
+        .stat-atk { background: #e67e22; } .stat-hp { background: #27ae60; }
 
-        /* 能力バッジ */
         .ability-container { position: absolute; top: 2px; right: 2px; display: flex; gap: 1px; z-index: 5; }
-        .badge {
-            width: 16px; height: 16px; border-radius: 50%; font-size: 10px;
-            display: flex; align-items: center; justify-content: center; border: 1px solid white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
-        .badge-ward { background: #3498db; }
-        .badge-toxic { background: #8e44ad; }
-        .badge-storm { background: #f1c40f; }
-        .badge-stealth { background: #95a5a6; }
+        .badge { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .badge-ward { background: #3498db; } .badge-toxic { background: #8e44ad; } .badge-storm { background: #f1c40f; } .badge-stealth { background: #95a5a6; }
 
-        /* 選択・攻撃状態 */
-        .card:active { transform: scale(0.95); }
         .card.selected { border-color: var(--accent); transform: translateY(-15px); box-shadow: 0 0 15px var(--accent); z-index: 10; }
         .card.can-attack { border-color: var(--success); box-shadow: 0 0 10px var(--success); }
-        .card.attacking { border-color: var(--danger); transform: scale(1.2); z-index: 100; box-shadow: 0 0 20px var(--danger); }
-
-        /* --- UIパーツ --- */
+        
+        /* UIパーツ */
         .leader { text-align: center; width: 70px; }
         .leader-name { font-size: 10px; font-weight: bold; color: var(--accent); margin-bottom: 2px; }
-        .hp-circle { 
-            background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 50%; 
-            width: 38px; height: 38px; line-height: 38px; 
-            font-weight: bold; font-size: 16px; margin: 0 auto; 
-            border: 2px solid white; box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
-        }
+        .hp-circle { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 50%; width: 38px; height: 38px; line-height: 38px; font-weight: bold; font-size: 16px; margin: 0 auto; border: 2px solid white; box-shadow: 0 0 8px rgba(231, 76, 60, 0.8); }
         .turn-info { text-align: center; font-size: 12px; }
         .mp-bar { font-size: 14px; color: var(--success); font-weight: bold; }
 
-        /* アクションボタン */
-        .action-overlay { 
-            position: absolute; bottom: 33%; right: 10px; 
-            display: flex; flex-direction: column; gap: 10px; z-index: 50; 
-        }
-        .game-btn { 
-            padding: 10px 16px; border-radius: 20px; border: none; 
-            font-weight: bold; color: white; font-size: 12px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4); 
-            cursor: pointer;
-        }
+        .action-overlay { position: absolute; bottom: 33%; right: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+        .game-btn { padding: 10px 16px; border-radius: 20px; border: none; font-weight: bold; color: white; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.4); cursor: pointer; }
         .btn-draw { background: linear-gradient(to right, #27ae60, #2ecc71); } 
         .btn-syn { background: linear-gradient(to right, #f39c12, #f1c40f); color: #333; }
-        #btn-end-turn { 
-            padding: 6px 12px; font-size: 11px; background: #e67e22; 
-            border-radius: 15px; border: none; color: white; font-weight: bold;
-        }
+        #btn-end-turn { padding: 6px 12px; font-size: 11px; background: #e67e22; border-radius: 15px; border: none; color: white; font-weight: bold; }
         #btn-end-turn:disabled { background: #555; color: #aaa; }
+        
+        #cancel-attack-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 10px 20px; border-radius: 20px; border: 2px solid white; font-weight: bold; z-index: 200; box-shadow: 0 0 15px var(--danger); }
 
-        /* キャンセルボタン */
-        #cancel-attack-btn {
-            display: none;
-            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--danger); color: white;
-            padding: 10px 20px; border-radius: 20px; border: 2px solid white;
-            font-weight: bold; z-index: 200; box-shadow: 0 0 15px var(--danger);
+        /* --- 4. リザルト画面 (勝利/敗北) --- */
+        #result-screen {
+            background: rgba(0,0,0,0.9); z-index: 5000;
+            backdrop-filter: blur(10px);
         }
+        .result-content { text-align: center; animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popUp { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .result-title { font-size: 48px; font-weight: 800; margin-bottom: 20px; letter-spacing: 5px; font-family: 'Orbitron', sans-serif; }
+        .result-win { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
+        .result-lose { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
+        
+        .result-message { font-size: 16px; color: #ccc; margin-bottom: 30px; }
+        
+        /* 勝利時の紙吹雪 */
+        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: confetti-fall linear forwards; }
+        @keyframes confetti-fall { 0% { transform: translateY(-10vh) rotate(0deg); } 100% { transform: translateY(110vh) rotate(720deg); } }
 
-        /* --- 詳細パネル (ポップアップ) --- */
-        #card-detail-panel {
-            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
-            width: 85%; max-width: 320px; background: rgba(20, 20, 30, 0.95);
-            border: 2px solid var(--accent); border-radius: 12px; padding: 20px;
-            display: none; flex-direction: column; color: white; z-index: 3000;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
+        /* ポップアップ詳細 */
+        #card-detail-panel { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 320px; background: rgba(20, 20, 30, 0.95); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; color: white; z-index: 3000; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
         .detail-close { position: absolute; top: 5px; right: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
         .detail-header { text-align: center; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 10px;}
         .detail-symbol { font-size: 36px; font-weight: bold; color: var(--primary); }
@@ -204,37 +197,14 @@
         .skill-item-name { font-weight: bold; color: var(--accent); font-size: 14px;}
         .skill-item-desc { color: #ddd; font-size: 11px; margin-top: 2px;}
 
-        /* --- ヒント --- */
-        #craftable-list {
-            position: absolute; bottom: 35%; left: 10px;
-            display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none;
-        }
-        .craft-hint-btn {
-            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--accent); color: white;
-            padding: 8px 12px; border-radius: 8px; pointer-events: auto;
-            display: flex; flex-direction: column; min-width: 140px;
-            box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
-        }
+        #craftable-list { position: absolute; bottom: 35%; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none; }
+        .craft-hint-btn { background: rgba(0, 0, 0, 0.9); border: 1px solid var(--accent); color: white; padding: 8px 12px; border-radius: 8px; pointer-events: auto; display: flex; flex-direction: column; min-width: 140px; box-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
         
-        /* --- モーダル --- */
-        #skill-modal {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 4000;
-            flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
-        }
+        #skill-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 4000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .skill-list { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
-        .skill-btn {
-            background: #fff; color: #333; padding: 15px; border-radius: 8px;
-            border-left: 8px solid var(--primary); position: relative; font-weight: bold;
-        }
-        .skill-btn:active { background: #eee; }
-
-        #msg-box {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 8px; border: 2px solid white;
-            font-size: 20px; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; text-align: center; white-space: nowrap;
-        }
-
+        .skill-btn { background: #fff; color: #333; padding: 15px; border-radius: 8px; border-left: 8px solid var(--primary); position: relative; font-weight: bold; }
+        
+        #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 8px; border: 2px solid white; font-size: 20px; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; text-align: center; white-space: nowrap; }
         body.targeting .card { border-style: dashed; }
         .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger) !important; box-shadow: 0 0 10px var(--danger); }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
@@ -243,49 +213,61 @@
 </head>
 <body>
 
-    <div id="start-screen">
-        <h1>無機化学カードゲーム<br><span style="font-size:14px; color:#aaa">CHEM-VERSE</span></h1>
-        <p>デッキを選んでください</p>
+    <div id="title-screen" class="screen">
+        <div id="particles"></div>
+        
+        <div class="game-logo">CHEM-VERSE</div>
+        <div class="game-sub-logo">MUKI-COLLECT TCG</div>
+        
+        <div class="menu-container">
+            <div class="menu-btn primary" onclick="showDeckSelect()">CPUバトル</div>
+            <div class="menu-btn disabled">対人戦 (準備中)</div>
+            <div class="menu-btn disabled">カード図鑑 (準備中)</div>
+        </div>
+    </div>
+
+    <div id="deck-select-screen" class="screen hidden">
+        <div class="deck-header">使用するデッキを選択</div>
         <div class="deck-grid">
             <div class="deck-card" onclick="startGame('aggro')">
                 <div class="deck-title">🔥 超速攻</div>
-                <div class="deck-desc">塩化水素、フッ化水素など<br>HPを犠牲にした高火力で<br>速攻を仕掛ける</div>
+                <div class="deck-desc">HCl, HF<br>高火力・低耐久で速攻</div>
             </div>
             <div class="deck-card" onclick="startGame('counter')">
                 <div class="deck-title">🛡️ カウンター</div>
-                <div class="deck-desc">塩化銀、赤錆など<br>沈殿と不動態で守り<br>受け流して反撃する</div>
+                <div class="deck-desc">AgCl, Fe2O3<br>沈殿と不動態で鉄壁</div>
             </div>
             <div class="deck-card" onclick="startGame('toxic')">
                 <div class="deck-title">☠️ 害悪(毒)</div>
-                <div class="deck-desc">一酸化炭素、硫化水素<br>「必殺」で大型を除去し<br>相手を追い詰める</div>
+                <div class="deck-desc">CO, H2S<br>必殺で大型を即死</div>
             </div>
             <div class="deck-card" onclick="startGame('control')">
                 <div class="deck-title">🧪 テクニカル</div>
-                <div class="deck-desc">水酸化Na、アルミ<br>回復と防御を使い分け<br>盤面を支配する</div>
+                <div class="deck-desc">NaOH, Al2O3<br>回復と両性で支配</div>
             </div>
             <div class="deck-card" onclick="startGame('gemstone')">
                 <div class="deck-title">💎 宝石</div>
-                <div class="deck-desc">ダイヤ、ルビー<br>圧倒的な硬度(HP)で<br>要塞を築く</div>
+                <div class="deck-desc">ダイヤ, ルビー<br>圧倒的な硬度(HP)</div>
             </div>
             <div class="deck-card" onclick="startGame('heavy')">
                 <div class="deck-title">🏭 重金属</div>
-                <div class="deck-desc">金、プラチナ<br>コストは重いが超強力<br>後半巻き返し型</div>
+                <div class="deck-desc">金, W, Pt<br>後半巻き返し型</div>
             </div>
             <div class="deck-card" onclick="startGame('noble')">
                 <div class="deck-title">🎈 貴ガス</div>
-                <div class="deck-desc">ヘリウム、ネオン<br>「潜伏」で選ばれない<br>一方的に攻撃</div>
+                <div class="deck-desc">ヘリウム, ネオン<br>潜伏で選ばれない</div>
             </div>
             <div class="deck-card" onclick="startGame('hazard')">
                 <div class="deck-title">⚗️ 危険物</div>
-                <div class="deck-desc">王水、濃硫酸<br>強力な除去スペルで<br>全てを溶かす</div>
+                <div class="deck-desc">王水, 濃硫酸<br>強力な除去スペル</div>
             </div>
         </div>
+        <div class="back-btn menu-btn" style="width:auto;" onclick="showTitle()">タイトルへ戻る</div>
     </div>
 
     <div id="game-board">
         <div id="enemy-hand-area"></div>
         <div id="enemy-field" class="area"></div>
-        
         <div id="info-area">
             <div class="leader" id="leader-enemy" onclick="onLeaderClick('enemy')">
                 <div class="avatar" style="font-size:24px;">🤖</div>
@@ -309,19 +291,28 @@
         <div id="player-field" class="area"></div>
         <div id="player-hand-area"></div>
 
-        <div id="card-detail-panel" onclick="hideDetail()">
-            <div class="detail-close">×</div>
-            <div class="detail-header">
-                <div class="detail-symbol" id="detail-symbol"></div>
-                <div class="detail-name" id="detail-name"></div>
-                <div class="detail-rarity" id="detail-rarity"></div>
-            </div>
-            <div class="detail-stats-box" id="detail-stats"></div>
-            <div class="detail-skills" id="detail-skills"></div>
-            <div style="text-align:center; margin-top:15px; font-size:10px; color:#888;">(タップして閉じる)</div>
-        </div>
-
         <div id="cancel-attack-btn" onclick="cancelAttack()">❌ 攻撃をやめる</div>
+    </div>
+
+    <div id="result-screen" class="screen hidden">
+        <div class="result-content">
+            <div class="result-title" id="result-title">VICTORY</div>
+            <div class="result-message" id="result-message">あなたの勝利です！</div>
+            <div class="menu-btn primary" onclick="showTitle()">タイトルへ戻る</div>
+        </div>
+        <div id="confetti-container"></div>
+    </div>
+
+    <div id="card-detail-panel" onclick="hideDetail()">
+        <div class="detail-close">×</div>
+        <div class="detail-header">
+            <div class="detail-symbol" id="detail-symbol"></div>
+            <div class="detail-name" id="detail-name"></div>
+            <div class="detail-rarity" id="detail-rarity"></div>
+        </div>
+        <div class="detail-stats-box" id="detail-stats"></div>
+        <div class="detail-skills" id="detail-skills"></div>
+        <div style="text-align:center; margin-top:15px; font-size:10px; color:#888;">(タップして閉じる)</div>
     </div>
 
     <div class="action-overlay" id="action-btns" style="display:none;">
@@ -338,6 +329,7 @@
     <div id="msg-box"></div>
 
     <script>
+        // --- 設定・データ ---
         const MAX_HAND = 10; 
         const MAX_FIELD = 5;
         const INITIAL_HP = 25;
@@ -430,14 +422,14 @@
         ];
 
         const DECKS = {
-            aggro: { name: '超速攻 (Aggro)', desc: 'HCl, HFなど低コスト高火力で速攻を仕掛けるデッキ。', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
-            counter: { name: 'カウンター (Counter)', desc: 'AgClの守護やFe2O3の高耐久で耐えて反撃するデッキ。', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
-            toxic: { name: '害悪毒 (Toxic)', desc: 'CO, H2Sなどの「必殺」持ちで大型ユニットを葬るデッキ。', elements: ['C', 'O', 'S', 'H', 'Cl', 'Cd'], recipes: ['CO', 'H2S', 'Cl2', 'SO2', 'CdS'] },
-            control: { name: 'コントロール (Control)', desc: 'NaOHやAl2O3で回復や防御を行い、盤面を支配するデッキ。', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
-            gemstone: { name: '宝石 (Gemstone)', desc: 'ダイヤモンドやルビーなど、圧倒的なステータスを持つデッキ。', elements: ['C', 'Al', 'O', 'Si', 'Cr', 'Ti'], recipes: ['Diamond', 'Ruby', 'Sapphire', 'SiO2'] },
-            heavy: { name: '重金属 (Heavy Metal)', desc: '金、プラチナなど、コストは重いが強力な金属デッキ。', elements: ['Au', 'Pt', 'W', 'Ti', 'Fe'], recipes: ['Au', 'Pt', 'W', 'Ti'] },
-            noble: { name: '貴ガス (Noble Gas)', desc: 'ヘリウムなど、「潜伏」能力で選ばれない攻撃を行うデッキ。', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] },
-            hazard: { name: '危険物 (Hazard)', desc: '王水や濃硫酸など、強力な除去スペルを主体としたデッキ。', elements: ['H', 'Cl', 'N', 'O', 'S', 'K', 'Mn'], recipes: ['AquaRegia', 'H2SO4', 'KMnO4'] }
+            aggro: { name: '超速攻', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
+            counter: { name: 'カウンター', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
+            toxic: { name: '害悪(毒)', elements: ['C', 'O', 'S', 'H', 'Cl', 'Cd'], recipes: ['CO', 'H2S', 'Cl2', 'SO2', 'CdS'] },
+            control: { name: 'コントロール', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
+            gemstone: { name: '宝石', elements: ['C', 'Al', 'O', 'Si', 'Cr', 'Ti'], recipes: ['Diamond', 'Ruby', 'Sapphire', 'SiO2'] },
+            heavy: { name: '重金属', elements: ['Au', 'Pt', 'W', 'Ti', 'Fe'], recipes: ['Au', 'Pt', 'W', 'Ti'] },
+            noble: { name: '貴ガス', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] },
+            hazard: { name: '危険物', elements: ['H', 'Cl', 'N', 'O', 'S', 'K', 'Mn'], recipes: ['AquaRegia', 'H2SO4', 'KMnO4'] }
         };
 
         let gs = {
@@ -452,25 +444,54 @@
 
         // --- 初期化 ---
         window.onload = () => {
-            generateDeckSelectScreen();
-            showHome();
+            initParticles();
+            showTitle();
         };
 
-        function generateDeckSelectScreen() {
-            // HTML内に静的に記述したため不要だが、動的生成ならここ
+        // パーティクル生成
+        function initParticles() {
+            const container = document.getElementById('particles');
+            if(!container) return;
+            for(let i=0; i<30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random()*100 + 'vw';
+                p.style.width = p.style.height = (Math.random()*5 + 2) + 'px';
+                p.style.animationDuration = (Math.random()*10 + 5) + 's';
+                p.style.animationDelay = (Math.random()*5) + 's';
+                container.appendChild(p);
+            }
         }
 
         // --- 画面遷移 ---
-        function showHome() { hideAllScreens(); document.getElementById('start-screen').style.display = 'flex'; }
+        function showTitle() { hideAll(); document.getElementById('title-screen').classList.remove('hidden'); }
+        function showDeckSelect() { hideAll(); document.getElementById('deck-select-screen').classList.remove('hidden'); }
         function showGame() { 
-            hideAllScreens(); 
+            hideAll(); 
             document.getElementById('game-board').style.display = 'flex'; 
             document.getElementById('action-btns').style.display = 'flex';
         }
-        function hideAllScreens() {
-            document.getElementById('start-screen').style.display = 'none';
+        function showResult(isWin) {
+            const sc = document.getElementById('result-screen');
+            const tit = document.getElementById('result-title');
+            const msg = document.getElementById('result-message');
+            sc.classList.remove('hidden');
+            if(isWin) {
+                tit.innerText = "VICTORY";
+                tit.className = "result-title result-win";
+                msg.innerText = "あなたの勝利です！";
+                createConfetti();
+            } else {
+                tit.innerText = "DEFEAT";
+                tit.className = "result-title result-lose";
+                msg.innerText = "敗北しました...";
+            }
+        }
+        function hideAll() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('game-board').style.display = 'none';
             document.getElementById('action-btns').style.display = 'none';
+            document.getElementById('confetti-container').innerHTML = '';
         }
 
         /* --- ゲーム開始 --- */
@@ -492,7 +513,7 @@
             gs.enemyPool = eConf.elements.map(sym => ELEM[sym]);
             gs.enemyRecipes = RECIPES.filter(r => eConf.recipes.includes(r.product.symbol));
             
-            document.getElementById('enemy-name').innerText = `CPU (${eConf.name.split(' ')[0]})`;
+            document.getElementById('enemy-name').innerText = `CPU (${eConf.name})`;
 
             gs.turn = 1; gs.isPlayerTurn = true; gs.mp = 1; gs.maxMp = 1;
             gs.player = { hp: INITIAL_HP, hand: [], field: [] };
@@ -527,10 +548,9 @@
             if(!gs.isPlayerTurn) return;
             if(gs.selectedHandIds.length === 0) return;
 
+            // 貴ガスのみ2枚で合成
             if(gs.selectedHandIds.length === 1) {
-                const card = gs.player.hand.find(c => c.id === gs.selectedHandIds[0]);
-                const singleRecipe = gs.playerRecipes.find(r => r.ingredients.length === 1 && r.ingredients[0] === card.symbol);
-                if(singleRecipe) { processSynth(singleRecipe); return; }
+                // 1枚合成は廃止(貴ガス調整のため) -> レシピ参照へ
             }
 
             const selCards = gs.player.hand.filter(c => gs.selectedHandIds.includes(c.id));
@@ -542,7 +562,6 @@
         }
 
         function processSynth(recipe) {
-            // スペル
             if(recipe.product.type === 'spell') {
                 const skill = recipe.product.skills[0];
                 gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
@@ -559,7 +578,6 @@
                 checkGameEnd(); updateView(); return;
             }
 
-            // ユニット
             if(gs.player.field.length >= MAX_FIELD) { showMessage("フィールド満員"); return; }
             gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
             gs.selectedHandIds = [];
@@ -572,11 +590,8 @@
         /* --- インタラクション --- */
         function onHandClick(id) {
             if(!gs.isPlayerTurn) return;
-            // 詳細表示
             const card = gs.player.hand.find(c => c.id === id);
             if(card) showDetail(card);
-
-            // 選択
             if(gs.selectedHandIds.includes(id)) gs.selectedHandIds = gs.selectedHandIds.filter(x => x !== id);
             else gs.selectedHandIds.push(id);
             updateView();
@@ -590,7 +605,7 @@
                 if(u && u.canAttack) {
                     gs.attackingUnit = u;
                     document.body.classList.add('targeting');
-                    updateView(); // ここでキャンセルボタンが表示される
+                    updateView(); 
                 }
             } else if(gs.attackingUnit) {
                 const target = gs.enemy.field.find(x => x.id === id);
@@ -655,7 +670,6 @@
             attacker.canAttack = false; showMessage(log); cancelAttack(); checkGameEnd(); updateView();
         }
 
-        // ★ キャンセル機能
         function cancelAttack() { 
             gs.attackingUnit = null; 
             document.body.classList.remove('targeting'); 
@@ -665,8 +679,8 @@
         function checkGameEnd() {
             gs.player.field = gs.player.field.filter(u => u.currentHp > 0);
             gs.enemy.field = gs.enemy.field.filter(u => u.currentHp > 0);
-            if(gs.enemy.hp <= 0) { alert("あなたの勝利！"); showHome(); return; }
-            if(gs.player.hp <= 0) { alert("敗北..."); showHome(); return; }
+            if(gs.enemy.hp <= 0) { showResult(true); return; }
+            if(gs.player.hp <= 0) { showResult(false); return; }
             updateView();
         }
 
@@ -757,7 +771,7 @@
             p.style.display = 'flex';
             document.getElementById('detail-symbol').innerText = card.symbol;
             document.getElementById('detail-name').innerText = card.name;
-            document.getElementById('detail-rarity').innerText = `${card.rarity}ランク`;
+            document.getElementById('detail-rarity').innerText = `${card.rarity}`;
             const stats = document.getElementById('detail-stats');
             const skills = document.getElementById('detail-skills');
             skills.innerHTML = '';
@@ -768,9 +782,9 @@
             } else {
                 stats.innerHTML = `<span style="color:#e67e22">⚔️${card.atk}</span> <span style="color:#2ecc71; margin-left:20px;">❤️${card.currentHp}/${card.maxHp}</span>`;
                 if(card.ability === 'ward') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">🛡️ 守護</div><div class="skill-item-desc">相手はこれ以外を攻撃できない。</div></div>`;
-                if(card.ability === 'toxic') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">☠️ 毒</div><div class="skill-item-desc">ダメージを与えたユニットを破壊する。</div></div>`;
-                if(card.ability === 'storm') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">⚡ 疾走</div><div class="skill-item-desc">召喚したターンに攻撃できる。</div></div>`;
-                if(card.ability === 'stealth') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">👁️ 潜伏</div><div class="skill-item-desc">攻撃するまで相手に選ばれない。</div></div>`;
+                if(card.ability === 'toxic') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">☠️ 毒</div><div class="skill-item-desc">ダメージを与えた敵を即死させる。</div></div>`;
+                if(card.ability === 'storm') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">⚡ 疾走</div><div class="skill-item-desc">出したターンに攻撃できる。</div></div>`;
+                if(card.ability === 'stealth') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">👁️ 潜伏</div><div class="skill-item-desc">攻撃するまで選ばれない。</div></div>`;
                 card.skills.forEach(s => {
                     let type = s.type ? s.type : '通常';
                     skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">${s.name} (威力:${s.power})</div><div class="skill-item-desc">${s.desc}</div></div>`;
@@ -847,6 +861,20 @@
             updateView();
         }
         function showMessage(txt, time=1500) { const box = document.getElementById('msg-box'); box.innerText = txt; box.style.opacity = 1; setTimeout(() => box.style.opacity = 0, time); }
+
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            if(!container) return;
+            container.innerHTML = '';
+            for(let i=0; i<50; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random()*100 + 'vw';
+                c.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
+                c.style.animationDuration = (Math.random()*3 + 2) + 's';
+                container.appendChild(c);
+            }
+        }
 
     </script>
 </body>
