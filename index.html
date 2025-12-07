@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse Mobile</title>
+    <title>Chem-Verse Mobile Enhanced</title>
     <style>
         :root {
             --bg-color: #1a1a1d;
@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
             background-color: var(--bg-color);
             color: white;
             margin: 0;
@@ -47,37 +47,51 @@
         .deck-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
         .deck-desc { font-size: 10px; color: #ddd; line-height: 1.3; }
 
-        /* --- ゲームボード (スマホ縦レイアウト) --- */
+        /* --- ゲームボード --- */
         #game-board { display: none; flex-direction: column; height: 100vh; position: relative; }
         
-        /* エリア配分調整 */
         #enemy-hand-area { height: 8%; background: #2c3e50; display: flex; justify-content: center; align-items: center; gap: 2px; }
         #enemy-field { height: 22%; background: #34495e; border-bottom: 2px solid #7f8c8d; display: flex; justify-content: center; align-items: center; }
         
         #info-area {
-            height: 12%; background: #222;
+            height: 10%; background: #222;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 10px; z-index: 10; box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         #player-field { height: 22%; background: #34495e; border-top: 2px solid #7f8c8d; display: flex; justify-content: center; align-items: center; }
+        
+        /* ★ 手札エリア改良: 高さを増やし、カードを大きく表示 */
         #player-hand-area { 
-            height: 36%; background: #2c3e50; 
+            height: 38%; background: #222f3e; 
             overflow-x: auto; display: flex; align-items: center; 
-            padding-left: 10px; gap: 5px;
+            padding-left: 15px; gap: 8px; /* 間隔を広げる */
         }
 
-        /* --- カード (スマホサイズ) --- */
+        /* --- カード共通スタイル --- */
         .card {
-            width: 64px; height: 90px; /* 少し小さく */
             background: var(--card-bg); color: #333;
-            border-radius: 5px; position: relative;
+            border-radius: 6px; position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             border: 2px solid #bdc3c7; flex-shrink: 0;
             transition: transform 0.1s;
         }
+        
+        /* ★ フィールド上のカード (少し小さめ) */
+        .area .card { width: 60px; height: 85px; }
+
+        /* ★ 手札のカード (大きく見やすく！) */
+        #player-hand-area .card { 
+            width: 85px; height: 120px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+        }
+        /* 手札の文字サイズ調整 */
+        #player-hand-area .card .card-symbol { font-size: 22px; margin-top: 15px; }
+        #player-hand-area .card .card-name { font-size: 11px; }
+        #player-hand-area .card .stats { font-size: 12px; bottom: 5px; }
+
         .card:active { transform: scale(0.95); }
-        .card.selected { border-color: var(--accent); transform: translateY(-10px); box-shadow: 0 0 10px var(--accent); }
+        .card.selected { border-color: var(--accent); transform: translateY(-15px); box-shadow: 0 0 15px var(--accent); }
         .card.can-attack { border-color: var(--primary); box-shadow: 0 0 8px var(--primary); }
         .card.attacking { border-color: var(--danger); box-shadow: 0 0 15px var(--danger); z-index: 100; transform: scale(1.1); }
 
@@ -92,10 +106,9 @@
         .stat-atk { background: #e67e22; color: white; padding: 1px 3px; border-radius: 3px; }
         .stat-hp { background: var(--success); color: white; padding: 1px 3px; border-radius: 3px; }
 
-        /* バッジ */
         .ability-container { position: absolute; top: -6px; right: -6px; display: flex; flex-direction: column; gap: 1px; }
         .badge {
-            width: 16px; height: 16px; border-radius: 50%; color: white; font-size: 10px;
+            width: 18px; height: 18px; border-radius: 50%; color: white; font-size: 10px;
             display: flex; align-items: center; justify-content: center; border: 1px solid white; font-weight: bold;
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
@@ -113,13 +126,12 @@
             font-weight: bold; font-size: 14px; margin: 0 auto; 
             border: 2px solid white; box-shadow: 0 0 5px #e74c3c;
         }
-        
         .turn-info { text-align: center; font-size: 12px; }
         .mp-bar { font-size: 14px; color: var(--success); font-weight: bold; }
 
-        /* --- ボタン類 --- */
+        /* --- アクションボタン --- */
         .action-overlay { 
-            position: absolute; bottom: 120px; right: 10px; 
+            position: absolute; bottom: 140px; right: 10px; 
             display: flex; flex-direction: column; gap: 8px; z-index: 50; 
         }
         .game-btn { 
@@ -136,7 +148,19 @@
         }
         #btn-end-turn:disabled { background: #555; color: #888; }
 
-        /* --- 詳細パネル (タップで表示) --- */
+        /* ★ キャンセルボタン (攻撃モード中のみ表示) */
+        #cancel-attack-btn {
+            display: none;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(231, 76, 60, 0.9); color: white;
+            padding: 15px 30px; border-radius: 30px; border: 2px solid white;
+            font-weight: bold; font-size: 16px; cursor: pointer;
+            z-index: 200; box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            animation: popIn 0.3s;
+        }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
+
+        /* --- 詳細パネル --- */
         #card-detail-panel {
             position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
             width: 85%; max-width: 300px; background: rgba(0, 0, 0, 0.95);
@@ -155,7 +179,7 @@
 
         /* --- ヒント --- */
         #craftable-list {
-            position: absolute; bottom: 38%; left: 10px;
+            position: absolute; bottom: 42%; left: 10px;
             display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none;
         }
         .craft-hint-btn {
@@ -184,7 +208,6 @@
             font-size: 20px; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; text-align: center; white-space: nowrap;
         }
 
-        /* ターゲット演出 */
         body.targeting .card { border-style: dashed; }
         .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger) !important; box-shadow: 0 0 10px var(--danger); }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
@@ -257,6 +280,8 @@
 
         <div id="player-field" class="area"></div>
         <div id="player-hand-area"></div>
+
+        <div id="cancel-attack-btn" onclick="cancelAttack()">❌ 攻撃をやめる</div>
 
         <div id="card-detail-panel" onclick="hideDetail()">
             <div class="detail-close">×</div>
@@ -364,7 +389,7 @@
             { ingredients: ['Pt'], product: { symbol: 'Pt', name: 'プラチナ', atk: 5, hp: 7, skills: [{name:'触媒作用', power:5, desc:'反応を促進する一撃'}] }},
             { ingredients: ['W'], product: { symbol: 'W', name: 'タングステン', atk: 7, hp: 8, ability:'ward', skills: [{name:'融点3422℃', power:7, desc:'熱に強い一撃'}] }},
             { ingredients: ['Ti'], product: { symbol: 'Ti', name: 'チタン', atk: 4, hp: 5, skills: [{name:'高強度', power:4, desc:'軽くて強い'}] }},
-            // ★貴ガス (弱体化: 2枚必要)
+            // 貴ガス (2枚必要)
             { ingredients: ['He', 'He'], product: { symbol: 'He', name: 'ヘリウム', atk: 2, hp: 2, ability:'stealth', skills: [{name:'不活性', power:2, desc:'潜伏攻撃'}] }},
             { ingredients: ['Ne', 'Ne'], product: { symbol: 'Ne', name: 'ネオン', atk: 3, hp: 3, ability:'stealth', skills: [{name:'ネオンサイン', power:3, desc:'潜伏攻撃'}] }},
             { ingredients: ['Ar', 'Ar'], product: { symbol: 'Ar', name: 'アルゴン', atk: 4, hp: 4, ability:'stealth', skills: [{name:'フィラメント保護', power:4, desc:'潜伏攻撃'}] }},
@@ -374,7 +399,7 @@
             { ingredients: ['K', 'Mn', 'O', 'O', 'O', 'O'], product: { symbol: 'KMnO4', name: '過マンガン酸K', atk: 0, hp: 0, type:'spell', skills: [{name:'強力酸化', power:7, type:'damage', desc:'単体7ダメージ'}] }},
         ];
 
-        // デッキ構成 (貴ガスは2枚組で出るように増量)
+        // デッキ構成 (貴ガス増量)
         const DECKS = {
             aggro: { name: '超速攻', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
             counter: { name: 'カウンター', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
@@ -382,7 +407,7 @@
             control: { name: 'コントロール', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
             gemstone: { name: '宝石', elements: ['C', 'Al', 'O', 'Si', 'Cr', 'Ti'], recipes: ['Diamond', 'Ruby', 'Sapphire', 'SiO2'] },
             heavy: { name: '重金属', elements: ['Au', 'Pt', 'W', 'Ti', 'Fe'], recipes: ['Au', 'Pt', 'W', 'Ti'] },
-            noble: { name: '貴ガス', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] }, // 2枚ずつ入る
+            noble: { name: '貴ガス', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] },
             hazard: { name: '危険物', elements: ['H', 'Cl', 'N', 'O', 'S', 'K', 'Mn'], recipes: ['AquaRegia', 'H2SO4', 'KMnO4'] }
         };
 
@@ -443,7 +468,13 @@
             if(!gs.isPlayerTurn) return;
             if(gs.selectedHandIds.length === 0) return;
 
-            // ★貴ガスの弱体化により、単体合成は廃止（全てレシピ参照）
+            // 単体金属など (1枚合成)
+            if(gs.selectedHandIds.length === 1) {
+                const card = gs.player.hand.find(c => c.id === gs.selectedHandIds[0]);
+                const singleRecipe = gs.playerRecipes.find(r => r.ingredients.length === 1 && r.ingredients[0] === card.symbol);
+                if(singleRecipe) { processSynth(singleRecipe); return; }
+            }
+
             const selCards = gs.player.hand.filter(c => gs.selectedHandIds.includes(c.id));
             const symbols = selCards.map(c => c.symbol).sort();
             const recipe = gs.playerRecipes.find(r => JSON.stringify(r.ingredients.sort()) === JSON.stringify(symbols));
@@ -453,6 +484,7 @@
         }
 
         function processSynth(recipe) {
+            // スペル
             if(recipe.product.type === 'spell') {
                 const skill = recipe.product.skills[0];
                 gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
@@ -469,6 +501,7 @@
                 checkGameEnd(); updateView(); return;
             }
 
+            // ユニット
             if(gs.player.field.length >= MAX_FIELD) { showMessage("フィールド満員"); return; }
             gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
             gs.selectedHandIds = [];
@@ -478,13 +511,14 @@
             updateView();
         }
 
+        /* --- インタラクション --- */
         function onHandClick(id) {
             if(!gs.isPlayerTurn) return;
-            // カード詳細を表示
+            // 詳細表示
             const card = gs.player.hand.find(c => c.id === id);
             if(card) showDetail(card);
 
-            // 選択処理
+            // 選択
             if(gs.selectedHandIds.includes(id)) gs.selectedHandIds = gs.selectedHandIds.filter(x => x !== id);
             else gs.selectedHandIds.push(id);
             updateView();
@@ -494,11 +528,11 @@
             if(!gs.isPlayerTurn) return;
             if(isPlayer) {
                 const u = gs.player.field.find(x => x.id === id);
-                if(u) showDetail(u); // 詳細表示
+                if(u) showDetail(u);
                 if(u && u.canAttack) {
                     gs.attackingUnit = u;
                     document.body.classList.add('targeting');
-                    updateView();
+                    updateView(); // ここでキャンセルボタンが表示される
                 }
             } else if(gs.attackingUnit) {
                 const target = gs.enemy.field.find(x => x.id === id);
@@ -519,7 +553,7 @@
         function prepareAttack(attacker, target, type) {
             if(type === 'leader' || (type === 'unit' && target.ability !== 'ward')) {
                 const guards = gs.enemy.field.filter(u => u.ability === 'ward' && u.ability !== 'stealth');
-                if(guards.length > 0) { showMessage("守護に阻まれた！"); cancelAttack(); return; }
+                if(guards.length > 0) { showMessage("守護に阻まれた！"); return; }
             }
             if(attacker.skills.length > 1) openSkillModal(attacker, target);
             else executeSkill(attacker, target, attacker.skills[0]);
@@ -563,12 +597,18 @@
             attacker.canAttack = false; showMessage(log); cancelAttack(); checkGameEnd(); updateView();
         }
 
-        function cancelAttack() { gs.attackingUnit = null; document.body.classList.remove('targeting'); updateView(); }
+        // ★ キャンセル機能
+        function cancelAttack() { 
+            gs.attackingUnit = null; 
+            document.body.classList.remove('targeting'); 
+            updateView(); 
+        }
+
         function checkGameEnd() {
             gs.player.field = gs.player.field.filter(u => u.currentHp > 0);
             gs.enemy.field = gs.enemy.field.filter(u => u.currentHp > 0);
-            if(gs.enemy.hp <= 0) alert("VICTORY!");
-            if(gs.player.hp <= 0) alert("DEFEAT...");
+            if(gs.enemy.hp <= 0) alert("VICTORY! 化学の勝利！");
+            if(gs.player.hp <= 0) alert("DEFEAT... 実験失敗...");
         }
 
         function endTurn() {
@@ -639,6 +679,12 @@
             document.getElementById('mp-display').innerText = `MP ${gs.mp}/${gs.maxMp}`;
             document.getElementById('player-hp').innerText = gs.player.hp;
             document.getElementById('enemy-hp').innerText = gs.enemy.hp;
+            
+            // キャンセルボタンの表示切り替え
+            const cancelBtn = document.getElementById('cancel-attack-btn');
+            if(gs.attackingUnit) cancelBtn.style.display = 'block';
+            else cancelBtn.style.display = 'none';
+
             renderCards('player-hand-area', gs.player.hand, 'hand');
             renderCards('player-field', gs.player.field, 'field', true);
             renderCards('enemy-field', gs.enemy.field, 'field', false);
@@ -658,15 +704,16 @@
 
             if(card.type === 'element') {
                 stats.innerHTML = `<span style="font-size:14px; color:#ccc">素材カード</span>`;
-                skills.innerHTML = `<div class="skill-item"><div class="skill-item-desc">レアリティ: ${card.rarity}</div></div>`;
+                skills.innerHTML = `<div class="skill-item"><div class="skill-item-desc">デッキ素材。合成に使用します。<br>レアリティ: ${card.rarity}</div></div>`;
             } else {
                 stats.innerHTML = `<span style="color:#e67e22">⚔️ ${card.atk}</span> <span style="color:#2ecc71">❤️ ${card.currentHp}/${card.maxHp}</span>`;
-                if(card.ability === 'ward') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">🛡️ 守護</div><div class="skill-item-desc">壁になる</div></div>`;
-                if(card.ability === 'toxic') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">☠️ 毒</div><div class="skill-item-desc">必殺</div></div>`;
-                if(card.ability === 'storm') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">⚡ 疾走</div><div class="skill-item-desc">即攻撃可</div></div>`;
-                if(card.ability === 'stealth') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">👁️ 潜伏</div><div class="skill-item-desc">選ばれない</div></div>`;
+                if(card.ability === 'ward') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">🛡️ 守護</div><div class="skill-item-desc">相手はこれ以外を攻撃できない</div></div>`;
+                if(card.ability === 'toxic') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">☠️ 毒</div><div class="skill-item-desc">ダメージを与えた敵を即死させる</div></div>`;
+                if(card.ability === 'storm') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">⚡ 疾走</div><div class="skill-item-desc">出したターンに攻撃できる</div></div>`;
+                if(card.ability === 'stealth') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">👁️ 潜伏</div><div class="skill-item-desc">攻撃するまで選ばれない</div></div>`;
                 card.skills.forEach(s => {
-                    skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">${s.name} (威力:${s.power})</div><div class="skill-item-desc">${s.desc}</div></div>`;
+                    let type = s.type ? s.type : '通常';
+                    skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">${s.name} (威力:${s.power})</div><div class="skill-item-desc">${s.desc} [${type}]</div></div>`;
                 });
             }
         }
@@ -676,11 +723,12 @@
             const el = document.getElementById(id); el.innerHTML = '';
             cards.forEach(c => {
                 const div = document.createElement('div'); div.className = 'card';
-                // スマホ用: クリックで詳細
-                div.onclick = (e) => { 
+                
+                // タップで詳細 (スマホ向け)
+                div.onclick = (e) => {
                     e.stopPropagation();
-                    if(type==='hand') onHandClick(c.id); 
-                    if(type==='field') onFieldCardClick(c.id, isPlayer); 
+                    if(type === 'hand') onHandClick(c.id);
+                    if(type === 'field') onFieldCardClick(c.id, isPlayer);
                 };
 
                 if(type === 'hand' && gs.selectedHandIds.includes(c.id)) div.classList.add('selected');
