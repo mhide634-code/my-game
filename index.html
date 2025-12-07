@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: Fixed</title>
+    <title>Chem-Verse: Complete Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,20 +17,13 @@
             --rare-sr: #9b59b6;
             --rare-ssr: #f1c40f;
         }
-
         body {
             font-family: 'M PLUS Rounded 1c', sans-serif;
             background-color: var(--bg-color);
-            color: white;
-            margin: 0;
-            user-select: none;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-            height: 100vh;
-            width: 100vw;
+            color: white; margin: 0; user-select: none;
+            overflow: hidden; -webkit-tap-highlight-color: transparent;
+            height: 100vh; width: 100vw;
         }
-
-        /* --- 共通 --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -39,43 +32,30 @@
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-        /* --- CSSアート (画像なしイラスト) --- */
+        /* CSS Art */
         .css-art { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        
         .art-gas { background: linear-gradient(to top, #89f7fe, #66a6ff); }
         .art-gas::after { content: '☁️'; font-size: 24px; filter: drop-shadow(0 0 5px white); animation: float 3s infinite ease-in-out; }
-        
         .art-liquid { background: linear-gradient(to bottom, #4facfe, #00f2fe); }
         .art-liquid::after { content: '💧'; font-size: 24px; animation: bounce 2s infinite; }
-        
         .art-solid { background: linear-gradient(to bottom, #e6b980, #eacda3); }
         .art-solid::after { content: '🪨'; font-size: 24px; }
-        
         .art-metal { background: linear-gradient(135deg, #f7971e, #ffd200); }
         .art-metal::after { content: '✨'; font-size: 24px; text-shadow: 0 0 5px white; }
-        
         .art-toxic { background: linear-gradient(to bottom, #f093fb, #f5576c); }
         .art-toxic::after { content: '☠️'; font-size: 24px; filter: drop-shadow(0 0 5px purple); }
-
         .art-H { background: linear-gradient(to top, #a1c4fd, #c2e9fb); }
-        .art-H::after { content: '( •ω• )'; font-size: 14px; color: #555; background: white; padding: 5px; border-radius: 50%; box-shadow: 0 0 10px white; }
-        
+        .art-H::after { content: '( •ω• )'; font-size: 14px; background: white; padding: 5px; border-radius: 50%; color:#333; }
         .art-Au { background: radial-gradient(circle, #ffd700, #b8860b); }
         .art-Au::after { content: '💰'; font-size: 28px; }
-
-        .art-Cl { background: linear-gradient(to top, #d4fc79, #96e6a1); }
-        .art-Cl::after { content: '🤢'; font-size: 24px; }
-
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-        /* --- タイトル画面 --- */
+        /* UI Styles */
         #title-screen { background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%); }
-        .game-logo { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--accent); text-shadow: 0 0 20px var(--accent); margin-bottom: 10px; text-align: center; }
+        .game-logo { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--accent); text-shadow: 0 0 20px var(--accent); margin-bottom: 20px; text-align: center; }
         .menu-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; margin: 10px; transition: 0.2s; }
-        .menu-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
-
-        /* --- デッキ選択 --- */
+        
         #deck-select-screen { padding: 20px; box-sizing: border-box; display: block; overflow-y: auto; }
         .deck-header { text-align: center; font-size: 20px; margin-bottom: 20px; color: var(--accent); }
         .deck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 60px; }
@@ -84,33 +64,14 @@
         .deck-desc { font-size: 10px; color: #ccc; }
         .back-btn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; padding: 10px 30px; border-radius: 20px; z-index: 200; }
 
-        /* --- ゲームボード --- */
-        #game-board { display: none; flex-direction: column; height: 100vh; position: relative; background: #111; }
-        
+        #game-board { display: none; flex-direction: column; height: 100vh; background: #111; position: relative; }
         #enemy-hand-area { height: 10%; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 2px; }
         #enemy-field { height: 23%; border-bottom: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
-        
-        #info-area {
-            height: 12%; background: rgba(20,20,30,0.9);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 10px; z-index: 10; border-top: 1px solid #333; border-bottom: 1px solid #333;
-        }
-
+        #info-area { height: 12%; background: rgba(20,20,30,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 10; border-top: 1px solid #333; border-bottom: 1px solid #333; }
         #player-field { height: 23%; border-top: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; }
-        
-        #player-hand-area { 
-            height: 32%; background: rgba(0,0,0,0.2);
-            overflow-x: auto; display: flex; align-items: center; 
-            padding-left: 10px; gap: 8px;
-        }
+        #player-hand-area { height: 32%; background: rgba(0,0,0,0.2); overflow-x: auto; display: flex; align-items: center; padding-left: 10px; gap: 8px; }
 
-        /* --- カード --- */
-        .card {
-            width: 70px; height: 100px; background: #222; color: #fff;
-            border-radius: 8px; position: relative; flex-shrink: 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 2px solid #555;
-            transition: transform 0.1s; overflow: hidden;
-        }
+        .card { width: 70px; height: 100px; background: #222; color: #fff; border-radius: 8px; position: relative; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 2px solid #555; transition: transform 0.1s; overflow: hidden; }
         .card[data-rarity="N"] { border-color: var(--rare-n); }
         .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow: 0 0 5px var(--rare-r); }
         .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 8px var(--rare-sr); }
@@ -119,22 +80,17 @@
 
         .card-art-area { width: 100%; height: 55%; position: relative; }
         .card-info-area { height: 45%; background: rgba(30,30,30,0.95); padding: 2px; display: flex; flex-direction: column; justify-content: space-between; }
-        
-        .card-symbol { font-size: 14px; font-weight: bold; color: var(--primary); text-align: center; text-shadow: 0 0 2px black; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; display: none; }
+        .card-symbol { font-size: 14px; font-weight: bold; color: var(--primary); text-align: center; display: none; }
         .card-name { font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
-        
         .stats { display: flex; justify-content: space-between; padding: 0 2px; font-weight: bold; font-size: 10px; margin-bottom: 2px; }
         .stat-atk { color: #e67e22; } .stat-hp { color: #2ecc71; }
-
         .ability-container { position: absolute; top: 2px; right: 2px; display: flex; gap: 1px; z-index: 5; }
-        .badge { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .badge { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid white; }
         .badge-ward { background: #3498db; } .badge-toxic { background: #8e44ad; } .badge-storm { background: #f1c40f; } .badge-stealth { background: #95a5a6; }
-
         .card.selected { transform: translateY(-15px); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); z-index: 10; }
         .card.can-attack { border-color: var(--success); box-shadow: 0 0 10px var(--success); }
         .card.attacking { transform: scale(1.2); border-color: var(--danger); box-shadow: 0 0 20px var(--danger); z-index: 100; }
 
-        /* UI */
         .leader { text-align: center; width: 70px; }
         .leader-name { font-size: 10px; color: var(--accent); font-weight: bold; }
         .hp-circle { width: 38px; height: 38px; line-height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c0392b, #900); border: 2px solid white; font-weight: bold; margin: 0 auto; box-shadow: 0 0 5px red; font-size: 16px; }
@@ -145,14 +101,10 @@
         .btn-syn { background: linear-gradient(to right, #f39c12, #e67e22); color: #222; }
         #btn-end-turn { padding: 6px 12px; font-size: 11px; background: #e67e22; border-radius: 15px; border: none; color: white; font-weight: bold; }
         #btn-end-turn:disabled { background: #555; color: #888; }
-
         #cancel-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 200; box-shadow: 0 0 10px var(--danger); cursor: pointer; }
 
-        /* 詳細パネル */
         #detail-panel { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 320px; background: rgba(20,20,30,0.95); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; color: white; z-index: 3000; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
         .detail-close { position: absolute; top: 5px; right: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .detail-sym { font-size: 40px; font-weight: bold; color: var(--primary); text-align: center; }
-        .detail-name { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 5px; }
         .skill-item { margin-bottom: 10px; border-left: 3px solid var(--accent); padding-left: 10px; background: rgba(255,255,255,0.05); padding: 8px; }
         
         #craftable-list { position: absolute; bottom: 38%; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none; }
@@ -162,13 +114,14 @@
         .skill-btn { background: white; color: #333; padding: 15px; border-radius: 8px; border-left: 8px solid var(--primary); width: 100%; max-width: 300px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
 
         #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border: 2px solid white; border-radius: 10px; font-weight: bold; font-size: 20px; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; white-space: nowrap; }
-
-        /* リザルト */
         #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 6000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .result-title { font-size: 48px; font-weight: bold; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
         .res-win { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
         .res-lose { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
-
+        
+        body.targeting .card { border-style: dashed; }
+        .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger) !important; box-shadow: 0 0 10px var(--danger); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -191,7 +144,7 @@
         <div id="enemy-field"></div>
         <div id="info-area">
             <div class="leader" onclick="attackLeader('enemy')">
-                <div class="avatar">🤖</div>
+                <div class="avatar" style="font-size:24px;">🤖</div>
                 <div class="leader-name" id="enemy-name">CPU</div>
                 <div id="enemy-hp" class="hp-circle">25</div>
             </div>
@@ -203,27 +156,27 @@
             <div class="leader" onclick="attackLeader('player')">
                 <div id="player-hp" class="hp-circle">25</div>
                 <div class="leader-name">あなた</div>
-                <div class="avatar">🧑‍🔬</div>
+                <div class="avatar" style="font-size:24px;">🧑‍🔬</div>
             </div>
         </div>
         <div id="craftable-list"></div>
         <div id="player-field"></div>
         <div id="player-hand-area"></div>
         <div id="cancel-btn" onclick="cancelAttack()">❌ 攻撃キャンセル</div>
+        
+        <div id="detail-panel" onclick="this.style.display='none'">
+            <div class="detail-close">×</div>
+            <div class="detail-sym" id="det-sym" style="font-size:40px; font-weight:bold; color:var(--primary); text-align:center;"></div>
+            <div class="detail-name" id="det-name" style="font-size:18px; font-weight:bold; text-align:center; margin-bottom:10px;"></div>
+            <div style="text-align:center; margin-bottom:10px; font-weight:bold; font-size:16px;" id="det-stats"></div>
+            <div style="font-size:12px; color:#ccc; max-height:200px; overflow-y:auto;" id="det-skills"></div>
+            <div style="text-align:center; margin-top:15px; font-size:10px; color:#666;">(タップして閉じる)</div>
+        </div>
     </div>
 
     <div class="action-overlay" id="action-btns" style="display:none;">
         <button class="game-btn btn-draw" onclick="actionDraw()">＋ ドロー</button>
         <button class="game-btn btn-syn" onclick="actionSynthesize()">⚗️ 合成</button>
-    </div>
-
-    <div id="detail-panel" onclick="this.style.display='none'">
-        <div class="detail-close">×</div>
-        <div class="detail-sym" id="det-sym"></div>
-        <div class="detail-name" id="det-name"></div>
-        <div style="text-align:center; margin-bottom:10px; font-weight:bold; font-size:16px;" id="det-stats"></div>
-        <div style="font-size:12px; color:#ccc; max-height:200px; overflow-y:auto;" id="det-skills"></div>
-        <div style="text-align:center; margin-top:15px; font-size:10px; color:#666;">(タップして閉じる)</div>
     </div>
 
     <div id="skill-modal">
@@ -241,11 +194,16 @@
     <div id="msg-box"></div>
 
     <script>
-        // --- データ定義 (CSSアートクラス付き) ---
+        const MAX_HAND = 10; 
+        const MAX_FIELD = 5;
+        const INITIAL_HP = 25;
+
+        // データ定義
         const ELEM = {
             H: { symbol: 'H', name: '水素', rarity: 'N', css: 'art-H' },
             He: { symbol: 'He', name: 'ヘリウム', rarity: 'SR', css: 'art-gas' },
             Li: { symbol: 'Li', name: 'リチウム', rarity: 'R', css: 'art-metal' },
+            Be: { symbol: 'Be', name: 'ベリリウム', rarity: 'R', css: 'art-metal' },
             B: { symbol: 'B', name: 'ホウ素', rarity: 'R', css: 'art-solid' },
             C: { symbol: 'C', name: '炭素', rarity: 'N', css: 'art-solid' },
             N: { symbol: 'N', name: '窒素', rarity: 'N', css: 'art-gas' },
@@ -263,12 +221,15 @@
             K: { symbol: 'K', name: 'カリウム', rarity: 'N', css: 'art-metal' },
             Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R', css: 'art-metal' },
             Ti: { symbol: 'Ti', name: 'チタン', rarity: 'SR', css: 'art-metal' },
+            V: { symbol: 'V', name: 'バナジウム', rarity: 'SR', css: 'art-metal' },
             Cr: { symbol: 'Cr', name: 'クロム', rarity: 'SR', css: 'art-metal' },
             Mn: { symbol: 'Mn', name: 'マンガン', rarity: 'R', css: 'art-metal' },
             Fe: { symbol: 'Fe', name: '鉄', rarity: 'N', css: 'art-metal' },
             Ni: { symbol: 'Ni', name: 'ニッケル', rarity: 'R', css: 'art-metal' },
             Cu: { symbol: 'Cu', name: '銅', rarity: 'N', css: 'art-metal' },
             Zn: { symbol: 'Zn', name: '亜鉛', rarity: 'R', css: 'art-metal' },
+            Ga: { symbol: 'Ga', name: 'ガリウム', rarity: 'SR', css: 'art-metal' },
+            Ge: { symbol: 'Ge', name: 'ゲルマニウム', rarity: 'SR', css: 'art-metal' },
             Ag: { symbol: 'Ag', name: '銀', rarity: 'SR', css: 'art-metal' },
             Cd: { symbol: 'Cd', name: 'カドミウム', rarity: 'R', css: 'art-toxic' },
             Sn: { symbol: 'Sn', name: 'スズ', rarity: 'R', css: 'art-metal' },
@@ -319,11 +280,13 @@
         // --- 初期化 ---
         window.onload = () => {
             const grid = document.getElementById('deck-grid');
-            for(let key in DECKS) {
-                const d = document.createElement('div'); d.className='deck-card';
-                d.innerHTML = `<div class="deck-title">${DECKS[key].name}</div><div class="deck-desc">${DECKS[key].desc}</div>`;
-                d.onclick = () => startGame(key);
-                grid.appendChild(d);
+            if(grid) {
+                for(let key in DECKS) {
+                    const d = document.createElement('div'); d.className='deck-card';
+                    d.innerHTML = `<div class="deck-title">${DECKS[key].name}</div><div class="deck-desc">${DECKS[key].desc}</div>`;
+                    d.onclick = () => startGame(key);
+                    grid.appendChild(d);
+                }
             }
             showTitle();
         };
@@ -338,25 +301,29 @@
         }
 
         function startGame(key) {
-            gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
-            gs.playerPool = DECKS[key].elements.map(s => ELEM[s]);
-            // ★修正点: プレイヤー用レシピと敵用レシピを分ける
-            gs.playerRecipes = RECIPES.filter(r => DECKS[key].recipes.includes(r.product.symbol));
+            try {
+                gs = { hp:25, enemyHp:25, hand:[], field:[], enemyHand:[], enemyField:[], turn:1, mp:1, maxMp:1, isPlayerTurn:true, selected:[], attacker:null };
+                gs.playerPool = DECKS[key].elements.map(s => ELEM[s]);
+                gs.playerRecipes = RECIPES.filter(r => DECKS[key].recipes.includes(r.product.symbol));
 
-            // CPU Random
-            const cpuKey = Object.keys(DECKS)[Math.floor(Math.random()*Object.keys(DECKS).length)];
-            gs.enemyPool = DECKS[cpuKey].elements.map(s=>ELEM[s]);
-            gs.enemyRecipes = RECIPES.filter(r => DECKS[cpuKey].recipes.includes(r.product.symbol));
-            
-            document.getElementById('enemy-name').innerText = `CPU (${DECKS[cpuKey].name})`;
+                const keys = Object.keys(DECKS);
+                const cpuKey = keys[Math.floor(Math.random()*keys.length)];
+                gs.enemyPool = DECKS[cpuKey].elements.map(s=>ELEM[s]);
+                gs.enemyRecipes = RECIPES.filter(r => DECKS[cpuKey].recipes.includes(r.product.symbol));
+                
+                document.getElementById('enemy-name').innerText = `CPU (${DECKS[cpuKey].name})`;
 
-            hideAll();
-            document.getElementById('game-board').style.display='flex';
-            document.getElementById('action-btns').style.display='flex';
-            
-            for(let i=0; i<5; i++) { draw(true); draw(false); }
-            updateView();
-            msg("バトル開始！");
+                hideAll();
+                document.getElementById('game-board').style.display='flex';
+                document.getElementById('action-btns').style.display='flex';
+                
+                for(let i=0; i<5; i++) { draw(true); draw(false); }
+                updateView();
+                msg("バトル開始！");
+            } catch(e) {
+                console.error(e);
+                alert("エラーが発生しました: " + e.message);
+            }
         }
 
         function draw(isPlayer) {
@@ -375,17 +342,14 @@
             if(!gs.isPlayerTurn || gs.selected.length<1) return;
             const sel = gs.hand.filter(c=>gs.selected.includes(c.id));
             const syms = sel.map(c=>c.symbol).sort();
-            // ★修正点: gs.playerRecipesを使う
             const rec = gs.playerRecipes.find(r=>JSON.stringify(r.ingredients.sort())===JSON.stringify(syms));
             if(rec) processSynth(rec);
             else { msg("反応しません"); gs.selected=[]; updateView(); }
         }
 
         function processSynth(rec) {
-            // スペル
             if(rec.product.type==='spell') {
                 gs.hand = gs.hand.filter(c=>!gs.selected.includes(c.id)); gs.selected=[];
-                // 簡易効果
                 if(gs.enemyField.length>0) { gs.enemyField[0].currentHp-=99; msg("敵を破壊！"); }
                 else { gs.enemyHp-=5; msg("リーダーにダメージ！"); }
                 checkEnd(); updateView(); return;
@@ -490,8 +454,7 @@
         async function cpuTurn() {
             if(gs.maxMp<10) gs.maxMp++; gs.mp=gs.maxMp;
             draw(false); updateView(); await sleep(500);
-            
-            // CPU合成 (修正点: gs.enemyRecipesを使用)
+            // 簡易CPU
             let acted=true;
             while(acted && gs.enemyField.length<MAX_FIELD) {
                 acted=false;
@@ -580,7 +543,6 @@
         function updateHint() {
             const list = document.getElementById('craftable-list'); list.innerHTML='';
             if(!gs.isPlayerTurn) return;
-            // ★修正点: gs.playerRecipesを使う
             gs.playerRecipes.forEach(r => {
                 const handSym = gs.hand.map(c=>c.symbol);
                 let possible = true;
@@ -609,12 +571,15 @@
             const p = document.getElementById('detail-panel'); p.style.display='flex';
             document.getElementById('det-sym').innerText = c.symbol;
             document.getElementById('det-name').innerText = c.name;
+            const skillsDiv = document.getElementById('det-skills'); skillsDiv.innerHTML='';
             if(c.type!=='element') {
                 document.getElementById('det-stats').innerHTML = `⚔️${c.atk} <span style="margin-left:10px; color:var(--success)">❤️${c.currentHp}/${c.maxHp}</span>`;
-                document.getElementById('det-desc').innerHTML = (c.skills||[]).map(s=>`<div><b>【${s.name}】</b> ${s.desc}</div>`).join('');
+                c.skills.forEach(s => {
+                    skillsDiv.innerHTML += `<div class="skill-item"><div style="font-weight:bold; color:var(--accent)">${s.name} (威力:${s.power})</div><div style="font-size:11px;">${s.desc}</div></div>`;
+                });
             } else {
                 document.getElementById('det-stats').innerText = '';
-                document.getElementById('det-desc').innerText = '合成素材';
+                skillsDiv.innerText = '合成素材';
             }
         }
 
