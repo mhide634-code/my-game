@@ -1,929 +1,609 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Chem-Verse: Muki-Collect (改良版)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chem-Verse: Ultimate</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f0c29;
-            --accent: #f1c40f;
-            --primary: #3498db;
-            --muted: #9aa3c0;
-            --card-shadow: 0 12px 30px rgba(20,40,80,0.18);
+            --bg-color: #0b1020; --accent: #f1c40f; --primary: #3498db; --danger: #e74c3c; --success: #2ecc71;
+            --rare-n: #95a5a6; --rare-r: #3498db; --rare-sr: #9b59b6; --rare-ssr: #f1c40f; --card-white: #fbfeff;
         }
-        html,body{height:100%;margin:0;font-family:'M PLUS Rounded 1c',sans-serif;background:linear-gradient(135deg,#0f0c29,#24243e);color:white;overflow:hidden}
-        .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
-        .hidden{display:none}
-        .game-logo{font-family:Orbitron, sans-serif;font-size:40px;color:var(--accent);text-shadow:0 0 20px var(--accent);margin-bottom:6px}
-        .game-sub-logo{color:#ccc;margin-bottom:18px}
-        .menu-container{display:flex;flex-direction:column;gap:12px}
-        .menu-btn{background:rgba(255,255,255,0.06);color:white;padding:14px 22px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-weight:800}
-        .menu-btn.primary{background:linear-gradient(90deg,var(--primary),#2980b9);border:none;box-shadow:0 6px 18px rgba(52,152,219,0.25)}
-        .menu-row{display:flex;gap:12px}
-        /* Deck select layout */
-        .deck-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:760px;max-width:95%;margin-top:6px}
-        .deck-card{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);position:relative}
-        .deck-title{font-weight:800;color:var(--accent);font-size:16px}
-        .deck-desc{font-size:12px;color:var(--muted);margin-top:6px}
-        .deck-actions{display:flex;gap:8px;margin-top:10px}
-        .small-btn{padding:8px 10px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
-        .small-btn.cpu{background:linear-gradient(90deg,#2ecc71,#27ae60);color:#042}
-        .small-btn.hotseat{background:linear-gradient(90deg,#3498db,#2a7bd6);color:white}
-        .small-btn.pokedex{background:linear-gradient(90deg,#f1c40f,#f39c12);color:#311}
+        body { font-family: 'M PLUS Rounded 1c', sans-serif; background: linear-gradient(135deg,#071027,#0b1020); color: white; margin: 0; user-select: none; overflow: hidden; height: 100vh; width: 100vw; -webkit-tap-highlight-color: transparent; }
+        
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: linear-gradient(135deg,#0f0c29,#302b63,#24243e); transition: opacity 0.3s; }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+        .scrollable { overflow-y: auto; justify-content: flex-start; padding: 20px; }
 
-        /* Game board */
-        #game-board{display:none;position:absolute;inset:0;background:linear-gradient(180deg,#0f1724,#0b1020);padding:16px;box-sizing:border-box}
-        #enemy-hand-area{height:12%;display:flex;align-items:center;gap:6px;padding:6px;overflow:auto}
-        #enemy-field{height:22%;display:flex;align-items:center;justify-content:center;gap:8px;padding:6px}
-        #info-area{height:12%;display:flex;align-items:center;justify-content:space-between;padding:6px}
-        #player-field{height:22%;display:flex;align-items:center;justify-content:center;gap:8px;padding:6px}
-        #player-hand-area{height:22%;display:flex;align-items:center;gap:8px;padding:6px;overflow:auto}
+        /* --- タイトル --- */
+        #title-screen { background: radial-gradient(circle at center,#162235 0%, #07070a 60%); }
+        .game-logo { font-family: 'Orbitron', sans-serif; font-size: 44px; color: var(--accent); text-shadow: 0 8px 30px rgba(241,196,15,0.2); margin-bottom: 20px; text-align: center; }
+        .menu-container { display: flex; flex-direction: column; gap: 15px; width: 80%; max-width: 300px; }
+        .menu-btn { padding: 15px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; text-align: center; font-size: 16px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s; }
+        .menu-btn:active { transform: scale(0.95); }
+        .btn-p { background: linear-gradient(90deg, #2a7bd6, #3498db); border: none; box-shadow: 0 4px 15px rgba(52,152,219,0.4); }
+        .btn-pvp { background: linear-gradient(90deg, #e74c3c, #c0392b); border: none; box-shadow: 0 4px 15px rgba(231,76,60,0.4); }
 
-        .leader{display:flex;flex-direction:column;align-items:center;gap:6px}
-        .avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#fff,#eee);display:flex;align-items:center;justify-content:center;font-size:26px;color:#333}
-        .hp-circle{background:linear-gradient(135deg,#e74c3c,#c0392b);width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;border:2px solid white}
+        /* --- デッキ選択 --- */
+        .deck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 600px; padding-bottom: 80px; }
+        .deck-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; cursor: pointer; min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+        .deck-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        .deck-title { font-weight: bold; color: var(--accent); font-size: 16px; }
+        .deck-desc { font-size: 11px; color: #aaa; margin-top: 5px; }
+        .back-btn { position: fixed; bottom: 20px; background: #333; padding: 10px 30px; border-radius: 20px; z-index: 200; cursor: pointer; }
 
-        /* card base (kept similar to original) */
-        .card{width:86px;height:116px;border-radius:10px;background:#222;border:2px solid #555;box-shadow:0 6px 14px rgba(0,0,0,0.5);overflow:hidden;flex-shrink:0;cursor:pointer;position:relative}
-        .card[data-rarity="SSR"]{box-shadow:0 10px 22px rgba(255,200,60,0.12)}
-        .card-art{height:56px;display:flex;align-items:center;justify-content:center;font-size:20px}
-        .card-info{height:60px;padding:6px;background:rgba(0,0,0,0.18);display:flex;flex-direction:column;justify-content:space-between}
-        .card-symbol{font-weight:800;color:var(--primary);text-align:center}
-        .card-name{font-size:11px;text-align:center;color:#ddd}
-        .stats{display:flex;justify-content:space-between;font-size:11px;padding:0 6px}
-        .ability-container{position:absolute;top:6px;right:6px;display:flex;gap:4px}
-        .badge{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px}
-        .badge-ward{background:#3498db}
-        .badge-toxic{background:#8e44ad}
-        .badge-storm{background:#f1c40f}
-        .badge-stealth{background:#95a5a6}
+        /* --- ゲームボード --- */
+        #game-board { display: none; flex-direction: column; height: 100vh; background: #111; }
+        #info-area { height: 12%; background: rgba(30,30,45,0.95); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 10; border-top: 1px solid #444; border-bottom: 1px solid #444; }
+        .area { display: flex; justify-content: center; align-items: center; }
+        #enemy-hand-area { height: 10%; background: rgba(0,0,0,0.3); gap: -10px; } 
+        #enemy-field { height: 24%; border-bottom: 2px solid #333; }
+        #player-field { height: 24%; border-top: 2px solid #333; } 
+        #player-hand-area { height: 30%; background: rgba(0,0,0,0.2); overflow-x: auto; justify-content: flex-start; padding: 0 10px; gap: 5px; align-items: center; display: flex; }
 
-        .valid-target{box-shadow:0 0 12px var(--accent);border-color:var(--accent)}
-        .selected{transform:translateY(-10px);box-shadow:0 8px 24px rgba(0,0,0,0.5);border-color:var(--primary)}
+        /* --- カードデザイン --- */
+        .card { width: 85px; height: 125px; background: linear-gradient(180deg, var(--card-white), #f0f6ff); border-radius: 8px; border: 2px solid #777; box-shadow: 0 6px 12px rgba(0,0,0,0.4); display: flex; flex-direction: column; padding: 3px; position: relative; flex-shrink: 0; margin: 2px; transition: transform 0.15s; overflow: hidden; box-sizing: border-box; color: #222; }
+        .card[data-rarity="N"] { border-color: var(--rare-n); }
+        .card[data-rarity="R"] { border-color: var(--rare-r); box-shadow: 0 0 5px var(--rare-r); }
+        .card[data-rarity="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 8px var(--rare-sr); }
+        .card[data-rarity="SSR"] { border-color: var(--rare-ssr); box-shadow: 0 0 12px var(--rare-ssr); animation: shine 3s infinite linear; }
+        @keyframes shine { 0% { filter: brightness(1); } 50% { filter: brightness(1.2); } 100% { filter: brightness(1); } }
 
-        /* art classes (cute gradients) */
-        .art-gas{background:linear-gradient(135deg,#dff3ff,#bfe9ff);color:#004e92}
-        .art-liquid{background:linear-gradient(135deg,#d9f3ff,#a6e1ff);color:#004e92}
-        .art-solid{background:linear-gradient(135deg,#fff6e8,#f0e6ff);color:#5d4037}
-        .art-metal{background:linear-gradient(135deg,#fff5e6,#fff0b8);color:#5d4037}
-        .art-toxic{background:linear-gradient(135deg,#f3e8ff,#eadcff);color:#4b2f6b}
+        .c-head { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; font-size: 9px; font-weight: bold; color: #444; margin-bottom: 2px; }
+        .c-art-box { width: 100%; height: 60px; background: #eee; position: relative; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 32px; }
+        .c-text-box { flex-grow: 1; padding: 2px; font-size: 8px; color: #333; background: rgba(0,0,0,0.03); overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2; margin-top: 2px; border-radius: 2px; }
+        .c-stats { display: flex; justify-content: space-between; font-weight: 900; font-size: 11px; padding: 2px 4px; margin-top: auto; }
+        .st-a { color: #d35400; background: #ffe0b2; padding: 0 4px; border-radius: 4px; }
+        .st-h { color: #27ae60; background: #c8e6c9; padding: 0 4px; border-radius: 4px; }
 
-        /* small UI */
-        .action-overlay{position:absolute;right:18px;top:18px;display:flex;flex-direction:column;gap:8px;z-index:40}
-        .game-btn{padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
-        .pokedex-panel{position:absolute;right:18px;top:80px;width:320px;background:linear-gradient(180deg,#fff,#f8fbff);color:#112;border-radius:12px;padding:12px;box-shadow:var(--card-shadow);max-height:72vh;overflow:auto;z-index:60}
-        .pokedex-entry{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#f1f7ff);margin-bottom:8px;border:1px solid rgba(0,0,0,0.04)}
-        .mini-art{width:56px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px}
-        #msg-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);padding:12px 20px;border-radius:12px;font-weight:900;opacity:0;transition:opacity .3s;z-index:90}
+        .card.selected { transform: translateY(-20px) scale(1.1); border-color: var(--accent); box-shadow: 0 0 20px var(--accent); z-index: 100; }
+        .card.can-attack { border-color: var(--success); box-shadow: 0 0 15px var(--success); }
+        .card.attacking { transform: scale(1.2); border-color: var(--danger); box-shadow: 0 0 25px var(--danger); z-index: 200; }
+        .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger)!important; box-shadow: inset 0 0 10px var(--danger); }
+        @keyframes pulse { 50% { opacity: 0.6; } }
 
-        /* responsive */
-        @media(max-width:900px){ .deck-grid{grid-template-columns:1fr} .pokedex-panel{display:none} }
+        /* UIパーツ */
+        .leader { text-align: center; width: 70px; }
+        .hp-circle { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 50%; width: 40px; height: 40px; line-height: 40px; font-weight: bold; font-size: 18px; margin: 0 auto; border: 2px solid white; box-shadow: 0 0 10px rgba(231, 76, 60, 0.6); }
+        .action-overlay { position: absolute; bottom: 33%; right: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+        .game-btn { padding: 12px 18px; border-radius: 25px; border: none; font-weight: bold; color: white; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.4); cursor: pointer; transition: 0.2s; }
+        .game-btn:active { transform: scale(0.95); }
+        .btn-dr { background: linear-gradient(to right, #27ae60, #2ecc71); } 
+        .btn-sy { background: linear-gradient(to right, #f39c12, #f1c40f); color: #222; }
+        #btn-end-turn { padding: 6px 15px; background: #e67e22; border-radius: 15px; border: none; color: white; font-weight: bold; cursor: pointer; }
+        #cancel-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 12px 30px; border-radius: 25px; font-weight: bold; z-index: 200; box-shadow: 0 0 20px var(--danger); cursor: pointer; }
+
+        /* モーダル */
+        #msg-box { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 40px; border-radius: 10px; font-weight: bold; font-size: 24px; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; white-space: nowrap; border: 2px solid white; }
+        #turn-change-screen { background: rgba(0,0,0,0.95); z-index: 7000; }
+        
+        #card-detail-panel { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 320px; background: rgba(20,20,30,0.98); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; z-index: 3000; box-shadow: 0 0 50px black; }
+        .detail-close { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #aaa; }
+        
+        #skill-modal { display: none; background: rgba(0,0,0,0.85); z-index: 4000; }
+        .sk-btn { background: white; color: #333; padding: 15px; width: 80%; max-width: 300px; margin-bottom: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; border-left: 6px solid var(--primary); }
+        
+        #res-scr { background: rgba(0,0,0,0.95); z-index: 6000; }
+        .res-tit { font-size: 48px; font-weight: bold; font-family: 'Orbitron'; margin-bottom: 20px; }
+        .res-win { color: var(--accent); text-shadow: 0 0 20px var(--accent); } 
+        .res-lose { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
+        .confetti { position: absolute; width: 10px; height: 10px; background: #f00; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+        #craft-list { position: absolute; bottom: 38%; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 40; pointer-events: none; }
+        .craft-btn { background: rgba(0,0,0,0.9); border: 1px solid var(--accent); padding: 8px 12px; border-radius: 6px; pointer-events: auto; font-size: 12px; color: white; cursor: pointer; box-shadow: 0 0 8px var(--accent); }
     </style>
 </head>
 <body>
 
-    <!-- Title -->
     <div id="title-screen" class="screen">
-        <div class="game-logo">CHEM-VERSE</div>
-        <div class="game-sub-logo">MUKI-COLLECT TCG</div>
-
+        <div id="particles"></div>
+        <div class="logo">CHEM-VERSE</div>
         <div class="menu-container">
-            <div class="menu-row">
-                <div class="menu-btn primary" onclick="showDeckSelect('cpu')">CPUバトル</div>
-                <div class="menu-btn" onclick="showDeckSelect('hotseat')">対人戦（ホットシート）</div>
-                <div class="menu-btn" onclick="showPokedexScreen()">カード図鑑</div>
-            </div>
+            <button class="menu-btn btn-p" onclick="showDeckSelect('cpu')">CPU対戦</button>
+            <button class="menu-btn btn-pvp" onclick="showDeckSelect('hotseat')">対人戦 (2P)</button>
+            <button class="menu-btn" onclick="showLib()">カード図鑑</button>
         </div>
     </div>
 
-    <!-- Deck select -->
-    <div id="deck-select-screen" class="screen hidden">
-        <div style="font-size:20px;font-weight:800;color:var(--accent);margin-bottom:12px">使用するデッキを選択</div>
-        <div class="deck-grid" id="deck-grid">
-            <!-- filled by JS -->
-        </div>
-        <div style="margin-top:12px"><button class="menu-btn" onclick="showTitle()">タイトルへ戻る</button></div>
+    <div id="deck-select-screen" class="screen hidden scrollable">
+        <h2 style="text-align:center; color:var(--accent); margin-bottom:20px;">デッキ選択</h2>
+        <div class="deck-grid" id="deck-grid-container"></div>
+        <div class="back-btn" onclick="showTitle()">戻る</div>
     </div>
 
-    <!-- Game board (kept original layout, enhanced) -->
+    <div id="lib-screen" class="screen hidden scrollable">
+        <h2 style="text-align:center; color:var(--primary); margin-bottom:20px;">カード図鑑</h2>
+        <div class="deck-grid" id="lib-grid" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
+        <div class="back-btn" onclick="showTitle()">戻る</div>
+    </div>
+
     <div id="game-board">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="display:flex;gap:8px;align-items:center">
-                <div class="leader" id="leader-enemy" onclick="onLeaderClick('enemy')" style="cursor:pointer">
-                    <div class="avatar" id="enemy-avatar">🤖</div>
-                    <div class="leader-name" id="enemy-name">CPU</div>
-                    <div id="enemy-hp" class="hp-circle">25</div>
-                </div>
-            </div>
-
-            <div style="text-align:center">
-                <div id="turn-display" style="font-weight:900">ターン 1</div>
-                <div id="mp-display" style="color:var(--muted);margin-top:6px">MP 1/1</div>
-            </div>
-
-            <div style="display:flex;gap:8px;align-items:center">
-                <button id="btn-end-turn" class="game-btn" style="background:#e67e22;color:white;padding:8px 12px;border-radius:10px" onclick="endTurn()">ターン終了</button>
-                <div class="leader" id="leader-player" style="cursor:pointer" onclick="onLeaderClick('player')">
-                    <div id="player-hp" class="hp-circle">25</div>
-                    <div class="leader-name">あなた</div>
-                    <div class="avatar" id="player-avatar">🧑‍🔬</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="enemy-hand-area"></div>
+        <div id="enemy-hand-area" class="area"></div>
         <div id="enemy-field" class="area"></div>
-
-        <div id="info-area"></div>
-
+        <div id="info-area">
+            <div class="leader" onclick="atkLdr('enemy')">
+                <div style="font-size:24px;">🤖</div>
+                <div id="enemy-hp" class="hp-circle">25</div>
+            </div>
+            <div style="text-align:center">
+                <div id="turn-display" style="color:#aaa; font-size: 12px;">TURN 1</div>
+                <div id="mp-display" style="font-size:16px; font-weight:bold; color:var(--success)">MP 1/1</div>
+            </div>
+            <button id="btn-end-turn" onclick="endTurn()">TURN END</button>
+            <div class="leader" onclick="atkLdr('player')">
+                <div id="player-hp" class="hp-circle">25</div>
+                <div style="font-size:24px;">🧑‍🔬</div>
+            </div>
+        </div>
+        <div id="craft-list"></div>
         <div id="player-field" class="area"></div>
-        <div id="player-hand-area" class="area"></div>
+        <div id="player-hand-area"></div>
+        <div id="cancel-btn" onclick="cancelAtk()">❌ キャンセル</div>
+    </div>
 
-        <div id="cancel-attack-btn" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:22%;background:#c0392b;color:white;padding:8px 16px;border-radius:12px;cursor:pointer" onclick="cancelAttack()">❌ 攻撃をやめる</div>
+    <div class="action-overlay" id="action-btns" style="display:none;">
+        <button class="game-btn btn-dr" onclick="actDraw()">＋ ドロー</button>
+        <button class="game-btn btn-sy" onclick="actSyn()">⚗️ 合成</button>
+    </div>
 
-        <!-- Pokedex small toggle -->
-        <div class="action-overlay">
-            <button class="game-btn" style="background:linear-gradient(90deg,#f1c40f,#f39c12)" onclick="togglePokedex()">図鑑</button>
-            <button class="game-btn" style="background:linear-gradient(90deg,#27ae60,#2ecc71)" onclick="actionDraw()">＋ ドロー</button>
-            <button class="game-btn" style="background:linear-gradient(90deg,#f39c12,#f1c40f)" onclick="actionSynthesize()">⚗️ 合成</button>
+    <div id="turn-change-screen" class="screen hidden" style="z-index:7000; background:rgba(0,0,0,0.98);">
+        <div style="font-size:24px; color:#aaa; margin-bottom:20px;">NEXT TURN</div>
+        <div id="next-player-name" style="font-size:40px; font-weight:bold; color:var(--accent); margin-bottom:40px;">PLAYER 2</div>
+        <div style="font-size:14px; color:#ccc; margin-bottom:20px;">端末を相手に渡してください</div>
+        <button class="menu-btn btn-p" onclick="startNextTurn()">バトル再開</button>
+    </div>
+
+    <div id="card-detail-panel" onclick="hideDetail()">
+        <div class="detail-close">×</div>
+        <div style="text-align:center">
+            <span id="detail-symbol" style="font-size:36px; font-weight:bold; color:var(--primary);"></span>
+            <span id="detail-name" style="font-size:20px; font-weight:bold; margin-left:10px;"></span>
         </div>
+        <div style="text-align:center; font-size:12px; color:var(--accent); margin-bottom:10px;" id="detail-rarity"></div>
+        <div id="detail-art" style="width:100%; height:120px; background:#000; border-radius:8px; display:flex; justify-content:center; align-items:center; font-size:40px; margin-bottom:15px;"></div>
+        <div id="detail-stats" style="display:flex; justify-content:center; gap:30px; font-size:20px; font-weight:bold; margin-bottom:15px;"></div>
+        <div id="detail-skills" style="font-size:13px; color:#ddd; line-height:1.5;"></div>
+        <div style="text-align:center; margin-top:20px; font-size:10px; color:#888;">(タップして閉じる)</div>
+    </div>
 
-        <!-- small pokedex panel -->
-        <div id="pokedex-panel" class="pokedex-panel hidden">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <div style="font-weight:900">図鑑</div>
-                <button class="small-btn pokedex" onclick="openFullPokedex()">全体を開く</button>
-            </div>
-            <div id="pokedexList"></div>
-        </div>
+    <div id="skill-modal" class="screen hidden">
+        <h3 style="color:white; margin-bottom:20px;">技を選択してください</h3>
+        <div id="skill-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+        <button class="menu-btn" style="background:#7f8c8d; margin-top:20px;" onclick="closeSk()">キャンセル</button>
+    </div>
 
+    <div id="res-scr" class="screen hidden">
+        <div class="res-tit" id="res-tit">VICTORY</div>
+        <div style="margin-bottom:30px; font-size:20px; font-weight:bold;" id="res-msg">勝利！</div>
+        <button class="menu-btn primary" onclick="showTitle()">タイトルへ戻る</button>
         <div id="confetti-container"></div>
-        <div id="msg-box"></div>
     </div>
 
-    <!-- Result modal -->
-    <div id="result-screen" class="screen hidden">
-        <div class="result-content" style="text-align:center">
-            <div class="result-title" id="result-title" style="font-size:36px">VICTORY</div>
-            <div class="result-message" id="result-message" style="margin:12px 0">あなたの勝利です！</div>
-            <div><button class="menu-btn primary" onclick="showTitle()">タイトルへ戻る</button></div>
-        </div>
-        <div id="confetti-container"></div>
-    </div>
+    <div id="msg-box"></div>
 
-    <!-- Card detail (kept) -->
-    <div id="card-detail-panel" style="display:none;position:absolute;left:50%;top:12%;transform:translateX(-50%);width:340px;background:rgba(20,20,30,0.95);border:2px solid var(--accent);border-radius:12px;padding:16px;z-index:200">
-        <div style="text-align:right"><span style="cursor:pointer;color:#888" onclick="hideDetail()">×</span></div>
-        <div style="text-align:center;margin-bottom:8px">
-            <div id="detail-symbol" style="font-size:28px;color:var(--primary)"></div>
-            <div id="detail-name" style="font-weight:900;font-size:18px"></div>
-            <div id="detail-rarity" style="color:var(--accent)"></div>
-        </div>
-        <div id="detail-stats" style="text-align:center;font-weight:900;color:#eee"></div>
-        <div id="detail-skills" style="margin-top:10px"></div>
-    </div>
+    <script>
+        const MAX_H=10, MAX_F=5, INI_HP=25;
+        
+        // データ定義
+        const ELEM = {
+            H:{s:'H',n:'水素',r:'N',c:'art-fir'}, He:{s:'He',n:'ヘリウム',r:'SR',c:'art-gas'}, Li:{s:'Li',n:'リチウム',r:'R',c:'art-met'},
+            B:{s:'B',n:'ホウ素',r:'R',c:'art-sol'}, C:{s:'C',n:'炭素',r:'N',c:'art-sol'}, N:{s:'N',n:'窒素',r:'N',c:'art-gas'},
+            O:{s:'O',n:'酸素',r:'N',c:'art-gas'}, F:{s:'F',n:'フッ素',r:'SR',c:'art-tox'}, Ne:{s:'Ne',n:'ネオン',r:'SR',c:'art-gas'},
+            Na:{s:'Na',n:'ナトリウム',r:'N',c:'art-met'}, Mg:{s:'Mg',n:'マグネシウム',r:'R',c:'art-met'}, Al:{s:'Al',n:'アルミニウム',r:'R',c:'art-met'},
+            Si:{s:'Si',n:'ケイ素',r:'R',c:'art-sol'}, P:{s:'P',n:'リン',r:'R',c:'art-sol'}, S:{s:'S',n:'硫黄',r:'R',c:'art-tox'},
+            Cl:{s:'Cl',n:'塩素',r:'N',c:'art-tox'}, Ar:{s:'Ar',n:'アルゴン',r:'SR',c:'art-gas'}, K:{s:'K',n:'カリウム',r:'N',c:'art-met'},
+            Ca:{s:'Ca',n:'カルシウム',r:'R',c:'art-met'}, Ti:{s:'Ti',n:'チタン',r:'SR',c:'art-met'}, V:{s:'V',n:'バナジウム',r:'SR',c:'art-met'},
+            Cr:{s:'Cr',n:'クロム',r:'SR',c:'art-met'}, Mn:{s:'Mn',n:'マンガン',r:'R',c:'art-met'}, Fe:{s:'Fe',n:'鉄',r:'N',c:'art-met'},
+            Ni:{s:'Ni',n:'ニッケル',r:'R',c:'art-met'}, Cu:{s:'Cu',n:'銅',r:'N',c:'art-met'}, Zn:{s:'Zn',n:'亜鉛',r:'R',c:'art-met'},
+            Ga:{s:'Ga',n:'ガリウム',r:'SR',c:'art-met'}, Ge:{s:'Ge',n:'ゲルマニウム',r:'SR',c:'art-met'}, Ag:{s:'Ag',n:'銀',r:'SR',c:'art-met'},
+            Cd:{s:'Cd',n:'カドミウム',r:'R',c:'art-tox'}, Sn:{s:'Sn',n:'スズ',r:'R',c:'art-met'}, Ba:{s:'Ba',n:'バリウム',r:'R',c:'art-met'},
+            W:{s:'W',n:'タングステン',r:'SSR',c:'art-met'}, Pt:{s:'Pt',n:'プラチナ',r:'SSR',c:'art-met'}, Au:{s:'Au',n:'金',r:'SSR',c:'art-gol'},
+            Hg:{s:'Hg',n:'水銀',r:'SR',c:'art-liq'}, Pb:{s:'Pb',n:'鉛',r:'R',c:'art-met'}
+        };
 
-    <!-- Full pokedex screen -->
-    <div id="pokedex-screen" class="screen hidden" style="align-items:flex-start;overflow:auto;padding-top:40px">
-        <div style="width:920px;max-width:95%;background:linear-gradient(180deg,#fff,#f8fbff);color:#112;border-radius:12px;padding:18px;box-shadow:var(--card-shadow)">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <div style="font-weight:900;font-size:20px">図鑑</div>
-                <div>
-                    <button class="menu-btn" onclick="closeFullPokedex()">閉じる</button>
-                </div>
-            </div>
-            <div id="pokedexFullList" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
-        </div>
-    </div>
+        const REC = [
+            {i:['H','Cl'],p:{s:'HCl',n:'塩化水素',r:'R',a:5,h:1,c:'art-tox',sk:[{n:'強酸',p:5,d:'高火力'}]}},
+            {i:['H','F'],p:{s:'HF',n:'フッ化水素',r:'SR',a:4,h:2,ab:'tox',c:'art-tox',sk:[{n:'ガラス腐食',p:4,d:'攻撃'},{n:'猛毒',p:0,t:'tox',d:'必殺'}]}},
+            {i:['Na','H'],p:{s:'NaH',n:'水素化Na',r:'R',a:3,h:1,ab:'stm',c:'art-sol',sk:[{n:'還元',p:3,d:'疾走'}]}},
+            {i:['H','H','O'],p:{s:'H2O',n:'水',r:'N',a:1,h:4,c:'art-liq',sk:[{n:'水流',p:1,d:'攻撃'},{n:'加水分解',p:3,t:'heal',d:'回復'}]}},
+            {i:['Ag','Cl'],p:{s:'AgCl',n:'塩化銀',r:'SR',a:1,h:6,ab:'wrd',c:'art-sol',sk:[{n:'沈殿',p:0,t:'grd',d:'守護'}]}},
+            {i:['Fe','O'],p:{s:'FeO',n:'酸化鉄',r:'N',a:3,h:5,c:'art-sol',sk:[{n:'黒錆',p:3,d:'通常'}]}},
+            {i:['Fe','O','O'],p:{s:'Fe2O3',n:'赤錆',r:'R',a:2,h:8,ab:'wrd',c:'art-sol',sk:[{n:'不動態',p:2,d:'高耐久'}]}},
+            {i:['Cu','O'],p:{s:'CuO',n:'酸化銅',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'黒粉',p:3,d:'攻撃'}]}},
+            {i:['Zn','Cu'],p:{s:'Brass',n:'黄銅',r:'R',a:4,h:5,c:'art-met',sk:[{n:'合金',p:4,d:'攻撃'}]}},
+            {i:['Hg','Zn'],p:{s:'Amalgam',n:'アマルガム',r:'SR',a:3,h:6,ab:'wrd',c:'art-met',sk:[{n:'合金化',p:3,d:'守護'}]}},
+            {i:['C','O'],p:{s:'CO',n:'一酸化炭素',r:'R',a:1,h:2,ab:'tox',c:'art-gas',sk:[{n:'不完全燃焼',p:1,d:'攻撃'},{n:'結合',p:0,t:'tox',d:'必殺'}]}},
+            {i:['H','S'],p:{s:'H2S',n:'硫化水素',r:'R',a:2,h:3,ab:'tox',c:'art-gas',sk:[{n:'腐卵臭',p:2,d:'攻撃'},{n:'硫化',p:0,t:'tox',d:'必殺'}]}},
+            {i:['Cl','Cl'],p:{s:'Cl2',n:'塩素ガス',r:'R',a:3,h:3,c:'art-gas',sk:[{n:'散布',p:2,t:'aoe',d:'全体2ダメ'}]}},
+            {i:['S','O','O'],p:{s:'SO2',n:'二酸化硫黄',r:'N',a:2,h:4,c:'art-gas',sk:[{n:'酸性雨',p:1,t:'aoe',d:'全体1ダメ'}]}},
+            {i:['Cd','S'],p:{s:'CdS',n:'硫化Cd',r:'SR',a:2,h:5,ab:'tox',c:'art-tox',sk:[{n:'イタイイタイ',p:0,t:'tox',d:'猛毒'}]}},
+            {i:['Na','O','H'],p:{s:'NaOH',n:'水酸化Na',r:'R',a:3,h:3,c:'art-sol',sk:[{n:'中和熱',p:2,t:'ah',d:'全体2/回'}]}},
+            {i:['Al','O','O'],p:{s:'Al2O3',n:'アルミナ',r:'R',a:2,h:7,ab:'wrd',c:'art-sol',sk:[{n:'被膜',p:2,d:'守護'}]}},
+            {i:['Cl','Na'],p:{s:'NaCl',n:'塩化Na',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'塩味',p:3,d:'通常'}]}},
+            {i:['Ca','O','H','H'],p:{s:'Ca(OH)2',n:'消石灰',r:'N',a:1,h:6,ab:'wrd',c:'art-sol',sk:[{n:'中和',p:4,t:'heal',d:'回復'}]}},
+            {i:['C','C','C'],p:{s:'Diamond',n:'ダイヤ',r:'SSR',a:4,h:10,ab:'wrd',c:'art-gol',sk:[{n:'硬度10',p:4,d:'鉄壁'}]}},
+            {i:['Al','O','O','Cr'],p:{s:'Ruby',n:'ルビー',r:'SR',a:5,h:8,c:'art-sol',sk:[{n:'深紅',p:5,d:'攻撃'}]}},
+            {i:['Al','O','Ti'],p:{s:'Sapphire',n:'サファイア',r:'SR',a:4,h:9,c:'art-sol',sk:[{n:'青玉',p:4,d:'耐久'}]}},
+            {i:['Si','O','O'],p:{s:'SiO2',n:'石英',r:'N',a:3,h:6,c:'art-sol',sk:[{n:'結晶',p:2,t:'aoe',d:'全体2'}]}},
+            {i:['Au'],p:{s:'Au',n:'金',r:'SSR',a:6,h:6,c:'art-gol',sk:[{n:'輝き',p:6,d:'火力'}]}},
+            {i:['Pt'],p:{s:'Pt',n:'プラチナ',r:'SSR',a:5,h:7,c:'art-met',sk:[{n:'触媒',p:5,d:'攻撃'}]}},
+            {i:['W'],p:{s:'W',n:'タングステン',r:'SSR',a:7,h:8,ab:'wrd',c:'art-met',sk:[{n:'融点',p:7,d:'攻撃'}]}},
+            {i:['Ti'],p:{s:'Ti',n:'チタン',r:'SR',a:4,h:5,c:'art-met',sk:[{n:'強度',p:4,d:'攻撃'}]}},
+            {i:['He','He'],p:{s:'He',n:'ヘリウム',r:'SR',a:2,h:2,ab:'stl',c:'art-gas',sk:[{n:'不活性',p:2,d:'潜伏'}]}},
+            {i:['Ne','Ne'],p:{s:'Ne',n:'ネオン',r:'SR',a:3,h:3,ab:'stl',c:'art-gas',sk:[{n:'発光',p:3,d:'潜伏'}]}},
+            {i:['Ar','Ar'],p:{s:'Ar',n:'アルゴン',r:'SR',a:4,h:4,ab:'stl',c:'art-gas',sk:[{n:'保護',p:4,d:'潜伏'}]}},
+            {i:['H','Cl','N','O','O','O'],p:{s:'AquaRegia',n:'王水',r:'SSR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'溶解',p:99,t:'tox',d:'除去'}]}},
+            {i:['H','H','S','O','O','O','O'],p:{s:'H2SO4',n:'濃硫酸',r:'SR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'脱水',p:5,t:'aoe',d:'全5ダメ'}]}},
+            {i:['K','Mn','O','O','O','O'],p:{s:'KMnO4',n:'過マンガン酸K',r:'SR',a:0,h:0,tp:'spl',c:'art-sol',sk:[{n:'酸化',p:7,t:'dmg',d:'7ダメ'}]}}
+        ];
 
-    <!-- Skill modal (kept) -->
-    <div id="skill-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;align-items:center;justify-content:center">
-        <div style="background:#111;padding:16px;border-radius:12px;max-width:420px;width:92%">
-            <h3 style="color:white">技を選択してください</h3>
-            <div id="skill-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
-            <div style="text-align:right;margin-top:12px"><button class="menu-btn" onclick="closeSkillModal()">キャンセル</button></div>
-        </div>
-    </div>
+        const DECKS = {
+            aggro:{n:'超速攻',d:'高火力・低耐久',e:['H','H','Cl','F','Na','O'],r:['HCl','HF','NaH','H2O']},
+            counter:{n:'カウンター',d:'守って反撃',e:['Ag','Cl','Fe','O','Cu','Zn','Hg'],r:['AgCl','FeO','Fe2O3','Brass','Amalgam','CuO']},
+            toxic:{n:'害悪',d:'必殺で即死',e:['C','O','S','H','Cl','Cd'],r:['CO','H2S','Cl2','SO2','CdS']},
+            control:{n:'コントロール',d:'回復と支配',e:['Al','O','H','Na','Cl','Ca'],r:['Al2O3','NaOH','H2O','NaCl','Ca(OH)2']},
+            gemstone:{n:'宝石',d:'最強の硬度',e:['C','C','C','Al','O','Si','Cr','Ti'],r:['Diamond','Ruby','Sapphire','SiO2']},
+            heavy:{n:'重金属',d:'後半最強',e:['Au','Pt','W','Ti'],r:['Au','Pt','W','Ti']},
+            noble:{n:'貴ガス',d:'潜伏攻撃',e:['He','He','Ne','Ne','Ar','Ar'],r:['He','Ne','Ar']},
+            hazard:{n:'危険物',d:'除去スペル',e:['H','Cl','N','O','S','K','Mn'],r:['AquaRegia','H2SO4','KMnO4']}
+        };
 
-<script>
-/* -------------------------
-  既存のデータ / レシピ等はそのまま使用
-  追加/修正ポイント:
-   - startGame(mode) が 'cpu' or 'hotseat' を受け取る
-   - ホットシート時は CPU ロジックを使わず、プレイヤーを入れ替えて交互プレイ
-   - 図鑑（localStorage）を追加、ドロー / 召喚でアンロック
-   - ゲーム中の見た目は元コード準拠。カード名は変更無し。
--------------------------*/
+        let gs = { mode:'cpu', p1:{}, p2:{}, turn:1, isP1Turn:true, active:null, other:null, sel:[], atk:null };
+        let p1Key = null;
 
-const MAX_HAND = 10; 
-const MAX_FIELD = 5;
-const INITIAL_HP = 25;
-
-/* --- ELEMENT / RECIPES / DECKS  --- */
-/* （元のまま） */
-const ELEM = {
-  H: { symbol: 'H', name: '水素', rarity: 'N', artClass: 'art-gas' },
-  He: { symbol: 'He', name: 'ヘリウム', rarity: 'SR', artClass: 'art-gas' },
-  Li: { symbol: 'Li', name: 'リチウム', rarity: 'R', artClass: 'art-metal' },
-  Be: { symbol: 'Be', name: 'ベリリウム', rarity: 'R', artClass: 'art-metal' },
-  B: { symbol: 'B', name: 'ホウ素', rarity: 'R', artClass: 'art-solid' },
-  C: { symbol: 'C', name: '炭素', rarity: 'N', artClass: 'art-solid' },
-  N: { symbol: 'N', name: '窒素', rarity: 'N', artClass: 'art-gas' },
-  O: { symbol: 'O', name: '酸素', rarity: 'N', artClass: 'art-gas' },
-  F: { symbol: 'F', name: 'フッ素', rarity: 'SR', artClass: 'art-toxic' },
-  Ne: { symbol: 'Ne', name: 'ネオン', rarity: 'SR', artClass: 'art-gas' },
-  Na: { symbol: 'Na', name: 'ナトリウム', rarity: 'N', artClass: 'art-metal' },
-  Mg: { symbol: 'Mg', name: 'マグネシウム', rarity: 'R', artClass: 'art-metal' },
-  Al: { symbol: 'Al', name: 'アルミニウム', rarity: 'R', artClass: 'art-metal' },
-  Si: { symbol: 'Si', name: 'ケイ素', rarity: 'R', artClass: 'art-solid' },
-  P: { symbol: 'P', name: 'リン', rarity: 'R', artClass: 'art-solid' },
-  S: { symbol: 'S', name: '硫黄', rarity: 'R', artClass: 'art-solid' },
-  Cl: { symbol: 'Cl', name: '塩素', rarity: 'N', artClass: 'art-toxic' },
-  Ar: { symbol: 'Ar', name: 'アルゴン', rarity: 'SR', artClass: 'art-gas' },
-  K: { symbol: 'K', name: 'カリウム', rarity: 'N', artClass: 'art-metal' },
-  Ca: { symbol: 'Ca', name: 'カルシウム', rarity: 'R', artClass: 'art-metal' },
-  Ti: { symbol: 'Ti', name: 'チタン', rarity: 'SR', artClass: 'art-metal' },
-  V: { symbol: 'V', name: 'バナジウム', rarity: 'SR', artClass: 'art-metal' },
-  Cr: { symbol: 'Cr', name: 'クロム', rarity: 'SR', artClass: 'art-metal' },
-  Mn: { symbol: 'Mn', name: 'マンガン', rarity: 'R', artClass: 'art-metal' },
-  Fe: { symbol: 'Fe', name: '鉄', rarity: 'N', artClass: 'art-metal' },
-  Ni: { symbol: 'Ni', name: 'ニッケル', rarity: 'R', artClass: 'art-metal' },
-  Cu: { symbol: 'Cu', name: '銅', rarity: 'N', artClass: 'art-metal' },
-  Zn: { symbol: 'Zn', name: '亜鉛', rarity: 'R', artClass: 'art-metal' },
-  Ga: { symbol: 'Ga', name: 'ガリウム', rarity: 'SR', artClass: 'art-metal' },
-  Ge: { symbol: 'Ge', name: 'ゲルマニウム', rarity: 'SR', artClass: 'art-metal' },
-  Ag: { symbol: 'Ag', name: '銀', rarity: 'SR', artClass: 'art-metal' },
-  Cd: { symbol: 'Cd', name: 'カドミウム', rarity: 'R', artClass: 'art-toxic' },
-  Sn: { symbol: 'Sn', name: 'スズ', rarity: 'R', artClass: 'art-metal' },
-  Ba: { symbol: 'Ba', name: 'バリウム', rarity: 'R', artClass: 'art-metal' },
-  W:  { symbol: 'W', name: 'タングステン', rarity: 'SSR', artClass: 'art-metal' },
-  Pt: { symbol: 'Pt', name: 'プラチナ', rarity: 'SSR', artClass: 'art-metal' },
-  Au: { symbol: 'Au', name: '金', rarity: 'SSR', artClass: 'art-metal' },
-  Hg: { symbol: 'Hg', name: '水銀', rarity: 'SR', artClass: 'art-toxic' },
-  Pb: { symbol: 'Pb', name: '鉛', rarity: 'R', artClass: 'art-metal' }
-};
-
-/* RECIPES + DECKS (省略せず元のまま) */
-const RECIPES = [ /* ... same content as you provided ... */ ];
-
-/* Because the RECIPES array is long, to avoid redundancy we will re-use the original RECIPES
-   which is already present in your file; here we assume the browser has it — since we are
-   modifying the same file, include the original RECIPES content exactly as before. */
-
-/* For brevity in this reply, we will reassign RECIPES by parsing from a string block.
-   (In the actual saved file below, RECIPES is the same full list the user provided.) */
-
-/* --- DECKS (same as original) --- */
-const DECKS = {
-    aggro: { name: '超速攻', elements: ['H', 'H', 'Cl', 'F', 'Na', 'O'], recipes: ['HCl', 'HF', 'NaH', 'H2O'] },
-    counter: { name: 'カウンター', elements: ['Ag', 'Cl', 'Fe', 'O', 'Cu', 'Zn', 'Hg'], recipes: ['AgCl', 'FeO', 'Fe2O3', 'Brass', 'Amalgam', 'CuO'] },
-    toxic: { name: '害悪(毒)', elements: ['C', 'O', 'S', 'H', 'Cl', 'Cd'], recipes: ['CO', 'H2S', 'Cl2', 'SO2', 'CdS'] },
-    control: { name: 'コントロール', elements: ['Al', 'O', 'H', 'Na', 'Cl', 'Ca'], recipes: ['Al2O3', 'NaOH', 'H2O', 'NaCl', 'Ca(OH)2'] },
-    gemstone: { name: '宝石', elements: ['C', 'Al', 'O', 'Si', 'Cr', 'Ti'], recipes: ['Diamond', 'Ruby', 'Sapphire', 'SiO2'] },
-    heavy: { name: '重金属', elements: ['Au', 'Pt', 'W', 'Ti', 'Fe'], recipes: ['Au', 'Pt', 'W', 'Ti'] },
-    noble: { name: '貴ガス', elements: ['He', 'He', 'Ne', 'Ne', 'Ar', 'Ar'], recipes: ['He', 'Ne', 'Ar'] },
-    hazard: { name: '危険物', elements: ['H', 'Cl', 'N', 'O', 'S', 'K', 'Mn'], recipes: ['AquaRegia', 'H2SO4', 'KMnO4'] }
-};
-
-/* --- Game state --- */
-let gs = {
-    playerPool: [], enemyPool: [],
-    playerRecipes: [], enemyRecipes: [],
-    turn: 1, isPlayerTurn: true, mp: 1, maxMp: 1,
-    player: { hp: INITIAL_HP, hand: [], field: [] },
-    enemy: { hp: INITIAL_HP, hand: [], field: [], mp: 1, maxMp: 1 },
-    selectedHandIds: [], attackingUnit: null,
-    hotseat: false
-};
-
-/* -------------------------
-   POKEDEX: localStorage utilities
-   key: 'muki_pokedex_v1'
--------------------------*/
-const POKE_KEY = 'muki_pokedex_v1';
-function loadPokedex(){ try { return JSON.parse(localStorage.getItem(POKE_KEY) || '[]'); } catch(e){ return [] } }
-function savePokedex(list){ localStorage.setItem(POKE_KEY, JSON.stringify(Array.from(new Set(list)))) }
-function unlockCard(symbol){
-    const list = loadPokedex();
-    if(!list.includes(symbol)){ list.push(symbol); savePokedex(list); renderPokedexPanel(); renderFullPokedex(); }
-}
-
-/* -------------------------
-   Build deck-select grid dynamically,
-   each deck gets CPU / Hotseat buttons
--------------------------*/
-function showDeckSelect(mode='cpu'){
-    hideAll(); document.getElementById('deck-select-screen').classList.remove('hidden');
-    const grid = document.getElementById('deck-grid');
-    grid.innerHTML = '';
-    Object.keys(DECKS).forEach(key => {
-        const conf = DECKS[key];
-        const card = document.createElement('div'); card.className='deck-card';
-        const title = document.createElement('div'); title.className='deck-title'; title.innerText = conf.name;
-        const desc = document.createElement('div'); desc.className='deck-desc'; desc.innerHTML = (conf.elements.slice(0,6).join(', ') + '<br>' + (conf.recipes||[]).slice(0,4).join(', '));
-        const actions = document.createElement('div'); actions.className='deck-actions';
-        const cpuBtn = document.createElement('button'); cpuBtn.className='small-btn cpu'; cpuBtn.innerText='CPUで始める'; cpuBtn.onclick = ()=> startGame(key,'cpu');
-        const hotBtn = document.createElement('button'); hotBtn.className='small-btn hotseat'; hotBtn.innerText='対人（ホット）'; hotBtn.onclick = ()=> startGame(key,'hotseat');
-        const pdBtn = document.createElement('button'); pdBtn.className='small-btn pokedex'; pdBtn.innerText='図鑑を見る'; pdBtn.onclick = ()=> { openFullPokedex(); };
-        actions.appendChild(cpuBtn); actions.appendChild(hotBtn); actions.appendChild(pdBtn);
-        card.appendChild(title); card.appendChild(desc); card.appendChild(actions);
-        grid.appendChild(card);
-    });
-}
-
-/* -------------------------
-   Navigation / small helpers
--------------------------*/
-function showTitle(){ hideAll(); document.getElementById('title-screen').classList.remove('hidden'); }
-function hideAll(){ document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById('game-board').style.display='none'; document.getElementById('pokedex-panel').classList.add('hidden'); }
-function showGameUI(){ hideAll(); document.getElementById('game-board').style.display='block'; }
-
-/* -------------------------
-   Start game (mode: 'cpu' or 'hotseat')
--------------------------*/
-function startGame(deckKey, mode='cpu'){
-    resetGame(deckKey, mode);
-    showGameUI();
-    showMessage('バトル開始！',1200);
-    updateView();
-}
-
-/* -------------------------
-   Reset game (shared)
--------------------------*/
-function resetGame(deckKey, mode='cpu'){
-    const pConf = DECKS[deckKey];
-    gs.playerPool = pConf.elements.map(sym => ELEM[sym]).filter(Boolean);
-    gs.playerRecipes = RECIPES.filter(r => pConf.recipes.includes(r.product.symbol));
-    gs.hotseat = (mode === 'hotseat');
-
-    if(gs.hotseat){
-        // For hotseat we use same pool for both players (symmetric). Could be changed later.
-        gs.enemyPool = gs.playerPool.slice();
-        gs.enemyRecipes = gs.playerRecipes.slice();
-        document.getElementById('enemy-name').innerText = 'Player 2';
-        document.getElementById('enemy-avatar').innerText = '🧑';
-    } else {
-        // choose CPU deck randomly
-        const keys = Object.keys(DECKS);
-        const cpuKey = keys[Math.floor(Math.random() * keys.length)];
-        const eConf = DECKS[cpuKey];
-        gs.enemyPool = eConf.elements.map(sym => ELEM[sym]).filter(Boolean);
-        gs.enemyRecipes = RECIPES.filter(r => eConf.recipes.includes(r.product.symbol));
-        document.getElementById('enemy-name').innerText = `CPU (${eConf.name})`;
-        document.getElementById('enemy-avatar').innerText = '🤖';
-    }
-
-    gs.turn = 1; gs.isPlayerTurn = true; gs.mp = 1; gs.maxMp = 1;
-    gs.player = { hp: INITIAL_HP, hand: [], field: [] };
-    gs.enemy = { hp: INITIAL_HP, hand: [], field: [], mp: 1, maxMp: 1 };
-    gs.selectedHandIds = []; gs.attackingUnit = null;
-
-    for(let i=0;i<5;i++){ drawCard(gs.player); drawCard(gs.enemy); }
-    document.getElementById('btn-end-turn').disabled = false;
-    renderPokedexPanel(); renderFullPokedex();
-}
-
-/* -------------------------
-   Draw card (elemental) - unlocks pokedex when drawn
--------------------------*/
-function drawCard(target){
-    const pool = (target === gs.enemy) ? gs.enemyPool : gs.playerPool;
-    if(!pool || pool.length===0) return null;
-    if(target.hand.length >= MAX_HAND){
-        if(target === gs.enemy) target.hand.shift(); else return null;
-    }
-    const base = pool[Math.floor(Math.random() * pool.length)];
-    const card = { ...base, id: Math.random().toString(36).substr(2,9), type:'element', symbol: base.symbol, name: base.name, rarity: base.rarity, artClass: base.artClass };
-    target.hand.push(card);
-    unlockCard(card.symbol); // unlock on draw
-    return card;
-}
-
-/* -------------------------
-   Player actions (draw, synth)
--------------------------*/
-function actionDraw(){
-    if(!gs.isPlayerTurn){ showMessage('今は操作できません'); return; }
-    if(gs.mp < 1){ showMessage('MP不足'); return; }
-    gs.mp--;
-    drawCard(gs.player);
-    updateView();
-}
-
-function actionSynthesize(){
-    if(!gs.isPlayerTurn) return;
-    if(gs.selectedHandIds.length === 0){ showMessage('素材を選んでください'); return; }
-    // build symbols and try find recipe
-    const sel = gs.player.hand.filter(c => gs.selectedHandIds.includes(c.id));
-    const symbols = sel.map(s=>s.symbol);
-    symbols.sort();
-    const recipe = gs.playerRecipes.find(r => {
-        const ing = r.ingredients.slice().sort();
-        return JSON.stringify(ing) === JSON.stringify(symbols);
-    });
-    if(!recipe){ showMessage('反応しません'); gs.selectedHandIds = []; updateView(); return; }
-    processSynth(recipe);
-}
-
-/* -------------------------
-   processSynth (summon or spell)
--------------------------*/
-function processSynth(recipe){
-    // remove materials from hand
-    gs.player.hand = gs.player.hand.filter(c => !gs.selectedHandIds.includes(c.id));
-    gs.selectedHandIds = [];
-    // if spell -> apply effect
-    if(recipe.product.type === 'spell'){
-        const skill = recipe.product.skills[0];
-        // apply to leader or strongest unit
-        if(gs.enemy.field.length > 0){
-            // target highest HP unit
-            const target = gs.enemy.field.reduce((a,b)=>a.currentHp>b.currentHp? a: b);
-            if(skill.type === 'toxic') target.currentHp = -99;
-            else target.currentHp -= skill.power;
-            showMessage(`${skill.name} を使用 -> ${target.name}`);
-        } else {
-            gs.enemy.hp -= skill.power;
-            showMessage(`${skill.name} を使用 -> リーダー`);
-        }
-        unlockCard(recipe.product.symbol);
-        checkGameEnd(); updateView(); return;
-    }
-    // summon unit
-    if(gs.player.field.length >= MAX_FIELD){ showMessage('フィールド満員'); return; }
-    const unit = { ...recipe.product, id: Math.random().toString(36).substr(2,9), maxHp: recipe.product.hp, currentHp: recipe.product.hp, canAttack: recipe.product.ability === 'storm', type:'unit' };
-    gs.player.field.push(unit);
-    unlockCard(unit.symbol);
-    showMessage(`召喚: ${unit.name}`);
-    updateView();
-}
-
-/* -------------------------
-   Interactions: hand/field clicks
--------------------------*/
-function onHandClick(id){
-    if(!gs.isPlayerTurn) return;
-    const card = gs.player.hand.find(c => c.id === id);
-    if(!card) return;
-    showDetail(card);
-    if(gs.selectedHandIds.includes(id)) gs.selectedHandIds = gs.selectedHandIds.filter(x=>x!==id);
-    else gs.selectedHandIds.push(id);
-    updateView();
-}
-
-function onFieldCardClick(id, isPlayer){
-    if(!gs.isPlayerTurn) return;
-    if(isPlayer){
-        const u = gs.player.field.find(x=>x.id===id);
-        if(!u) return;
-        showDetail(u);
-        if(u && u.canAttack){
-            gs.attackingUnit = u;
-            document.body.classList.add('targeting');
-            updateView();
-        }
-    } else {
-        if(gs.attackingUnit){
-            const target = gs.enemy.field.find(x=>x.id===id);
-            if(!target) return;
-            if(target.ability === 'stealth'){ showMessage('潜伏中！'); return; }
-            prepareAttack(gs.attackingUnit, target, 'unit');
-        } else {
-            const t = gs.enemy.field.find(x=>x.id===id); if(t) showDetail(t);
-        }
-    }
-}
-
-function onLeaderClick(side){
-    if(!gs.isPlayerTurn) return;
-    if(side === 'enemy' && gs.attackingUnit){ prepareAttack(gs.attackingUnit,'leader','leader'); }
-}
-
-/* -------------------------
-   Attack flow (same as original)
--------------------------*/
-function prepareAttack(attacker, target, type){
-    if(type === 'leader' || (type === 'unit' && target.ability !== 'ward')){
-        const guards = gs.enemy.field.filter(u => u.ability === 'ward' && u.ability !== 'stealth');
-        if(guards.length > 0){ showMessage('守護に阻まれた！'); return; }
-    }
-    if(attacker.skills && attacker.skills.length > 1) openSkillModal(attacker,target);
-    else executeSkill(attacker,target, attacker.skills ? attacker.skills[0] : {name:'通常攻撃',power: (attacker.atk||1)});
-}
-
-function executeSkill(attacker, target, skill){
-    let log = `${attacker.name} の ${skill.name}！`;
-    if(skill.type === 'aoe'){
-        gs.enemy.field.forEach(u => u.currentHp -= skill.power);
-        gs.enemy.hp -= skill.power;
-    } else if(skill.type === 'aoe_heal'){
-        gs.enemy.field.forEach(u => u.currentHp -= skill.power);
-        gs.player.hp += skill.power;
-    } else if(skill.type === 'heal'){
-        gs.player.hp += skill.power;
-    } else {
-        const dmg = skill.power;
-        if(target === 'leader'){
-            gs.enemy.hp -= dmg;
-        } else {
-            if(skill.type === 'toxic' && dmg > 0) target.currentHp = -99;
-            else target.currentHp -= dmg;
-            // retaliate
-            const counter = target.atk || 0;
-            if(target.currentHp <= 0 && target.ability === 'toxic' && counter > 0) attacker.currentHp = -99;
-            else attacker.currentHp -= counter;
-        }
-    }
-    attacker.canAttack = false;
-    showMessage(log);
-    cancelAttack();
-    checkGameEnd();
-    updateView();
-}
-
-function cancelAttack(){
-    gs.attackingUnit = null;
-    document.body.classList.remove('targeting');
-    updateView();
-}
-
-/* -------------------------
-   End turn / CPU or hotseat handling
--------------------------*/
-function endTurn(){
-    if(!gs.isPlayerTurn) return;
-    // if hotseat: swap player/enemy (turn passes to other human)
-    if(gs.hotseat){
-        // swap player <-> enemy objects (deep swap of state references)
-        const p = gs.player;
-        gs.player = gs.enemy;
-        gs.enemy = p;
-        // swap pools/recipes too for fairness (so draw will use correct pool)
-        const pp = gs.playerPool; gs.playerPool = gs.enemyPool; gs.enemyPool = pp;
-        const pr = gs.playerRecipes; gs.playerRecipes = gs.enemyRecipes; gs.enemyRecipes = pr;
-        // swap some UI labels
-        const enemyNameEl = document.getElementById('enemy-name');
-        const playerAvatar = document.getElementById('player-avatar');
-        const enemyAvatar = document.getElementById('enemy-avatar');
-        // toggle names
-        const curEnemyName = enemyNameEl.innerText;
-        if(curEnemyName.indexOf('Player') === -1) enemyNameEl.innerText = 'Player 2';
-        // increment turn and continue
-        gs.turn++;
-        gs.isPlayerTurn = true;
-        gs.mp = Math.min(gs.maxMp+1, 10);
-        showMessage(`ターン交代 — 次のプレイヤーの番です`);
-        updateView();
-        return;
-    }
-
-    // otherwise normal CPU flow
-    gs.isPlayerTurn = false;
-    cancelAttack();
-    document.getElementById('btn-end-turn').disabled = true;
-    showMessage('敵のターン');
-    setTimeout(cpuTurn, 1000);
-}
-
-/* -------------------------
-   CPU turn (same as original)
--------------------------*/
-async function cpuTurn(){
-    if(gs.enemy.maxMp < 10) gs.enemy.maxMp++; gs.enemy.mp = gs.enemy.maxMp;
-    drawCard(gs.enemy); updateView(); await sleep(800);
-
-    let acted = true;
-    while(acted && gs.enemy.field.length < MAX_FIELD){
-        acted = false;
-        const handSym = gs.enemy.hand.map(c => c.symbol);
-        for(const r of gs.enemyRecipes){
-            if(r.product.type === 'spell') continue;
-            const ingredients = [...r.ingredients];
-            const tempHand = [...handSym];
-            let possible = true;
-            for(const ing of ingredients){
-                const idx = tempHand.indexOf(ing);
-                if(idx === -1){ possible = false; break; }
-                tempHand.splice(idx,1);
+        // --- 初期化 ---
+        window.onload = () => {
+            initParticles();
+            
+            const g = document.getElementById('deck-grid-container');
+            for(let k in DECKS){
+                const d = document.createElement('div'); d.className='deck-card';
+                d.innerHTML=`<div class="deck-title">${DECKS[k].n}</div><div class="deck-desc">${DECKS[k].d}</div>`;
+                d.onclick=()=>deckSelected(k); 
+                g.appendChild(d);
             }
-            if(possible){
-                for(const ing of r.ingredients){
-                    const idx = gs.enemy.hand.findIndex(c => c.symbol === ing);
-                    if(idx>=0) gs.enemy.hand.splice(idx,1);
+            
+            const lg=document.getElementById('lib-grid');
+            for(let k in ELEM) addLib(ELEM[k],true,lg);
+            REC.forEach(r=>addLib(r.p,false,lg));
+            
+            showTitle();
+        };
+
+        function initParticles() {
+            const c = document.getElementById('particles');
+            for(let i=0; i<30; i++) {
+                const p = document.createElement('div'); p.className='particle';
+                p.style.left = Math.random()*100 + 'vw';
+                p.style.width = p.style.height = (Math.random()*5 + 2) + 'px';
+                p.style.animationDuration = (Math.random()*10 + 5) + 's';
+                p.style.animationDelay = (Math.random()*5) + 's';
+                c.appendChild(p);
+            }
+        }
+
+        // --- 画面遷移 ---
+        function showTitle() { hideAll(); document.getElementById('title-screen').classList.remove('hidden'); }
+        function showDeckSelect(mode) { gs.mode = mode; hideAll(); document.getElementById('deck-select-screen').classList.remove('hidden'); }
+        function showLib() { hideAll(); document.getElementById('lib-screen').classList.remove('hidden'); }
+        function hideAll() { 
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
+            document.getElementById('game-board').style.display='none'; 
+            document.getElementById('action-btns').style.display='none';
+            document.getElementById('res-scr').style.display='none';
+        }
+
+        function deckSelected(k){
+            if(gs.mode === 'cpu'){
+                startGame(k, null);
+            } else {
+                if(!p1Key){
+                    p1Key = k;
+                    document.querySelector('#deck-select-screen h2').innerText = "2P デッキ選択";
+                    alert("Player 1 選択完了。次は Player 2 です。");
+                } else {
+                    startGame(p1Key, k);
+                    p1Key = null;
                 }
-                const unit = { ...r.product, id: Math.random(), maxHp: r.product.hp, currentHp: r.product.hp, canAttack:false, type:'unit' };
-                gs.enemy.field.push(unit);
-                unlockCard(unit.symbol);
-                showMessage(`CPU召喚: ${unit.name}`);
-                await sleep(800); updateView(); acted = true; break;
             }
         }
-    }
 
-    gs.enemy.field.forEach(u => u.canAttack = true);
-    for(const u of gs.enemy.field){
-        if(!u.canAttack) continue;
-        const guards = gs.player.field.filter(g => g.ability === 'ward' && g.ability !== 'stealth');
-        let target = 'leader';
-        if(guards.length > 0) target = guards[0];
-        if(target === 'leader'){
-            gs.player.hp -= (u.skills && u.skills[0] ? u.skills[0].power : (u.atk || 1));
-            showMessage(`CPU攻撃 -> リーダー`);
-        } else {
-            const dmg = (u.skills && u.skills[0] ? u.skills[0].power : (u.atk || 1));
-            const toxic = u.skills && u.skills[0] && u.skills[0].type === 'toxic';
-            if(toxic && dmg > 0) target.currentHp = -99; else target.currentHp -= dmg;
-            u.currentHp -= (target.atk || 0);
-            showMessage(`CPU攻撃 -> ${target.name}`);
-        }
-        checkGameEnd(); updateView();
-        await sleep(800);
-    }
-    // next player turn
-    startPlayerTurn();
-}
+        function startGame(k1, k2) {
+            const createP = (key, name) => ({
+                name: name, hp: INI_HP, mp: 1, maxMp: 1,
+                pool: DECKS[key].e.map(s=>ELEM[s]),
+                rec: REC.filter(r=>DECKS[key].r.includes(r.p.s)),
+                h: [], f: []
+            });
 
-/* -------------------------
-   Start player turn (after CPU)
--------------------------*/
-function startPlayerTurn(){
-    gs.turn++; if(gs.maxMp < 10) gs.maxMp++; gs.mp = gs.maxMp;
-    gs.isPlayerTurn = true; document.getElementById('btn-end-turn').disabled = false;
-    gs.player.field.forEach(u => u.canAttack = true);
-    drawCard(gs.player); showMessage('あなたのターン'); updateView();
-}
+            gs.p1 = createP(k1, "PLAYER 1");
+            if(gs.mode === 'cpu') {
+                const keys = Object.keys(DECKS);
+                const ek = keys[Math.floor(Math.random()*keys.length)];
+                gs.p2 = createP(ek, `CPU (${DECKS[ek].n})`);
+            } else {
+                gs.p2 = createP(k2, "PLAYER 2");
+            }
+            
+            gs.turn = 1; gs.isP1Turn = true;
+            gs.active = gs.p1; gs.other = gs.p2;
+            gs.sel=[]; gs.atk=null;
 
-/* -------------------------
-   Utility: sleep
--------------------------*/
-const sleep = m => new Promise(r => setTimeout(r,m));
+            for(let i=0; i<5; i++) { draw(gs.p1); draw(gs.p2); }
 
-/* -------------------------
-   View update / render cards
--------------------------*/
-function updateView(){
-    document.getElementById('turn-display').innerText = `ターン ${gs.turn}`;
-    document.getElementById('mp-display').innerText = `MP ${gs.mp}/${gs.maxMp}`;
-    document.getElementById('player-hp').innerText = gs.player.hp;
-    document.getElementById('enemy-hp').innerText = gs.enemy.hp;
-
-    const cancelBtn = document.getElementById('cancel-attack-btn');
-    cancelBtn.style.display = gs.attackingUnit ? 'block' : 'none';
-
-    renderCards('player-hand-area', gs.player.hand, 'hand', true);
-    renderCards('player-field', gs.player.field, 'field', true);
-    renderCards('enemy-field', gs.enemy.field, 'field', false);
-
-    const eh = document.getElementById('enemy-hand-area'); eh.innerHTML = '';
-    gs.enemy.hand.forEach(() => {
-        const d = document.createElement('div'); d.className='card'; d.style.width='36px'; d.style.height='54px'; d.style.background='#34495e'; eh.appendChild(d);
-    });
-
-    renderPokedexPanel();
-    updateHint();
-}
-
-/* render card list into area */
-function renderCards(id, cards, type, isPlayer){
-    const el = document.getElementById(id);
-    el.innerHTML = '';
-    cards.forEach(c => {
-        const div = document.createElement('div'); div.className = 'card';
-        div.setAttribute('data-rarity', c.rarity || 'N');
-        div.onclick = (e) => { e.stopPropagation(); if(type==='hand') onHandClick(c.id); if(type==='field') onFieldCardClick(c.id, isPlayer); };
-
-        if(type === 'hand' && gs.selectedHandIds.includes(c.id)) div.classList.add('selected');
-        if(type === 'field' && c.canAttack && isPlayer) div.classList.add('can-attack');
-
-        // valid target highlight when attacking
-        if(type === 'field' && !isPlayer && gs.attackingUnit && c.ability !== 'stealth'){
-            const hasWard = gs.enemy.field.some(u => u.ability === 'ward' && u.ability !== 'stealth');
-            if(!hasWard || c.ability === 'ward') div.classList.add('valid-target');
+            hideAll();
+            document.getElementById('game-board').style.display='flex';
+            document.getElementById('action-btns').style.display='flex';
+            upd();
+            msg("バトル開始！");
         }
 
-        let inner = '';
-        if(c.type === 'element'){
-            inner = `<div class="card-art ${c.artClass || ''}">${c.symbol}</div>
-                     <div class="card-info"><div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
-        } else {
-            let badges = '<div class="ability-container">';
-            if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡</div>`;
-            if(c.ability === 'toxic') badges += `<div class="badge badge-toxic">☠️</div>`;
-            if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
-            if(c.ability === 'stealth') badges += `<div class="badge badge-stealth">👁️</div>`;
-            badges += '</div>';
-            inner = `${badges}<div class="card-art ${c.artClass || ''}">${c.symbol}</div>
-                     <div class="card-info"><div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div>
-                     <div class="stats"><div>⚔️${c.atk||0}</div><div>❤️${c.currentHp||c.hp||0}</div></div></div>`;
+        // --- ゲームロジック ---
+        function draw(p) {
+            if(p.h.length >= MAX_H) return;
+            const c = { ...p.pool[Math.floor(Math.random()*p.pool.length)], id:Math.random().toString(36), type:'el' };
+            p.h.push(c);
         }
-        div.innerHTML = inner;
-        el.appendChild(div);
-    });
-}
-
-/* -------------------------
-  Show card detail
--------------------------*/
-function showDetail(card){
-    const p = document.getElementById('card-detail-panel');
-    p.style.display = 'block';
-    document.getElementById('detail-symbol').innerText = card.symbol;
-    document.getElementById('detail-name').innerText = card.name;
-    document.getElementById('detail-rarity').innerText = `${card.rarity || ''}`;
-    const stats = document.getElementById('detail-stats');
-    const skills = document.getElementById('detail-skills');
-    skills.innerHTML = '';
-    if(card.type === 'element'){
-        stats.innerHTML = `<div style="color:#ccc">素材カード</div>`;
-        skills.innerHTML = `<div class="skill-item"><div class="skill-item-desc">合成素材として使用します。</div></div>`;
-    } else {
-        stats.innerHTML = `<div style="color:#e67e22">⚔️${card.atk}</div> <div style="color:#2ecc71">❤️${card.currentHp}/${card.maxHp}</div>`;
-        if(card.ability === 'ward') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">🛡️ 守護</div><div class="skill-item-desc">守護能力</div></div>`;
-        if(card.ability === 'toxic') skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">☠️ 毒</div><div class="skill-item-desc">毒能力</div></div>`;
-        if(card.skills) card.skills.forEach(s => {
-            skills.innerHTML += `<div class="skill-item"><div class="skill-item-name">${s.name} (威力:${s.power})</div><div class="skill-item-desc">${s.desc}</div></div>`;
-        });
-    }
-}
-function hideDetail(){ document.getElementById('card-detail-panel').style.display='none'; }
-
-/* -------------------------
-  Craft hint / auto-select (kept)
--------------------------*/
-function updateHint(){
-    const list = document.getElementById('craftable-list'); if(!list) return;
-    list.innerHTML = '';
-    if(!gs.isPlayerTurn) return;
-    gs.playerRecipes.forEach(r => {
-        const handSym = gs.player.hand.map(c => c.symbol);
-        let possible = true;
-        const temp = handSym.slice();
-        for(const ing of r.ingredients){ const idx = temp.indexOf(ing); if(idx===-1){ possible=false; break;} temp.splice(idx,1); }
-        if(possible){
-            const btn = document.createElement('div'); btn.className='craft-hint-btn'; btn.innerHTML = `✨ ${r.product.name} — ⚔️${r.product.atk} / ❤️${r.product.hp}`; btn.onclick = ()=> autoSelect(r.ingredients);
-            list.appendChild(btn);
+        function actDraw() { if(gs.active.mp < 1) { msg("MP不足"); return; } gs.active.mp--; draw(gs.active); upd(); }
+        
+        function actSyn() {
+            if(gs.sel.length === 0) return;
+            const sl = gs.active.h.filter(c => gs.sel.includes(c.id));
+            const sym = sl.map(c => c.s).sort();
+            
+            // 単体生成
+            if(gs.sel.length === 1) {
+                const r = gs.active.rec.find(x => x.i.length === 1 && x.i[0] === sym[0]);
+                if(r) { doSyn(r); return; }
+            }
+            
+            const r = gs.active.rec.find(x => JSON.stringify(x.i.sort()) === JSON.stringify(sym));
+            if(r) doSyn(r); else { msg("反応なし"); gs.sel=[]; upd(); }
         }
-    });
-}
-function autoSelect(ingredients){
-    gs.selectedHandIds = []; const temp = gs.player.hand.slice();
-    ingredients.forEach(ing => {
-        const idx = temp.findIndex(c => c.symbol === ing);
-        if(idx !== -1){ gs.selectedHandIds.push(temp[idx].id); temp.splice(idx,1); }
-    });
-    updateView();
-}
 
-/* -------------------------
-  Check game end
--------------------------*/
-function checkGameEnd(){
-    gs.player.field = gs.player.field.filter(u => u.currentHp > 0);
-    gs.enemy.field = gs.enemy.field.filter(u => u.currentHp > 0);
-    if(gs.enemy.hp <= 0){ showResult(true); return; }
-    if(gs.player.hp <= 0){ showResult(false); return; }
-    updateView();
-}
+        function doSyn(r) {
+            gs.active.h = gs.active.h.filter(c => !gs.sel.includes(c.id)); gs.sel = [];
+            
+            if(r.p.tp === 'spl') {
+                const s = r.p.sk[0];
+                if(gs.other.f.length > 0) {
+                    const t = gs.other.f.reduce((a,b)=>a.cur > b.cur ? a : b);
+                    if(s.t === 'tox') t.cur = -99; else t.cur -= s.p;
+                    msg(`${s.n} -> ${t.n}`);
+                } else {
+                    gs.other.hp -= s.p;
+                    msg(`${s.n} -> Leader`);
+                }
+                chk(); upd(); return;
+            }
 
-/* -------------------------
-  Result screen
--------------------------*/
-function showResult(isWin){
-    document.getElementById('result-screen').classList.remove('hidden');
-    document.getElementById('result-title').innerText = isWin ? 'VICTORY' : 'DEFEAT';
-    document.getElementById('result-message').innerText = isWin ? 'あなたの勝利です！' : '敗北しました...';
-    if(isWin) createConfetti();
-}
+            if(gs.active.f.length >= MAX_FIELD) { msg("満員"); return; }
+            const u = { ...r.p, id:Math.random().toString(36), max:r.p.h, cur:r.p.h, can:r.p.ab==='stm', type:'unit' };
+            gs.active.f.push(u);
+            msg(`召喚: ${u.n}`);
+            upd();
+        }
 
-/* -------------------------
-  Message / confetti
--------------------------*/
-function showMessage(txt, time=1200){
-    const b = document.getElementById('msg-box');
-    b.innerText = txt; b.style.opacity = 1;
-    setTimeout(()=> b.style.opacity = 0, time);
-}
-function createConfetti(){
-    const cont = document.getElementById('confetti-container'); cont.innerHTML = '';
-    for(let i=0;i<40;i++){
-        const d = document.createElement('div'); d.className = 'confetti';
-        d.style.left = (Math.random()*80+10)+'vw'; d.style.backgroundColor = `hsl(${Math.random()*360},80%,60%)`; d.style.animationDuration = (Math.random()*3+2)+'s';
-        cont.appendChild(d);
-    }
-}
+        // --- 操作 ---
+        function onHand(id) {
+            const c = gs.active.h.find(x => x.id === id);
+            showDet(c, true);
+            if(gs.sel.includes(id)) gs.sel = gs.sel.filter(x => x !== id); else gs.sel.push(id);
+            upd();
+        }
+        
+        function onField(id, isMy) {
+            if(isMy) {
+                const u = gs.active.f.find(x => x.id === id); showDet(u, false);
+                if(u && u.can) { gs.atk = u; document.body.classList.add('valid-target'); upd(); }
+            } else if(gs.atk) {
+                const t = gs.other.f.find(x => x.id === id);
+                if(t.ab === 'stl') { msg("潜伏中"); return; }
+                prepAtk(gs.atk, t, 'unit');
+            } else {
+                showDet(gs.other.f.find(x => x.id === id), false);
+            }
+        }
+        
+        function atkLdr(s) {
+            if((s === 'e' && gs.isP1Turn) || (s === 'p' && !gs.isP1Turn)) {
+                if(gs.atk) prepAtk(gs.atk, 'ldr', 'ldr');
+            }
+        }
 
-/* -------------------------
-   Pokedex UI: panel + full screen
--------------------------*/
-function renderPokedexPanel(){
-    const panel = document.getElementById('pokedex-panel');
-    const list = document.getElementById('pokedexList');
-    if(!panel || !list) return;
-    list.innerHTML = '';
-    const unlocked = loadPokedex();
-    // show up to 8 most recent or so
-    const keys = Object.keys(ELEM);
-    keys.forEach(k => {
-        const e = ELEM[k];
-        const entry = document.createElement('div'); entry.className='pokedex-entry';
-        const mini = document.createElement('div'); mini.className='mini-art ' + (e.artClass||''); mini.innerText = e.symbol;
-        const txt = document.createElement('div'); txt.style.flex='1';
-        const t = document.createElement('div'); t.style.fontWeight='800'; t.innerText = `${e.name} (${e.symbol})`;
-        const s = document.createElement('div'); s.style.color='#556'; s.style.fontSize='13px';
-        if(unlocked.includes(e.symbol)) s.innerText = `レア度:${e.rarity}`; else { s.innerText = '未解放'; mini.style.filter='grayscale(1)'; }
-        txt.appendChild(t); txt.appendChild(s);
-        entry.appendChild(mini); entry.appendChild(txt);
-        list.appendChild(entry);
-    });
-}
-function openFullPokedex(){
-    hideAll(); document.getElementById('pokedex-screen').classList.remove('hidden'); renderFullPokedex();
-}
-function closeFullPokedex(){ showTitle(); }
-function renderFullPokedex(){
-    const el = document.getElementById('pokedexFullList');
-    if(!el) return;
-    el.innerHTML = '';
-    const unlocked = loadPokedex();
-    Object.keys(ELEM).forEach(sym => {
-        const e = ELEM[sym];
-        const card = document.createElement('div'); card.style.background='linear-gradient(180deg,#fff,#f1f7ff)'; card.style.borderRadius='10px'; card.style.padding='8px';
-        card.style.color='#112'; card.style.display='flex'; card.style.flexDirection='column'; card.style.alignItems='center';
-        const mini = document.createElement('div'); mini.className = 'mini-art ' + (e.artClass||''); mini.style.width='64px'; mini.style.height='64px'; mini.innerText = e.symbol;
-        if(!unlocked.includes(e.symbol)) mini.style.filter='grayscale(1)';
-        const nm = document.createElement('div'); nm.style.fontWeight='800'; nm.style.marginTop='6px'; nm.innerText = `${e.name} (${e.symbol})`;
-        const sub = document.createElement('div'); sub.style.color='#556'; sub.style.fontSize='13px'; sub.style.marginTop='6px'; sub.innerText = unlocked.includes(e.symbol) ? `レア度: ${e.rarity}` : '未解放';
-        card.appendChild(mini); card.appendChild(nm); card.appendChild(sub);
-        el.appendChild(card);
-    });
-}
+        function prepAtk(a, t, type) {
+            if(type === 'ldr' || (type === 'unit' && t.ab !== 'wrd')) {
+                if(gs.other.f.some(u => u.ab === 'wrd' && u.ab !== 'stl')) { msg("守護あり"); cancelAtk(); return; }
+            }
+            if(a.sk.length > 1) openSk(a, t); else exeSk(a, t, a.sk[0]);
+        }
+        
+        function openSk(a, t) {
+            const m = document.getElementById('skill-modal'), l = document.getElementById('skill-list'); l.innerHTML = '';
+            a.sk.forEach(s => {
+                const b = document.createElement('div'); b.className = 'sk-btn';
+                b.innerHTML = `${s.n} (${s.p})`;
+                b.onclick = () => { exeSk(a, t, s); m.style.display = 'none'; };
+                l.appendChild(b);
+            });
+            m.style.display = 'flex';
+        }
+        function closeSk() { document.getElementById('skill-modal').style.display = 'none'; cancelAtk(); }
 
-/* toggles */
-function togglePokedex(){
-    const p = document.getElementById('pokedex-panel');
-    if(p.classList.contains('hidden')){ p.classList.remove('hidden'); renderPokedexPanel(); } else p.classList.add('hidden');
-}
-function showPokedexScreen(){ openFullPokedex(); }
+        function exeSk(a, t, s) {
+            if(s.t === 'aoe') { gs.other.f.forEach(u => u.cur -= s.p); gs.other.hp -= s.p; }
+            else if(s.t === 'ah') { gs.other.f.forEach(u => u.cur -= s.p); gs.active.hp += s.p; }
+            else if(s.t === 'heal') { gs.active.hp += s.p; }
+            else {
+                let d = s.p;
+                if(t === 'ldr') gs.other.hp -= d;
+                else {
+                    let cnt = t.a;
+                    if(s.t === 'tox' && d > 0) t.cur = -99; else t.cur -= d;
+                    if(t.cur <= 0 && t.ab === 'tox' && cnt > 0) a.cur = -99; else a.cur -= cnt;
+                }
+            }
+            a.can = false; msg(s.n); cancelAtk(); chk(); upd();
+        }
 
-/* -------------------------
-  Skill modal helpers
--------------------------*/
-function openSkillModal(attacker, target){
-    const modal = document.getElementById('skill-modal'); modal.style.display='flex';
-    const list = document.getElementById('skill-list'); list.innerHTML = '';
-    attacker.skills.forEach(s => {
-        const btn = document.createElement('div'); btn.style.background='#fff'; btn.style.padding='8px'; btn.style.borderRadius='8px'; btn.style.cursor='pointer'; btn.style.fontWeight='800';
-        btn.innerHTML = `<div>${s.name} (威力:${s.power})</div><div style="font-size:12px;color:#333">${s.desc}</div>`;
-        btn.onclick = ()=>{ executeSkill(attacker,target,s); closeSkillModal(); };
-        list.appendChild(btn);
-    });
-}
-function closeSkillModal(){ document.getElementById('skill-modal').style.display = 'none'; cancelAttack(); }
+        function cancelAtk() { gs.atk = null; document.body.classList.remove('valid-target'); upd(); }
+        
+        function chk() {
+            gs.active.f = gs.active.f.filter(u => u.cur > 0);
+            gs.other.f = gs.other.f.filter(u => u.cur > 0);
+            if(gs.other.hp <= 0) res(true); else if(gs.active.hp <= 0) res(false);
+        }
+        
+        function res(w) {
+            const s = document.getElementById('res-scr'), t = document.getElementById('res-tit'), m = document.getElementById('res-msg');
+            s.style.display = 'flex';
+            if(gs.mode === 'cpu') {
+                if(w) { t.innerText = "VICTORY"; t.style.color = "#f1c40f"; m.innerText = "勝利！"; createConfetti(); }
+                else { t.innerText = "DEFEAT"; t.style.color = "#e74c3c"; m.innerText = "敗北..."; }
+            } else {
+                t.innerText = "WINNER"; t.style.color = "#f1c40f";
+                m.innerText = (w ? gs.active.name : gs.other.name) + " の勝利！"; createConfetti();
+            }
+        }
+        
+        function endTurn() {
+            cancelAtk();
+            if(gs.mode === 'cpu') { msg("敵ターン"); setTimeout(cpu, 1000); }
+            else {
+                document.getElementById('turn-change-screen').classList.remove('hidden');
+                document.getElementById('next-player-name').innerText = gs.isP1Turn ? "PLAYER 2" : "PLAYER 1";
+            }
+        }
+        
+        function startNextTurn() {
+            document.getElementById('turn-change-screen').classList.add('hidden');
+            gs.isP1Turn = !gs.isP1Turn;
+            gs.active = gs.isP1Turn ? gs.p1 : gs.p2; gs.other = gs.isP1Turn ? gs.p2 : gs.p1;
+            gs.turn++; if(gs.active.maxMp < 10) gs.active.maxMp++; gs.active.mp = gs.active.maxMp;
+            gs.active.f.forEach(u => u.can = true);
+            draw(gs.active); msg(`${gs.active.name}のターン`); upd();
+        }
 
-/* -------------------------
-  Initial UI setup & bindings
--------------------------*/
-window.onload = () => {
-    initParticles();
-    showTitle();
-    renderPokedexPanel();
-    renderFullPokedex();
-};
+        async function cpu() {
+            const e = gs.p2; if(e.maxMp < 10) e.maxMp++; e.mp = e.maxMp;
+            draw(e); upd(); await sleep(500);
+            
+            let act = true;
+            while(act && e.f.length < MAX_FIELD) {
+                act = false; const h = e.h.map(c => c.s);
+                for(let r of e.rec) {
+                    if(r.p.tp === 'spl') continue;
+                    let i = [...r.i], th = [...h], ok = true;
+                    for(let x of i) { let idx = th.indexOf(x); if(idx < 0) { ok = false; break; } th.splice(idx, 1); }
+                    if(ok) {
+                        for(let x of r.i) { let idx = e.h.findIndex(c => c.s === x); e.h.splice(idx, 1); }
+                        e.f.push({ ...r.p, id:Math.random(), max:r.p.h, cur:r.p.h, can:false, type:'unit' });
+                        msg("CPU召喚"); upd(); await sleep(800); act = true; break;
+                    }
+                }
+            }
+            e.f.forEach(u => u.can = true);
+            for(let u of e.f) {
+                if(!u.can) continue;
+                let t = 'ldr', grd = gs.p1.f.find(g => g.ab === 'wrd' && g.ab !== 'stl'); if(grd) t = grd;
+                if(t === 'ldr') { gs.p1.hp -= u.sk[0].p; msg("CPU攻撃"); }
+                else {
+                    let d = u.sk[0].p; 
+                    if(u.sk[0].t === 'tox' && d > 0) t.cur = -99; else t.cur -= d;
+                    u.cur -= t.a; msg(`CPU攻撃`);
+                }
+                chk(); upd(); await sleep(800);
+            }
+            gs.turn++; if(gs.p1.maxMp < 10) gs.p1.maxMp++; gs.p1.mp = gs.p1.maxMp;
+            gs.p1.f.forEach(u => u.can = true); draw(gs.p1); msg("あなたのターン"); upd();
+        }
+        const sleep = m => new Promise(r => setTimeout(r, m));
 
-function initParticles(){
-    const container = document.getElementById('particles'); if(!container) return;
-    for(let i=0;i<24;i++){
-        const p = document.createElement('div'); p.className='particle'; p.style.left=(Math.random()*100)+'vw'; p.style.width = p.style.height = (Math.random()*6+3)+'px'; p.style.animationDuration = (Math.random()*10+6)+'s'; container.appendChild(p);
-    }
-}
+        function upd() {
+            const p = gs.active, e = gs.other;
+            document.getElementById('turn-display').innerText = `Turn ${gs.turn}`;
+            document.getElementById('mp-display').innerText = `MP ${p.mp}/${p.maxMp}`;
+            document.getElementById('player-hp').innerText = p.hp;
+            document.getElementById('enemy-hp').innerText = e.hp;
+            //document.querySelector('#leader-player .leader-name').innerText = p.name;
+            //document.getElementById('enemy-name').innerText = e.name;
+            //document.getElementById('cancel-attack-btn').style.display = gs.atk ? 'block' : 'none';
+            
+            rend('player-hand-area', p.h, 'hand', true);
+            rend('player-field', p.f, 'field', true);
+            rend('enemy-field', e.f, 'field', false);
+            const eh = document.getElementById('enemy-hand-area'); eh.innerHTML = '';
+            e.h.forEach(() => { const d = document.createElement('div'); d.className = 'card'; d.style.background = '#34495e'; d.style.width = '30px'; d.style.height = '45px'; eh.appendChild(d); });
+            
+            const hl = document.getElementById('craftable-list'); hl.innerHTML = '';
+            if(gs.mode === 'cpu' && !gs.isP1Turn) return; // CPUターンはヒントなし
+            
+            gs.active.rec.forEach(r => {
+                let h = gs.active.h.map(c => c.s), ok = true;
+                for(const i of r.ingredients) { const idx = h.indexOf(i); if(idx === -1) { ok = false; break; } h.splice(idx, 1); }
+                if(ok) {
+                    const b = document.createElement('div'); b.className = 'craft-hint-btn';
+                    b.innerHTML = `<div style="font-weight:bold;color:var(--accent)">✨ ${r.product.n}</div><div style="font-size:10px">⚔️${r.product.a} ❤️${r.product.h}</div>`;
+                    b.onclick = () => { gs.sel = []; let th = [...gs.active.h]; r.ingredients.forEach(i => { const idx = th.findIndex(c => c.s === i); if(idx !== -1) { gs.sel.push(th[idx].id); th.splice(idx, 1); } }); upd(); };
+                    hl.appendChild(b);
+                }
+            });
+        }
 
-/* Bind buttons available in-game */
-document.addEventListener('click', (e)=>{
-    // click outside to close small panels
-});
+        function rend(eid, l, type, isP) {
+            const el = document.getElementById(eid); el.innerHTML = '';
+            l.forEach(c => { el.appendChild(createC(c, c.type === 'el', type === 'hand' && gs.sel.includes(c.id), type === 'field' && c.can && isP, type === 'field' && !isP && gs.atk)); });
+        }
 
-/* Expose functions used in HTML */
-window.startGame = startGame;
-window.showDeckSelect = showDeckSelect;
-window.showTitle = showTitle;
-window.showPokedexScreen = showPokedexScreen;
-window.actionDraw = actionDraw;
-window.actionSynthesize = actionSynthesize;
-window.endTurn = endTurn;
-window.cancelAttack = cancelAttack;
-window.onHandClick = onHandClick;
-window.onFieldCardClick = onFieldCardClick;
-window.onLeaderClick = onLeaderClick;
-window.openFullPokedex = openFullPokedex;
-window.closeFullPokedex = closeFullPokedex;
-window.hideDetail = hideDetail;
+        function createC(c, isEl, isSel, isCan, isTgt) {
+            const d = document.createElement('div'); d.className = 'card'; d.setAttribute('data-rarity', c.r);
+            let art = c.c || 'art-p-solid', bz = '', st = '';
+            if(!isEl) {
+                if(c.ab === 'wrd') bz += '<div class="c-badge cb-ward">🛡️</div>';
+                if(c.ab === 'tox') bz += '<div class="c-badge cb-toxic">☠️</div>';
+                if(c.ab === 'stm') bz += '<div class="c-badge cb-storm">⚡</div>';
+                if(c.ab === 'stl') bz += '<div class="c-badge cb-stealth">👁️</div>';
+                st = `<div class="c-stats-box"><div class="stat-atk-box">⚔️${c.a}</div><div class="stat-hp-box">❤️${c.cur}</div></div>`;
+            }
+            d.innerHTML = `
+                <div class="c-head"><span class="card-name">${c.n}</span><span class="card-symbol-small">${c.s}</span></div>
+                <div class="c-art-box art-frame"><div class="css-art ${art}"></div></div>
+                <div class="c-text-box">${!isEl && c.sk ? `<span class="skill-name-small">${c.sk[0].n}</span>` : (isEl ? '素材' : '')}</div>
+                ${!isEl ? `<div class="badges" style="flex-direction:column">${bz}</div>` : ''}
+                ${st}
+            `;
+            if(isSel) d.classList.add('selected');
+            if(isCan) d.classList.add('can-attack');
+            if(isTgt) d.classList.add('valid-target');
+            if(!d.onclick) d.onclick = (e) => { e.stopPropagation();
+                if(gs.active.h.includes(c)) onHand(c.id);
+                else if(gs.active.f.includes(c)) onField(c.id, true);
+                else if(gs.other.f.includes(c)) onField(c.id, false);
+            };
+            return d;
+        }
 
-/* Minimal: populate deck grid initially so user sees options quickly */
-showDeckSelect('cpu');
+        function addLib(d, isE, rt) {
+            const c = createC({ ...d, id: 0 }, isE, false, false, false);
+            c.onclick = () => showDet(d, isE);
+            rt.appendChild(c);
+        }
 
-</script>
+        function showDet(c, isEl) {
+            const p = document.getElementById('det-pan'); p.style.display = 'flex';
+            document.getElementById('dt-sym').innerText = c.s; document.getElementById('dt-name').innerText = c.n;
+            document.querySelector('#det-pan .css-art').className = `css-art ${c.c || 'art-p-solid'}`;
+            const st = document.getElementById('dt-st'), ds = document.getElementById('dt-desc');
+            if(isEl) { st.innerHTML = `<span style="font-size:14px;color:#ccc">素材</span>`; ds.innerHTML = `<div>合成に使用します。</div>`; }
+            else {
+                st.innerHTML = `<span style="color:#e67e22">⚔️${c.a}</span> <span style="color:#2ecc71">❤️${c.cur}/${c.max}</span>`;
+                ds.innerHTML = c.sk.map(s => `<div><b>${s.n}</b> (${s.p}): ${s.d}</div>`).join('');
+            }
+        }
+        function msg(t) { const b = document.getElementById('msg-box'); b.innerText = t; b.style.opacity = 1; setTimeout(() => b.style.opacity = 0, 1500); }
+        function createConfetti() { const c = document.getElementById('confetti-container'); if(!c) return; c.innerHTML = ''; for(let i = 0; i < 50; i++) { const p = document.createElement('div'); p.className = 'confetti'; p.style.left = Math.random() * 100 + 'vw'; p.style.backgroundColor = `hsl(${Math.random() * 360},100%,50%)`; p.style.animationDuration = (Math.random() * 3 + 2) + 's'; c.appendChild(p); } }
+    </script>
 </body>
 </html>
