@@ -38,7 +38,26 @@
             z-index: 100; transition: opacity 0.3s;
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
+        
 
+    /* ★ ここから追加：CSS Art ★ */
+   　.art-frame { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #000; }
+    .css-art { font-size: 24px; position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+    
+    .art-gas { background: linear-gradient(to tr, #a1c4fd, #c2e9fb); } .art-gas::after { content: '☁️'; filter: drop-shadow(0 0 5px white); animation: float 3s infinite; }
+    .art-liq { background: linear-gradient(to b, #4facfe, #00f2fe); } .art-liq::after { content: '💧'; animation: bounce 2s infinite; }
+    .art-sol { background: linear-gradient(to b, #e6b980, #eacda3); } .art-sol::after { content: '🪨'; }
+    .art-met { background: linear-gradient(135deg, #bdc3c7, #2c3e50); } .art-met::after { content: '✨'; text-shadow: 0 0 5px white; animation: spin 5s infinite; }
+    .art-tox { background: linear-gradient(to b, #f093fb, #f5576c); } .art-tox::after { content: '☠️'; filter: drop-shadow(0 0 5px purple); }
+    .art-fir { background: linear-gradient(to t, #e74c3c, #f1c40f); } .art-fir::after { content: '🔥'; animation: pulse 0.5s infinite; }
+    .art-gol { background: radial-gradient(circle, #ffd700, #b8860b); } .art-gol::after { content: '💎'; filter: drop-shadow(0 0 5px gold); }
+    .art-H { background: linear-gradient(to t, #89f7fe, #66a6ff); } .art-H::after { content:'(•ω•)'; font-size:10px; background:white; color:#333; padding:3px; border-radius:10px; }
+    
+    @keyframes float { 50% { transform: translateY(-5px); } } @keyframes bounce { 50% { transform: scale(1.1); } } 
+    @keyframes spin { 100% { filter: hue-rotate(360deg); } } @keyframes pulse { 50% { opacity: 0.7; } }
+    /* ★ 追加終了 ★ */
+
+    
         /* --- 1. タイトル画面 --- */
         #title-screen {
             background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
@@ -812,18 +831,20 @@
                     if(!hasWard || c.ability === 'ward') div.classList.add('valid-target');
                 }
                 
-                let content = '';
-                if(c.type === 'element') {
-                    content = `<div class="card-art ${c.artClass}">${c.symbol}</div><div class="card-info"><div class="card-symbol">${c.symbol}</div><div class="card-name">${c.name}</div></div>`;
-                } else {
-                    let badges = `<div class="ability-container">`;
-                    if(c.ability === 'ward') badges += `<div class="badge badge-ward">🛡️</div>`;
-                    if(c.ability === 'toxic') badges += `<div class="badge badge-toxic">☠️</div>`;
-                    if(c.ability === 'storm') badges += `<div class="badge badge-storm">⚡</div>`;
-                    if(c.ability === 'stealth') badges += `<div class="badge badge-stealth">👁️</div>`;
-                    badges += `</div>`;
-                    content = `${badges}<div class="card-art ${c.artClass}">${c.symbol}</div><div class="card-info"><div class="card-symbol" style="color:var(--primary)">${c.symbol}</div><div class="card-name">${c.name}</div><div class="stats"><div class="stat-box stat-atk">⚔️${c.atk}</div><div class="stat-box stat-hp">❤️${c.currentHp}</div></div></div>`;
-                }
+                // ★アートクラスを取得（なければ汎用）
+        let art = c.artClass || 'art-sol'; 
+        
+        // ... (バッジ生成ロジックなどはそのまま) ...
+
+        // ★中身のHTML生成部分を統一して書き換え
+        let artHTML = `<div class="art-frame"><div class="css-art ${art}"></div></div>`;
+
+        d.innerHTML = `
+            ${!isEl ? `<div class="card-badges" style="top:65px;right:2px;flex-direction:column">${bz}</div>` : ''}
+            <div class="card-header"><span class="card-name">${nam}</span><span class="card-symbol-small">${sym}</span></div>
+            ${artHTML} <div class="card-text-box">${!isEl && c.sk ? c.sk[0].name : (isEl?'素材':'')}</div>
+            ${st}
+        `;
                 div.innerHTML = content;
                 el.appendChild(div);
             });
