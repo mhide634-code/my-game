@@ -3,248 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chem-Verse: Complete</title>
+    <title>Chem-Verse: Ultimate Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #1a1a1d; --accent: #f1c40f; --primary: #3498db; --danger: #e74c3c; --success: #2ecc71;
-            --card-bg: #222; --card-frame: #bdc3c7;
-            --rare-n: #95a5a6; --rare-r: #3498db; --rare-sr: #9b59b6; --rare-ssr: #f1c40f;
+            --card-bg: #2b2b2b; --card-border: #7f8c8d;
+            --n: #95a5a6; --r: #3498db; --sr: #9b59b6; --ssr: #f1c40f;
         }
-        body { font-family: 'M PLUS Rounded 1c', sans-serif; background-color: var(--bg-color); color: white; margin: 0; user-select: none; overflow: hidden; height: 100vh; width: 100vw; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'M PLUS Rounded 1c', sans-serif; background: var(--bg-color); color: white; margin: 0; overflow: hidden; user-select: none; -webkit-tap-highlight-color: transparent; }
         
-        /* --- 画面制御 --- */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); z-index: 100; transition: opacity 0.3s; }
+        /* --- 画面管理 --- */
+        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); z-index: 100; transition: 0.3s; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
-        .scrollable { overflow-y: auto; justify-content: flex-start; padding: 20px; }
+        .scrollable { overflow-y: auto; justify-content: flex-start; padding-top: 60px; }
 
-        /* --- エラー表示用 --- */
-        #error-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; color: red; padding: 20px; display: none; overflow: auto; white-space: pre-wrap; font-family: monospace; }
-
-        /* --- CSSアート (イラスト描画) --- */
-        .art-frame { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #111; }
-        .css-art { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        /* --- CSSアート (イラスト) --- */
+        .art-frame { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #000; border-radius: 2px; }
+        .css-art { font-size: 24px; position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        /* 属性別背景とアイコン */
+        .art-gas { background: linear-gradient(to tr, #a1c4fd, #c2e9fb); } .art-gas::after { content: '☁️'; filter: drop-shadow(0 0 5px white); animation: float 3s infinite; }
+        .art-liq { background: linear-gradient(to b, #4facfe, #00f2fe); } .art-liq::after { content: '💧'; animation: bounce 2s infinite; }
+        .art-sol { background: linear-gradient(to b, #e6b980, #eacda3); } .art-sol::after { content: '🪨'; }
+        .art-met { background: linear-gradient(135deg, #bdc3c7, #2c3e50); } .art-met::after { content: '✨'; text-shadow: 0 0 5px white; animation: spin 5s infinite; }
+        .art-tox { background: linear-gradient(to b, #f093fb, #f5576c); } .art-tox::after { content: '☠️'; filter: drop-shadow(0 0 5px purple); }
+        .art-fir { background: linear-gradient(to t, #e74c3c, #f1c40f); } .art-fir::after { content: '🔥'; animation: pulse 0.5s infinite; }
+        .art-gol { background: radial-gradient(circle, #ffd700, #b8860b); } .art-gol::after { content: '💎'; filter: drop-shadow(0 0 5px gold); }
         
-        .art-gas { background: linear-gradient(to top right, #a1c4fd, #c2e9fb); } .art-gas::after { content: '☁️'; font-size: 30px; filter: drop-shadow(0 0 5px white); animation: float 3s infinite ease-in-out; }
-        .art-liquid { background: linear-gradient(to bottom, #4facfe, #00f2fe); } .art-liquid::after { content: '💧'; font-size: 30px; animation: bounce 2s infinite; }
-        .art-solid { background: linear-gradient(to bottom, #e6b980, #eacda3); } .art-solid::after { content: '🪨'; font-size: 30px; }
-        .art-metal { background: linear-gradient(135deg, #bdc3c7, #2c3e50); } .art-metal::after { content: '✨'; font-size: 30px; text-shadow: 0 0 5px white; animation: spin 5s infinite linear; }
-        .art-toxic { background: linear-gradient(to bottom, #f093fb, #f5576c); } .art-toxic::after { content: '☠️'; font-size: 30px; filter: drop-shadow(0 0 5px purple); }
-        .art-fire { background: linear-gradient(to top, #e74c3c, #f1c40f); } .art-fire::after { content: '🔥'; font-size: 30px; animation: pulse 0.5s infinite; }
-        .art-gold { background: radial-gradient(circle, #ffd700, #b8860b); } .art-gold::after { content: '💎'; font-size: 30px; filter: drop-shadow(0 0 5px gold); }
-        .art-H { background: linear-gradient(to top, #89f7fe, #66a6ff); } .art-H::after { content:'(•ω•)'; font-size:12px; background:white; color:#333; padding:4px; border-radius:10px; box-shadow: 0 0 5px white;}
+        /* 個別 */
+        .art-H { background: linear-gradient(to t, #89f7fe, #66a6ff); } .art-H::after { content:'(•ω•)'; font-size:10px; background:white; color:#333; padding:3px; border-radius:10px; }
+        
+        @keyframes float { 50% { transform: translateY(-5px); } } @keyframes bounce { 50% { transform: scale(1.1); } } 
+        @keyframes spin { 100% { filter: hue-rotate(360deg); } } @keyframes pulse { 50% { opacity: 0.7; } }
 
-        @keyframes float { 50% { transform: translateY(-5px); } }
-        @keyframes bounce { 50% { transform: scale(1.1); } }
-        @keyframes pulse { 50% { opacity: 0.7; } }
-        @keyframes spin { 100% { filter: hue-rotate(360deg); } }
-
-        /* --- タイトル画面 --- */
-        #title-screen { background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%); }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--accent); text-shadow: 0 0 15px var(--accent); margin-bottom: 20px; text-align: center; }
-        .menu-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; margin: 10px; width: 220px; text-align: center; backdrop-filter: blur(5px); }
-        .menu-btn.primary { background: linear-gradient(90deg, var(--primary), #2980b9); border: none; box-shadow: 0 0 10px var(--primary); }
-        .menu-btn.disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* --- デッキ選択 & 図鑑 --- */
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 600px; padding-bottom: 60px; }
-        .list-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 15px; border-radius: 12px; cursor: pointer; min-height: 80px; display: flex; flex-direction: column; justify-content: space-between; }
-        .back-btn { position: fixed; bottom: 20px; background: #333; padding: 10px 30px; border-radius: 20px; z-index: 200; cursor: pointer; }
+        /* --- UIパーツ --- */
+        .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer; backdrop-filter: blur(5px); margin: 5px; text-align: center; width: 200px; }
+        .btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+        .btn-p { background: linear-gradient(90deg, var(--primary), #2980b9); border: none; box-shadow: 0 0 15px rgba(52, 152, 219, 0.4); }
+        
+        .logo { font-family: 'Orbitron'; font-size: 42px; color: var(--accent); text-shadow: 0 0 20px var(--accent); margin-bottom: 30px; text-align: center; }
 
         /* --- ゲームボード --- */
-        #game-board { display: none; flex-direction: column; height: 100vh; background: #111; position: relative; }
-        #info-area { height: 12%; background: rgba(30,30,40,0.95); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 10; border-bottom: 1px solid #444; border-top: 1px solid #444; }
+        #game-board { display: none; flex-direction: column; height: 100vh; background: #111; }
         .area { display: flex; justify-content: center; align-items: center; }
-        #enemy-hand { height: 8%; background: rgba(0,0,0,0.3); } 
-        #enemy-field { height: 24%; border-bottom: 2px solid #333; }
-        #player-field { height: 24%; border-top: 2px solid #333; } 
-        #player-hand { height: 32%; background: rgba(0,0,0,0.2); overflow-x: auto; justify-content: flex-start; padding: 0 10px; gap: 5px; }
+        #e-hand { height: 10%; background: rgba(0,0,0,0.4); }
+        #e-field { height: 23%; border-bottom: 2px solid #333; }
+        #info-area { height: 12%; background: rgba(30,30,40,0.95); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 10; border-y: 1px solid #444; }
+        #p-field { height: 23%; border-top: 2px solid #333; }
+        #p-hand { height: 32%; background: rgba(0,0,0,0.2); overflow-x: auto; justify-content: flex-start; padding: 0 10px; gap: 5px; align-items: center; display: flex; }
 
         /* --- カードデザイン (TCG風) --- */
-        .card { width: 85px; height: 125px; background: var(--card-bg); border-radius: 6px; border: 2px solid var(--card-frame); box-shadow: 0 4px 8px rgba(0,0,0,0.5); display: flex; flex-direction: column; padding: 3px; position: relative; flex-shrink: 0; margin: 2px; transition: transform 0.1s; overflow: hidden; }
-        .card[data-r="N"] { border-color: var(--rare-n); }
-        .card[data-r="R"] { border-color: var(--rare-r); box-shadow: 0 0 4px var(--rare-r); }
-        .card[data-r="SR"] { border-color: var(--rare-sr); box-shadow: 0 0 6px var(--rare-sr); background: linear-gradient(135deg, #2c3e50, #4a235a); }
-        .card[data-r="SSR"] { border-color: var(--rare-ssr); box-shadow: 0 0 8px var(--rare-ssr); background: linear-gradient(135deg, #f1c40f, #e67e22); animation: shine 3s infinite; }
-        @keyframes shine { 0% { filter: brightness(1); } 50% { filter: brightness(1.2); } 100% { filter: brightness(1); } }
+        .card {
+            width: 85px; height: 125px; background: var(--card-bg); border-radius: 6px;
+            border: 2px solid var(--card-border); box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; padding: 3px; position: relative; flex-shrink: 0; margin: 2px;
+            transition: transform 0.1s; overflow: hidden; box-sizing: border-box;
+        }
+        .card[data-r="N"] { border-color: var(--n); } 
+        .card[data-r="R"] { border-color: var(--r); box-shadow: 0 0 5px var(--r); }
+        .card[data-r="SR"] { border-color: var(--sr); box-shadow: 0 0 8px var(--sr); background: linear-gradient(135deg, #2c3e50, #4a235a); }
+        .card[data-r="SSR"] { border-color: var(--ssr); box-shadow: 0 0 10px var(--ssr); background: linear-gradient(135deg, #f1c40f, #e67e22); animation: holo 3s infinite linear; }
+        @keyframes holo { 0% { filter: brightness(1); } 50% { filter: brightness(1.2); } 100% { filter: brightness(1); } }
 
-        .c-header { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; font-size: 9px; font-weight: bold; color: #eee; margin-bottom: 2px; background: rgba(0,0,0,0.3); }
-        .c-art-box { width: 100%; height: 60px; background: #000; position: relative; border: 1px solid #555; border-radius: 2px; overflow: hidden; }
-        .c-text-box { flex-grow: 1; padding: 2px; font-size: 7px; color: #ddd; background: rgba(255,255,255,0.05); overflow: hidden; line-height: 1.1; display:flex; align-items:center; justify-content:center; text-align:center;}
-        .c-stats-box { display: flex; justify-content: space-between; font-weight: 900; font-size: 11px; padding: 2px 4px; background: rgba(0,0,0,0.6); margin-top: auto; }
-        .stat-atk { color: #e67e22; } .stat-hp { color: #2ecc71; }
+        .c-head { display: flex; justify-content: space-between; font-size: 8px; font-weight: bold; color: #eee; margin-bottom: 2px; }
+        .c-art-box { width: 100%; height: 60px; margin-bottom: 2px; border: 1px solid #555; }
+        .c-text { flex-grow: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); font-size: 8px; padding: 2px; color: #ddd; overflow: hidden; line-height: 1.1; display:flex; align-items:center; justify-content:center; text-align:center;}
+        .c-stats { position: absolute; bottom: 3px; width: 92%; left: 4%; display: flex; justify-content: space-between; font-weight: 900; font-size: 10px; }
+        .st-a { color: #e67e22; background: rgba(0,0,0,0.8); padding: 0 3px; border-radius: 3px; }
+        .st-h { color: #2ecc71; background: rgba(0,0,0,0.8); padding: 0 3px; border-radius: 3px; }
 
-        .badges { position: absolute; top: 70px; right: 2px; display: flex; gap: 1px; z-index: 5; }
-        .bdg { width: 14px; height: 14px; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; border: 1px solid white; box-shadow: 1px 1px 2px black; }
-        .bdg-w { background: var(--primary); } .bdg-t { background: #8e44ad; } .bdg-s { background: var(--accent); } .bdg-st { background: var(--rare-n); }
+        .badges { position: absolute; top: 68px; right: 2px; display: flex; gap: 1px; z-index: 5; }
+        .bdg { width: 12px; height: 12px; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid white; }
+        .b-w { background: var(--primary); } .b-t { background: #8e44ad; } .b-s { background: var(--accent); } .b-h { background: var(--n); }
 
-        .card.selected { transform: translateY(-15px) scale(1.05); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); z-index: 100; }
+        .card.selected { transform: translateY(-20px) scale(1.05); border-color: var(--accent); z-index: 100; box-shadow: 0 0 15px var(--accent); }
         .card.can-attack { border-color: var(--success); box-shadow: 0 0 10px var(--success); }
-        .card.attacking { transform: scale(1.2); border-color: var(--danger); box-shadow: 0 0 20px var(--danger); z-index: 200; }
-        .valid-target { animation: pulse 0.8s infinite; border-color: var(--danger)!important; }
+        .card.valid-target { animation: pulse 0.8s infinite; border-color: var(--danger)!important; }
 
-        /* UIパーツ */
-        .leader { text-align: center; width: 70px; }
-        .hp-circle { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 50%; width: 38px; height: 38px; line-height: 38px; font-weight: bold; font-size: 16px; margin: 0 auto; border: 2px solid white; box-shadow: 0 0 8px red; font-size: 16px; }
-        .action-overlay { position: absolute; bottom: 35%; right: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
-        .game-btn { padding: 12px 18px; border-radius: 25px; border: none; font-weight: bold; color: white; font-size: 12px; box-shadow: 0 4px 5px rgba(0,0,0,0.5); cursor: pointer; }
-        .btn-draw { background: linear-gradient(to right, #27ae60, #2ecc71); } 
-        .btn-syn { background: linear-gradient(to right, #f39c12, #f1c40f); color: #333; }
-        #btn-end-turn { padding: 6px 12px; background: #e67e22; border-radius: 15px; border: none; color: white; font-weight: bold; }
-        #cancel-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 200; box-shadow: 0 0 10px var(--danger); cursor: pointer; }
+        /* UI: リーダーなど */
+        .ldr { text-align: center; width: 70px; }
+        .hp { width: 35px; height: 35px; border-radius: 50%; background: #c0392b; border: 2px solid white; line-height: 35px; font-weight: bold; margin: 0 auto; box-shadow: 0 0 8px red; font-size: 16px; }
+        .acts { position: absolute; bottom: 34%; right: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+        .g-btn { padding: 10px 16px; border-radius: 20px; border: none; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
+        .g-dr { background: linear-gradient(to right, #27ae60, #2ecc71); }
+        .g-sy { background: linear-gradient(to right, #f39c12, #e67e22); color: #222; }
+        #cancel-btn { display: none; position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 200; box-shadow: 0 0 15px var(--danger); cursor: pointer; }
 
-        /* モーダル */
-        #msg-box { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 10px; font-weight: bold; font-size: 20px; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; white-space: nowrap; }
+        /* 図鑑・デッキ選択グリッド */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; width: 100%; max-width: 600px; padding-bottom: 80px; }
+        .list-card { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; cursor: pointer; min-height: 80px; border: 1px solid #555; display:flex; flex-direction:column; justify-content:space-between; }
         
-        #detail-panel { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 300px; background: rgba(20,20,30,0.98); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; z-index: 3000; box-shadow: 0 0 40px black; }
-        .big-art-frame { width: 100%; height: 150px; border: 2px solid #555; margin: 10px 0; border-radius: 8px; }
+        /* 詳細パネル */
+        #det-pan { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 300px; background: rgba(20,20,30,0.98); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: none; flex-direction: column; z-index: 3000; box-shadow: 0 0 50px black; }
+        .big-art { width: 100%; height: 150px; border: 2px solid #555; margin: 10px 0; border-radius: 8px; }
 
-        #skill-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 4000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .sk-btn { background: white; color: #333; padding: 15px; width: 100%; max-width: 300px; margin-bottom: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; border-left: 5px solid var(--primary); }
+        /* 合成ヒント */
+        #craft-list { position: absolute; bottom: 36%; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none; }
+        .craft-btn { background: rgba(0,0,0,0.9); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 5px; pointer-events: auto; font-size: 12px; color: white; cursor: pointer; box-shadow: 0 0 5px var(--accent); text-align: left; }
 
+        #msg-box { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 8px; border: 2px solid white; font-size: 20px; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5000; white-space: nowrap; }
+        
         #res-scr { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 6000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .res-tit { font-size: 48px; font-weight: bold; font-family: 'Orbitron'; margin-bottom: 20px; }
-
-        #craft-list { position: absolute; bottom: 38%; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 40; pointer-events: none; }
-        .craft-btn { background: rgba(0,0,0,0.9); border: 1px solid var(--accent); padding: 8px 12px; border-radius: 8px; pointer-events: auto; font-size: 12px; color: white; cursor: pointer; box-shadow: 0 0 5px var(--accent); }
+        .res-win { color: var(--accent); } .res-lose { color: var(--danger); }
+        .confetti { position: absolute; width: 10px; height: 10px; background: #f00; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
     </style>
 </head>
 <body>
 
-<div id="error-overlay"></div>
-
 <div id="title-screen" class="screen">
     <div class="logo">CHEM-VERSE</div>
-    <div class="menu-btn primary" onclick="showDeck()">CPU対戦</div>
+    <div class="menu-btn btn-p" onclick="showDeck()">CPU対戦</div>
     <div class="menu-btn" onclick="showLib()">カード図鑑</div>
-    <div class="menu-btn disabled" style="opacity:0.5">対人戦 (準備中)</div>
+    <div class="menu-btn disabled">対人戦 (準備中)</div>
 </div>
 
 <div id="deck-screen" class="screen hidden scrollable">
     <h2 style="text-align:center; color:var(--accent)">デッキ選択</h2>
-    <div class="grid-container" id="d-grid"></div>
-    <div class="back-btn" onclick="showTitle()">戻る</div>
+    <div class="grid" id="d-grid"></div>
+    <button class="btn" style="position:fixed; bottom:20px; background:#333; z-index:200;" onclick="showTitle()">戻る</button>
 </div>
 
 <div id="lib-screen" class="screen hidden scrollable">
     <h2 style="text-align:center; color:var(--primary)">カード図鑑</h2>
-    <div class="grid-container" id="lib-grid" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
-    <div class="back-btn" onclick="showTitle()">戻る</div>
+    <div class="grid" id="lib-grid" style="grid-template-columns:repeat(auto-fill, minmax(85px,1fr)); padding:10px;"></div>
+    <button class="btn" style="position:fixed; bottom:20px; background:#333; z-index:200;" onclick="showTitle()">戻る</button>
 </div>
 
 <div id="board">
-    <div id="enemy-hand" class="area"></div>
-    <div id="enemy-field" class="area"></div>
-    <div id="info">
-        <div class="ldr" onclick="atkLdr('enemy')"><div style="font-size:20px">🤖</div><div class="hp" id="e-hp">25</div></div>
+    <div id="e-hand" class="area"></div>
+    <div id="e-field" class="area"></div>
+    <div id="info-area">
+        <div class="ldr" onclick="atkLdr('e')"><div style="font-size:20px">🤖</div><div class="hp" id="e-hp">25</div></div>
         <div style="text-align:center">
-            <div id="turn-disp" style="font-size:12px;color:#aaa">Turn 1</div>
+            <div id="turn-disp" style="font-size:10px;color:#aaa">T1</div>
             <div id="mp-disp" style="font-size:14px;font-weight:bold;color:var(--success)">MP 1/1</div>
         </div>
-        <button id="end-btn" style="padding:6px 15px; border-radius:15px; border:none; background:#e67e22; color:white; font-weight:bold;" onclick="endTurn()">終了</button>
-        <div class="ldr" onclick="atkLdr('player')"><div id="p-hp" class="hp">25</div><div style="font-size:20px">🧑‍🔬</div></div>
+        <button style="padding:6px 12px; background:#e67e22; border-radius:15px; border:none; color:white; font-weight:bold;" onclick="endTurn()" id="btn-end">終了</button>
+        <div class="ldr" onclick="atkLdr('p')"><div id="p-hp" class="hp">25</div><div style="font-size:20px">🧑‍🔬</div></div>
     </div>
     <div id="craft-list"></div>
-    <div id="player-field" class="area"></div>
-    <div id="player-hand"></div>
+    <div id="p-field" class="area"></div>
+    <div id="p-hand"></div>
     <div id="cancel-btn" onclick="cancelAtk()">❌ キャンセル</div>
 </div>
 
 <div class="acts" id="acts" style="display:none">
-    <button class="game-btn btn-draw" onclick="actDraw()">＋ ドロー</button>
-    <button class="game-btn btn-syn" onclick="actSyn()">⚗️ 合成</button>
+    <button class="g-btn g-dr" onclick="actDraw()">＋ ドロー</button>
+    <button class="g-btn g-sy" onclick="actSyn()">⚗️ 合成</button>
 </div>
 
 <div id="det-pan" onclick="this.style.display='none'">
     <div style="text-align:right;font-size:24px">×</div>
-    <div style="text-align:center">
-        <span id="dt-sym" style="font-size:32px;font-weight:bold;color:var(--primary)"></span>
-        <span id="dt-name" style="font-size:20px;font-weight:bold;margin-left:10px"></span>
-    </div>
-    <div class="big-art-frame art-frame"><div id="dt-art" class="css-art"></div></div>
-    <div id="dt-st" style="display:flex;justify-content:center;gap:20px;font-size:18px;font-weight:bold;margin-bottom:10px;"></div>
-    <div id="dt-desc" style="font-size:12px;color:#ccc;max-height:150px;overflow-y:auto;line-height:1.5;"></div>
+    <div style="text-align:center"><span id="dt-sym" style="font-size:32px;font-weight:bold;color:var(--primary)"></span> <span id="dt-name" style="font-size:18px;font-weight:bold"></span></div>
+    <div class="art-frame big-art"><div id="dt-art" class="css-art"></div></div>
+    <div id="dt-st" style="display:flex;justify-content:center;gap:20px;font-size:18px;font-weight:bold;margin:10px 0;"></div>
+    <div id="dt-desc" style="font-size:12px;color:#ccc;max-height:100px;overflow-y:auto;line-height:1.4;"></div>
     <div style="text-align:center;margin-top:10px;font-size:10px;color:#666">(タップして閉じる)</div>
 </div>
 
-<div id="skill-modal">
+<div id="skill-modal" class="screen hidden" style="background:rgba(0,0,0,0.85); z-index:4000;">
     <h3>技を選択</h3>
-    <div id="sk-list"></div>
-    <button class="menu-btn" style="background:#7f8c8d; margin-top:20px; width:100px;" onclick="closeSkillModal()">キャンセル</button>
+    <div id="sk-list" style="width:80%; max-width:300px; display:flex; flex-direction:column; gap:10px;"></div>
+    <button class="btn" style="background:#777; margin-top:20px; width:auto;" onclick="closeSk()">キャンセル</button>
 </div>
 
 <div id="res-scr">
     <div class="res-tit" id="res-tit">VICTORY</div>
-    <div style="margin-bottom:30px;font-weight:bold;font-size:20px;" id="res-msg">勝利！</div>
-    <div class="menu-btn" onclick="showTitle()">タイトルへ</div>
+    <div style="margin-bottom:30px;font-size:20px;font-weight:bold;" id="res-msg"></div>
+    <button class="btn btn-p" onclick="showTitle()">タイトルへ</button>
+    <div id="confetti"></div>
 </div>
 
 <div id="msg-box"></div>
+<div id="err-log" style="position:fixed;top:0;left:0;background:red;color:white;z-index:9999;display:none;"></div>
 
 <script>
-    /* 【ここに後半のコードを貼り付けてください】 */
-</script>
-</body>
-</html>
-// エラーハンドリング
-window.onerror = function(msg, url, line) {
-    const d = document.getElementById('error-overlay');
-    d.style.display = 'block';
-    d.innerText = `エラーが発生しました:\n${msg}\nLine: ${line}`;
-};
+window.onerror = (m,u,l) => { document.getElementById('err-log').style.display='block'; document.getElementById('err-log').innerText=`Error: ${m} L:${l}`; };
 
 // --- データ定義 ---
-const MAX_H=10, MAX_F=5, INI_HP=25;
-
 const ELEM = {
-    H:{s:'H',n:'水素',r:'N',c:'art-H'}, He:{s:'He',n:'ヘリウム',r:'SR',c:'art-gas'}, Li:{s:'Li',n:'リチウム',r:'R',c:'art-metal'},
-    B:{s:'B',n:'ホウ素',r:'R',c:'art-solid'}, C:{s:'C',n:'炭素',r:'N',c:'art-solid'}, N:{s:'N',n:'窒素',r:'N',c:'art-gas'},
-    O:{s:'O',n:'酸素',r:'N',c:'art-gas'}, F:{s:'F',n:'フッ素',r:'SR',c:'art-toxic'}, Ne:{s:'Ne',n:'ネオン',r:'SR',c:'art-gas'},
-    Na:{s:'Na',n:'ナトリウム',r:'N',c:'art-metal'}, Mg:{s:'Mg',n:'マグネシウム',r:'R',c:'art-metal'}, Al:{s:'Al',n:'アルミニウム',r:'R',c:'art-metal'},
-    Si:{s:'Si',n:'ケイ素',r:'R',c:'art-solid'}, P:{s:'P',n:'リン',r:'R',c:'art-solid'}, S:{s:'S',n:'硫黄',r:'R',c:'art-toxic'},
-    Cl:{s:'Cl',n:'塩素',r:'N',c:'art-toxic'}, Ar:{s:'Ar',n:'アルゴン',r:'SR',c:'art-gas'}, K:{s:'K',n:'カリウム',r:'N',c:'art-metal'},
-    Ca:{s:'Ca',n:'カルシウム',r:'R',c:'art-metal'}, Ti:{s:'Ti',n:'チタン',r:'SR',c:'art-metal'}, V:{s:'V',n:'バナジウム',r:'SR',c:'art-metal'},
-    Cr:{s:'Cr',n:'クロム',r:'SR',c:'art-metal'}, Mn:{s:'Mn',n:'マンガン',r:'R',c:'art-metal'}, Fe:{s:'Fe',n:'鉄',r:'N',c:'art-metal'},
-    Ni:{s:'Ni',n:'ニッケル',r:'R',c:'art-metal'}, Cu:{s:'Cu',n:'銅',r:'N',c:'art-metal'}, Zn:{s:'Zn',n:'亜鉛',r:'R',c:'art-metal'},
-    Ag:{s:'Ag',n:'銀',r:'SR',c:'art-metal'}, Cd:{s:'Cd',n:'カドミウム',r:'R',c:'art-toxic'}, Sn:{s:'Sn',n:'スズ',r:'R',c:'art-metal'},
-    Ba:{s:'Ba',n:'バリウム',r:'R',c:'art-metal'}, W:{s:'W',n:'タングステン',r:'SSR',c:'art-metal'}, Pt:{s:'Pt',n:'プラチナ',r:'SSR',c:'art-metal'},
-    Au:{s:'Au',n:'金',r:'SSR',c:'art-gold'}, Hg:{s:'Hg',n:'水銀',r:'SR',c:'art-liquid'}, Pb:{s:'Pb',n:'鉛',r:'R',c:'art-metal'}
+    H:{s:'H',n:'水素',r:'N',c:'art-fir'}, He:{s:'He',n:'ヘリウム',r:'SR',c:'art-gas'}, Li:{s:'Li',n:'リチウム',r:'R',c:'art-met'},
+    B:{s:'B',n:'ホウ素',r:'R',c:'art-sol'}, C:{s:'C',n:'炭素',r:'N',c:'art-sol'}, N:{s:'N',n:'窒素',r:'N',c:'art-gas'},
+    O:{s:'O',n:'酸素',r:'N',c:'art-gas'}, F:{s:'F',n:'フッ素',r:'SR',c:'art-tox'}, Ne:{s:'Ne',n:'ネオン',r:'SR',c:'art-gas'},
+    Na:{s:'Na',n:'ナトリウム',r:'N',c:'art-met'}, Mg:{s:'Mg',n:'マグネシウム',r:'R',c:'art-met'}, Al:{s:'Al',n:'アルミニウム',r:'R',c:'art-met'},
+    Si:{s:'Si',n:'ケイ素',r:'R',c:'art-sol'}, P:{s:'P',n:'リン',r:'R',c:'art-sol'}, S:{s:'S',n:'硫黄',r:'R',c:'art-tox'},
+    Cl:{s:'Cl',n:'塩素',r:'N',c:'art-tox'}, Ar:{s:'Ar',n:'アルゴン',r:'SR',c:'art-gas'}, K:{s:'K',n:'カリウム',r:'N',c:'art-met'},
+    Ca:{s:'Ca',n:'カルシウム',r:'R',c:'art-met'}, Ti:{s:'Ti',n:'チタン',r:'SR',c:'art-met'}, V:{s:'V',n:'バナジウム',r:'SR',c:'art-met'},
+    Cr:{s:'Cr',n:'クロム',r:'SR',c:'art-met'}, Mn:{s:'Mn',n:'マンガン',r:'R',c:'art-met'}, Fe:{s:'Fe',n:'鉄',r:'N',c:'art-met'},
+    Ni:{s:'Ni',n:'ニッケル',r:'R',c:'art-met'}, Cu:{s:'Cu',n:'銅',r:'N',c:'art-met'}, Zn:{s:'Zn',n:'亜鉛',r:'R',c:'art-met'},
+    Ga:{s:'Ga',n:'ガリウム',r:'SR',c:'art-met'}, Ge:{s:'Ge',n:'ゲルマニウム',r:'SR',c:'art-met'}, Ag:{s:'Ag',n:'銀',r:'SR',c:'art-met'},
+    Cd:{s:'Cd',n:'カドミウム',r:'R',c:'art-tox'}, Sn:{s:'Sn',n:'スズ',r:'R',c:'art-met'}, Ba:{s:'Ba',n:'バリウム',r:'R',c:'art-met'},
+    W:{s:'W',n:'タングステン',r:'SSR',c:'art-met'}, Pt:{s:'Pt',n:'プラチナ',r:'SSR',c:'art-met'}, Au:{s:'Au',n:'金',r:'SSR',c:'art-gol'},
+    Hg:{s:'Hg',n:'水銀',r:'SR',c:'art-liq'}, Pb:{s:'Pb',n:'鉛',r:'R',c:'art-met'}
 };
 
 const REC = [
-    {i:['H','Cl'],p:{s:'HCl',n:'塩化水素',r:'R',a:5,h:1,c:'art-toxic',sk:[{n:'強酸',p:5,d:'高火力攻撃'}]}},
-    {i:['H','F'],p:{s:'HF',n:'フッ化水素',r:'SR',a:4,h:2,ab:'tox',c:'art-toxic',sk:[{n:'ガラス腐食',p:4,d:'攻撃'},{n:'猛毒',p:0,t:'tox',d:'必殺'}]}},
-    {i:['Na','H'],p:{s:'NaH',n:'水素化Na',r:'R',a:3,h:1,ab:'stm',c:'art-solid',sk:[{n:'還元',p:3,d:'疾走'}]}},
-    {i:['H','H','O'],p:{s:'H2O',n:'水',r:'N',a:1,h:4,c:'art-liquid',sk:[{n:'水流',p:1,d:'攻撃'},{n:'加水分解',p:3,t:'heal',d:'回復'}]}},
-    {i:['Ag','Cl'],p:{s:'AgCl',n:'塩化銀',r:'SR',a:1,h:6,ab:'wrd',c:'art-solid',sk:[{n:'沈殿',p:0,t:'grd',d:'守護'}]}},
-    {i:['Fe','O'],p:{s:'FeO',n:'酸化鉄',r:'N',a:3,h:5,c:'art-solid',sk:[{n:'黒錆',p:3,d:'通常'}]}},
-    {i:['Fe','O','O'],p:{s:'Fe2O3',n:'赤錆',r:'R',a:2,h:8,ab:'wrd',c:'art-solid',sk:[{n:'不動態',p:2,d:'高耐久'}]}},
+    {i:['H','Cl'],p:{s:'HCl',n:'塩化水素',r:'R',a:5,h:1,c:'art-tox',sk:[{n:'強酸',p:5,d:'高火力'}]}},
+    {i:['H','F'],p:{s:'HF',n:'フッ化水素',r:'SR',a:4,h:2,ab:'tox',c:'art-tox',sk:[{n:'ガラス腐食',p:4,d:'攻撃'},{n:'猛毒',p:0,t:'tox',d:'必殺'}]}},
+    {i:['Na','H'],p:{s:'NaH',n:'水素化Na',r:'R',a:3,h:1,ab:'stm',c:'art-sol',sk:[{n:'還元',p:3,d:'疾走'}]}},
+    {i:['H','H','O'],p:{s:'H2O',n:'水',r:'N',a:1,h:4,c:'art-liq',sk:[{n:'水流',p:1,d:'攻撃'},{n:'加水分解',p:3,t:'heal',d:'回復'}]}},
+    {i:['Ag','Cl'],p:{s:'AgCl',n:'塩化銀',r:'SR',a:1,h:6,ab:'wrd',c:'art-sol',sk:[{n:'沈殿',p:0,t:'grd',d:'守護'}]}},
+    {i:['Fe','O'],p:{s:'FeO',n:'酸化鉄',r:'N',a:3,h:5,c:'art-sol',sk:[{n:'黒錆',p:3,d:'通常'}]}},
+    {i:['Fe','O','O'],p:{s:'Fe2O3',n:'赤錆',r:'R',a:2,h:8,ab:'wrd',c:'art-sol',sk:[{n:'不動態',p:2,d:'高耐久'}]}},
+    {i:['Cu','O'],p:{s:'CuO',n:'酸化銅',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'黒粉',p:3,d:'攻撃'}]}},
+    {i:['Zn','Cu'],p:{s:'Brass',n:'黄銅',r:'R',a:4,h:5,c:'art-met',sk:[{n:'合金',p:4,d:'攻撃'}]}},
+    {i:['Hg','Zn'],p:{s:'Amalgam',n:'アマルガム',r:'SR',a:3,h:6,ab:'wrd',c:'art-met',sk:[{n:'合金化',p:3,d:'守護'}]}},
     {i:['C','O'],p:{s:'CO',n:'一酸化炭素',r:'R',a:1,h:2,ab:'tox',c:'art-gas',sk:[{n:'結合',p:0,t:'tox',d:'必殺'}]}},
     {i:['H','S'],p:{s:'H2S',n:'硫化水素',r:'R',a:2,h:3,ab:'tox',c:'art-gas',sk:[{n:'硫化',p:0,t:'tox',d:'必殺'}]}},
     {i:['Cl','Cl'],p:{s:'Cl2',n:'塩素ガス',r:'R',a:3,h:3,c:'art-gas',sk:[{n:'散布',p:2,t:'aoe',d:'全体2ダメ'}]}},
     {i:['S','O','O'],p:{s:'SO2',n:'二酸化硫黄',r:'N',a:2,h:4,c:'art-gas',sk:[{n:'酸性雨',p:1,t:'aoe',d:'全体1ダメ'}]}},
-    {i:['Na','O','H'],p:{s:'NaOH',n:'水酸化Na',r:'R',a:3,h:3,c:'art-solid',sk:[{n:'中和熱',p:2,t:'ah',d:'全体2ダメ/回復'}]}},
-    {i:['Al','O','O'],p:{s:'Al2O3',n:'アルミナ',r:'R',a:2,h:7,ab:'wrd',c:'art-solid',sk:[{n:'被膜',p:2,d:'守護'}]}},
-    {i:['C','C','C'],p:{s:'Diamond',n:'ダイヤ',r:'SSR',a:4,h:10,ab:'wrd',c:'art-gold',sk:[{n:'硬度10',p:4,d:'鉄壁'}]}},
-    {i:['Au'],p:{s:'Au',n:'金',r:'SSR',a:6,h:6,c:'art-gold',sk:[{n:'輝き',p:6,d:'高火力'}]}},
+    {i:['Cd','S'],p:{s:'CdS',n:'硫化Cd',r:'SR',a:2,h:5,ab:'tox',c:'art-tox',sk:[{n:'イタイイタイ',p:0,t:'tox',d:'猛毒'}]}},
+    {i:['Na','O','H'],p:{s:'NaOH',n:'水酸化Na',r:'R',a:3,h:3,c:'art-sol',sk:[{n:'中和熱',p:2,t:'ah',d:'全体2ダメ/回復'}]}},
+    {i:['Al','O','O'],p:{s:'Al2O3',n:'アルミナ',r:'R',a:2,h:7,ab:'wrd',c:'art-sol',sk:[{n:'被膜',p:2,d:'守護'}]}},
+    {i:['Cl','Na'],p:{s:'NaCl',n:'塩化Na',r:'N',a:3,h:4,c:'art-sol',sk:[{n:'塩味',p:3,d:'通常'}]}},
+    {i:['Ca','O','H','H'],p:{s:'Ca(OH)2',n:'消石灰',r:'N',a:1,h:6,ab:'wrd',c:'art-sol',sk:[{n:'中和',p:4,t:'heal',d:'回復'}]}},
+    {i:['C','C','C'],p:{s:'Diamond',n:'ダイヤ',r:'SSR',a:4,h:10,ab:'wrd',c:'art-gol',sk:[{n:'硬度10',p:4,d:'鉄壁'}]}},
+    {i:['Al','O','O','Cr'],p:{s:'Ruby',n:'ルビー',r:'SR',a:5,h:8,c:'art-sol',sk:[{n:'深紅',p:5,d:'攻撃'}]}},
+    {i:['Al','O','Ti'],p:{s:'Sapphire',n:'サファイア',r:'SR',a:4,h:9,c:'art-sol',sk:[{n:'青玉',p:4,d:'高耐久'}]}},
+    {i:['Si','O','O'],p:{s:'SiO2',n:'石英',r:'N',a:3,h:6,c:'art-sol',sk:[{n:'結晶',p:2,t:'aoe',d:'全体2ダメ'}]}},
+    {i:['Au'],p:{s:'Au',n:'金',r:'SSR',a:6,h:6,c:'art-gol',sk:[{n:'輝き',p:6,d:'高火力'}]}},
+    {i:['Pt'],p:{s:'Pt',n:'プラチナ',r:'SSR',a:5,h:7,c:'art-met',sk:[{n:'触媒',p:5,d:'攻撃'}]}},
+    {i:['W'],p:{s:'W',n:'タングステン',r:'SSR',a:7,h:8,ab:'wrd',c:'art-met',sk:[{n:'融点',p:7,d:'攻撃'}]}},
+    {i:['Ti'],p:{s:'Ti',n:'チタン',r:'SR',a:4,h:5,c:'art-met',sk:[{n:'強度',p:4,d:'攻撃'}]}},
     {i:['He','He'],p:{s:'He',n:'ヘリウム',r:'SR',a:2,h:2,ab:'stl',c:'art-gas',sk:[{n:'不活性',p:2,d:'潜伏'}]}},
-    {i:['H','Cl','N','O','O','O'],p:{s:'AquaRegia',n:'王水',r:'SSR',a:0,h:0,tp:'spl',c:'art-liquid',sk:[{n:'溶解',p:99,t:'tox',d:'除去'}]}},
-    {i:['Cu','O'],p:{s:'CuO',n:'酸化銅',r:'N',a:3,h:4,c:'art-solid',sk:[{n:'黒粉',p:3,d:'攻撃'}]}},
-    {i:['Zn','Cu'],p:{s:'Brass',n:'黄銅',r:'R',a:4,h:5,c:'art-metal',sk:[{n:'合金',p:4,d:'攻撃'}]}},
-    {i:['Hg','Zn'],p:{s:'Amalgam',n:'アマルガム',r:'SR',a:3,h:6,ab:'wrd',c:'art-liquid',sk:[{n:'合金化',p:3,d:'守護'}]}},
-    {i:['Cd','S'],p:{s:'CdS',n:'硫化Cd',r:'SR',a:2,h:5,ab:'tox',c:'art-toxic',sk:[{n:'猛毒',p:0,t:'tox',d:'猛毒'}]}},
-    {i:['Cl','Na'],p:{s:'NaCl',n:'塩化Na',r:'N',a:3,h:4,c:'art-solid',sk:[{n:'塩味',p:3,d:'通常'}]}},
-    {i:['Ca','O','H','H'],p:{s:'Ca(OH)2',n:'消石灰',r:'N',a:1,h:6,ab:'wrd',c:'art-solid',sk:[{n:'中和',p:4,t:'heal',d:'回復'}]}},
-    {i:['Al','O','O','Cr'],p:{s:'Ruby',n:'ルビー',r:'SR',a:5,h:8,c:'art-solid',sk:[{n:'深紅',p:5,d:'攻撃'}]}},
-    {i:['Al','O','Ti'],p:{s:'Sapphire',n:'サファイア',r:'SR',a:4,h:9,c:'art-solid',sk:[{n:'青玉',p:4,d:'攻撃'}]}},
-    {i:['Si','O','O'],p:{s:'SiO2',n:'石英',r:'N',a:3,h:6,c:'art-solid',sk:[{n:'結晶',p:2,t:'aoe',d:'全体2ダメ'}]}},
-    {i:['Pt'],p:{s:'Pt',n:'プラチナ',r:'SSR',a:5,h:7,c:'art-metal',sk:[{n:'触媒',p:5,d:'攻撃'}]}},
-    {i:['W'],p:{s:'W',n:'タングステン',r:'SSR',a:7,h:8,ab:'wrd',c:'art-metal',sk:[{n:'融点',p:7,d:'攻撃'}]}},
-    {i:['Ti'],p:{s:'Ti',n:'チタン',r:'SR',a:4,h:5,c:'art-metal',sk:[{n:'強度',p:4,d:'攻撃'}]}},
     {i:['Ne','Ne'],p:{s:'Ne',n:'ネオン',r:'SR',a:3,h:3,ab:'stl',c:'art-gas',sk:[{n:'発光',p:3,d:'潜伏'}]}},
     {i:['Ar','Ar'],p:{s:'Ar',n:'アルゴン',r:'SR',a:4,h:4,ab:'stl',c:'art-gas',sk:[{n:'保護',p:4,d:'潜伏'}]}},
-    {i:['H','H','S','O','O','O','O'],p:{s:'H2SO4',n:'濃硫酸',r:'SR',a:0,h:0,tp:'spl',c:'art-liquid',sk:[{n:'脱水',p:5,t:'aoe',d:'全体5ダメ'}]}},
-    {i:['K','Mn','O','O','O','O'],p:{s:'KMnO4',n:'過マンガン酸K',r:'SR',a:0,h:0,tp:'spl',c:'art-solid',sk:[{n:'酸化',p:7,t:'dmg',d:'7ダメ'}]}}
+    {i:['H','Cl','N','O','O','O'],p:{s:'AquaRegia',n:'王水',r:'SSR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'溶解',p:99,t:'tox',d:'除去'}]}},
+    {i:['H','H','S','O','O','O','O'],p:{s:'H2SO4',n:'濃硫酸',r:'SR',a:0,h:0,tp:'spl',c:'art-liq',sk:[{n:'脱水',p:5,t:'aoe',d:'全体5ダメ'}]}},
+    {i:['K','Mn','O','O','O','O'],p:{s:'KMnO4',n:'過マンガン酸K',r:'SR',a:0,h:0,tp:'spl',c:'art-sol',sk:[{n:'酸化',p:7,t:'dmg',d:'7ダメ'}]}}
 ];
 
 const DECKS = {
@@ -258,62 +246,54 @@ const DECKS = {
     hazard:{n:'危険物',d:'除去スペル',e:['H','Cl','N','O','S','K','Mn'],r:['AquaRegia','H2SO4','KMnO4']}
 };
 
-let gs={hp:INI_HP, ehp:INI_HP, h:[], f:[], eh:[], ef:[], tn:1, mp:1, mmp:1, my:true, sel:[], atk:null, pp:[], pr:[], ep:[], er:[]};
+let gs={hp:25,ehp:25,h:[],f:[],eh:[],ef:[],tn:1,mp:1,mmp:1,my:true,sel:[],atk:null};
 
-// --- 初期化 ---
-window.onload = () => {
-    try {
-        const g = document.getElementById('d-grid');
-        if(g) {
-            for(let k in DECKS){
-                const d=document.createElement('div'); d.className='list-card';
-                d.innerHTML=`<div style="font-weight:bold;color:var(--accent)">${DECKS[k].n}</div><div style="font-size:10px;color:#ccc">${DECKS[k].d}</div>`;
-                d.onclick=()=>startGame(k); g.appendChild(d);
-            }
-        }
-        // 図鑑
-        const lg=document.getElementById('lib-grid');
-        if(lg) {
-            for(let k in ELEM) addLibCard(ELEM[k], 'el', lg);
-            REC.forEach(r=>addLibCard(r.p, 'unit', lg));
-        }
-        showTitle();
-    } catch(e) { document.getElementById('error-overlay').style.display='block'; document.getElementById('error-overlay').innerText=e; }
+window.onload=()=>{
+    // デッキ生成
+    const dg=document.getElementById('d-grid');
+    for(let k in DECKS){
+        const d=document.createElement('div'); d.className='list-card';
+        d.innerHTML=`<div class="deck-title">${DECKS[k].n}</div><div class="deck-desc">${DECKS[k].d}</div>`;
+        d.onclick=()=>startGame(k); dg.appendChild(d);
+    }
+    // 図鑑生成
+    const lg=document.getElementById('lib-grid');
+    for(let k in ELEM) addLib(ELEM[k],true,lg);
+    REC.forEach(r=>addLib(r.p,false,lg));
+    showTitle();
 };
 
-function addLibCard(d, type, root){
-    const c=createCardUI({...d, id:0}, type==='el', false, false, false);
-    c.onclick=()=>showDet(d, type==='el');
-    root.appendChild(c);
+function addLib(d,isE,rt){
+    const c=createC(d,isE,false,false,false);
+    c.onclick=()=>showDet(d,isE);
+    rt.appendChild(c);
 }
 
 function showTitle(){hide();document.getElementById('title-screen').classList.remove('hidden');}
 function showDeck(){hide();document.getElementById('deck-select-screen').classList.remove('hidden');}
 function showLib(){hide();document.getElementById('lib-screen').classList.remove('hidden');}
 function hide(){
-    document.querySelectorAll('.screen').forEach(e=>e.classList.add('hidden'));
+    document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
     document.getElementById('game-board').style.display='none';
-    document.getElementById('action-btns').style.display='none';
+    document.getElementById('acts').style.display='none';
     document.getElementById('res-scr').style.display='none';
 }
 
 function startGame(k){
-    try {
-        gs={hp:INI_HP, ehp:INI_HP, h:[], f:[], eh:[], ef:[], tn:1, mp:1, mmp:1, my:true, sel:[], atk:null};
-        gs.pp=DECKS[k].e.map(x=>ELEM[x]); gs.pr=REC.filter(r=>DECKS[k].r.includes(r.p.s));
-        let ek=Object.keys(DECKS)[Math.floor(Math.random()*8)];
-        gs.ep=DECKS[ek].e.map(x=>ELEM[x]); gs.er=REC.filter(r=>DECKS[ek].r.includes(r.p.s));
-        document.getElementById('enemy-name').innerText=`CPU (${DECKS[ek].n.substring(0,4)})`;
-        hide(); document.getElementById('game-board').style.display='flex'; document.getElementById('action-btns').style.display='flex';
-        for(let i=0;i<5;i++){draw(true);draw(false);}
-        upd(); msg("バトル開始！");
-    } catch(e) { alert(e); }
+    gs={hp:25,ehp:25,h:[],f:[],eh:[],ef:[],tn:1,mp:1,mmp:1,my:true,sel:[],atk:null};
+    gs.pp=DECKS[k].e.map(x=>ELEM[x]); gs.pr=REC.filter(r=>DECKS[k].r.includes(r.p.s));
+    let ek=Object.keys(DECKS)[Math.floor(Math.random()*8)];
+    gs.ep=DECKS[ek].e.map(x=>ELEM[x]); gs.er=REC.filter(r=>DECKS[ek].r.includes(r.p.s));
+    document.getElementById('enemy-name').innerText=`CPU (${DECKS[ek].n.substring(0,4)})`;
+    hide(); document.getElementById('game-board').style.display='flex'; document.getElementById('acts').style.display='flex';
+    for(let i=0;i<5;i++){draw(true);draw(false);}
+    upd(); msg("バトル開始！");
 }
 
 function draw(isP){
     const p=isP?gs.pp:gs.ep, h=isP?gs.h:gs.eh;
-    if(h.length>=MAX_H){ if(!isP)h.shift(); else return; }
-    h.push({...p[Math.floor(Math.random()*p.length)], id:Math.random().toString(36), type:'el'});
+    if(h.length>=10){ if(!isP)h.shift(); else return; }
+    h.push({...p[Math.floor(Math.random()*p.length)],id:Math.random(),type:'el'});
 }
 
 function actDraw(){ if(!gs.my||gs.mp<1){msg("MP不足");return;} gs.mp--; draw(true); upd(); }
@@ -321,38 +301,36 @@ function actDraw(){ if(!gs.my||gs.mp<1){msg("MP不足");return;} gs.mp--; draw(t
 function actSyn(){
     if(!gs.my||gs.sel.length<1)return;
     const sl=gs.h.filter(c=>gs.sel.includes(c.id)), sym=sl.map(c=>c.s).sort();
-    if(gs.sel.length===1){
-        const r=gs.pr.find(x=>x.i.length===1 && x.i[0]===sym[0]);
-        if(r){ doSyn(r); return; }
+    if(gs.sel.length===1){ // 1枚
+        const r=gs.pr.find(x=>x.i.length===1&&x.i[0]===sym[0]);
+        if(r){doSyn(r);return;}
     }
     const r=gs.pr.find(x=>JSON.stringify(x.i.sort())===JSON.stringify(sym));
-    if(r) doSyn(r); else {msg("反応なし");gs.sel=[];upd();}
+    if(r)doSyn(r); else{msg("反応なし");gs.sel=[];upd();}
 }
 
 function doSyn(r){
     if(r.p.tp==='spl'){
         gs.h=gs.h.filter(c=>!gs.sel.includes(c.id)); gs.sel=[];
         const s=r.p.sk[0];
-        if(gs.ef.length>0){ let t=gs.ef.reduce((a,b)=>a.cur>b.cur?a:b); if(s.t==='tox')t.cur=-99;else t.cur-=s.p; msg(`${s.n}->${t.n}`); }
+        if(gs.ef.length>0){ const t=gs.ef.reduce((a,b)=>a.cur>b.cur?a:b); if(s.t==='tox')t.cur=-99;else t.cur-=s.p; msg(`${s.n}->${t.n}`); }
         else{ gs.ehp-=s.p; msg(`${s.n}->Leader`); }
         chk(); upd(); return;
     }
-    if(gs.f.length>=MAX_FIELD){msg("満員");return;}
+    if(gs.f.length>=5){msg("満員");return;}
     gs.h=gs.h.filter(c=>!gs.sel.includes(c.id)); gs.sel=[];
-    gs.f.push({...r.p, id:Math.random().toString(36), max:r.p.h, cur:r.p.h, can:r.p.ab==='stm', type:'unit'});
+    gs.f.push({...r.p,id:Math.random(),max:r.p.h,cur:r.p.h,can:r.p.ab==='stm',type:'unit'});
     msg(`召喚:${r.p.n}`); upd();
 }
 
 function onHand(id){ if(!gs.my)return; const c=gs.h.find(x=>x.id===id); showDet(c,true); if(gs.sel.includes(id))gs.sel=gs.sel.filter(x=>x!==id);else gs.sel.push(id); upd(); }
-
 function onField(id,isP){
     if(!gs.my)return;
     if(isP){
         const u=gs.f.find(x=>x.id===id); showDet(u,false);
-        if(u&&u.can){ gs.atk=u; document.body.classList.add('targeting'); upd(); }
+        if(u&&u.can){gs.atk=u;document.body.classList.add('targeting');upd();}
     } else if(gs.atk){
-        const t=gs.ef.find(x=>x.id===id);
-        if(t.ab==='stl'){msg("潜伏中");return;}
+        const t=gs.ef.find(x=>x.id===id); if(t.ab==='stl'){msg("潜伏中");return;}
         prepAtk(gs.atk,t,'unit');
     } else {
         showDet(gs.ef.find(x=>x.id===id),false);
@@ -372,35 +350,37 @@ function openSk(a,t){
     a.sk.forEach(s=>{
         const b=document.createElement('div'); b.className='sk-btn'; b.innerHTML=`${s.n} (${s.p})`;
         b.onclick=()=>{exeSk(a,t,s);m.style.display='none';}; l.appendChild(b);
-    }); m.style.display='flex';
+    });
+    m.style.display='flex';
 }
-function closeSkillModal(){ document.getElementById('skill-modal').style.display='none'; cancelAtk(); }
+function closeSk(){document.getElementById('skill-modal').style.display='none';cancelAtk();}
 
 function exeSk(a,t,s){
-    if(s.t==='aoe'){ gs.ef.forEach(u=>u.cur-=s.p); gs.ehp-=s.p; }
-    else if(s.t==='ah'){ gs.ef.forEach(u=>u.cur-=s.p); gs.hp+=s.p; }
-    else if(s.t==='heal'){ gs.hp+=s.p; }
-    else {
-        let d=s.p; if(t==='ldr') gs.ehp-=d;
-        else {
-            let cnt=t.a; if(s.t==='tox'&&d>0)t.cur=-99; else t.cur-=d;
-            if(t.cur<=0&&t.ab==='tox'&&cnt>0)a.cur=-99; else a.cur-=cnt;
+    if(s.t==='aoe'){gs.ef.forEach(u=>u.cur-=s.p);gs.ehp-=s.p;}
+    else if(s.t==='ah'){gs.ef.forEach(u=>u.cur-=s.p);gs.hp+=s.p;}
+    else if(s.t==='heal'){gs.hp+=s.p;}
+    else{
+        let d=s.p; if(t==='ldr')gs.ehp-=d;
+        else{
+            let cnt=t.a; if(s.t==='tox'&&d>0)t.cur=-99;else t.cur-=d;
+            if(t.cur<=0&&t.ab==='tox'&&cnt>0)a.cur=-99;else a.cur-=cnt;
         }
     }
     a.can=false; msg(s.n); cancelAtk(); chk(); upd();
 }
 
-function cancelAtk(){ gs.atk=null; document.body.classList.remove('targeting'); upd(); }
+function cancelAtk(){gs.atk=null;document.body.classList.remove('targeting');upd();}
 function chk(){
     gs.f=gs.f.filter(u=>u.cur>0); gs.ef=gs.ef.filter(u=>u.cur>0);
     if(gs.ehp<=0)res(true); else if(gs.hp<=0)res(false);
 }
 function res(w){
-    document.getElementById('res-scr').style.display='flex';
-    document.getElementById('res-tit').innerText=w?"VICTORY":"DEFEAT";
-    document.getElementById('res-tit').style.color=w?"var(--accent)":"var(--danger)";
+    const s=document.getElementById('res-scr'), t=document.getElementById('res-tit'), m=document.getElementById('res-msg');
+    s.style.display='flex';
+    if(w){t.innerText="VICTORY";t.className="res-tit res-win";m.innerText="勝利！";confetti();}
+    else{t.innerText="DEFEAT";t.className="res-tit res-lose";m.innerText="敗北...";}
 }
-function endTurn(){ gs.my=false; cancelAtk(); upd(); msg("敵ターン"); setTimeout(cpu,1000); }
+function endTurn(){ gs.my=false;cancelAtk();upd();msg("敵ターン");setTimeout(cpu,1000); }
 
 async function cpu(){
     if(gs.mmp<10)gs.mmp++; gs.mp=gs.mmp; draw(false); upd(); await sleep(500);
@@ -430,58 +410,50 @@ async function cpu(){
 }
 const sleep=m=>new Promise(r=>setTimeout(r,m));
 
-// --- 描画 ---
 function upd(){
-    document.getElementById('turn-disp').innerText=`Turn ${gs.tn}`; document.getElementById('mp-disp').innerText=`MP ${gs.mp}/${gs.mmp}`;
+    document.getElementById('turn-disp').innerText=`T${gs.tn}`; document.getElementById('mp-disp').innerText=`MP ${gs.mp}/${gs.mmp}`;
     document.getElementById('p-hp').innerText=gs.hp; document.getElementById('e-hp').innerText=gs.ehp;
     document.getElementById('cancel-btn').style.display=gs.atk?'block':'none';
-    
-    rend(document.getElementById('p-hand'), gs.h, 'h', true);
-    rend(document.getElementById('p-field'), gs.f, 'f', true);
-    rend(document.getElementById('e-field'), gs.ef, 'f', false);
-    const eh=document.getElementById('e-hand'); eh.innerHTML=''; gs.eh.forEach(()=>{
-        const d=document.createElement('div'); d.className='card'; d.style.background='#555'; d.style.width='30px'; d.style.height='45px'; eh.appendChild(d);
-    });
+    rend('p-hand', gs.h, 'h', true); rend('p-field', gs.f, 'f', true); rend('e-field', gs.ef, 'f', false);
+    const eh=document.getElementById('e-hand'); eh.innerHTML=''; gs.eh.forEach(()=>{const d=document.createElement('div');d.className='card';d.style.background='#444';d.style.width='30px';d.style.height='45px';eh.appendChild(d);});
     // Hint
     const hl=document.getElementById('craft-list'); hl.innerHTML='';
     if(gs.my) gs.pr.forEach(r=>{
         let h=gs.h.map(c=>c.s), ok=true;
         for(let x of r.i){ let idx=h.indexOf(x); if(idx<0){ok=false;break;} h.splice(idx,1); }
         if(ok){
-            const b=document.createElement('div'); b.className='craft-btn'; b.innerText=`✨ ${r.p.n}`;
+            const b=document.createElement('div'); b.className='craft-hint-btn';
+            b.innerHTML=`<div style="font-weight:bold;color:var(--accent)">✨ ${r.p.n}</div><div style="font-size:10px">⚔️${r.p.a} ❤️${r.p.h}</div>`;
             b.onclick=()=>{ gs.sel=[]; let th=[...gs.h]; r.i.forEach(x=>{ let idx=th.findIndex(c=>c.s===x); gs.sel.push(th[idx].id); th.splice(idx,1); }); upd(); };
             hl.appendChild(b);
         }
     });
 }
 
-function rend(el, l, type, isP){
-    el.innerHTML='';
+function rend(eid, l, type, isP){
+    const el=document.getElementById(eid); el.innerHTML='';
     l.forEach(c=>{
-        el.appendChild(createCardUI(c, c.type==='el', type==='h'&&gs.sel.includes(c.id), type==='f'&&c.can&&isP, type==='f'&&!isP&&gs.atk));
+        el.appendChild(createC(c, c.type==='el', type==='h'&&gs.sel.includes(c.id), type==='f'&&c.can&&isP, type==='f'&&!isP&&gs.atk));
     });
 }
 
-function createCardUI(c, isEl, isSel, isCan, isTgt){
+function createC(c, isEl, isSel, isCan, isTgt){
     const d=document.createElement('div'); d.className='card'; d.setAttribute('data-r', c.r);
-    let art=c.c||'art-sol', sym=c.s, nam=c.n;
-    let bz='', st='';
+    let art=c.c||'art-sol', bz='', st='';
     if(!isEl){
-        if(c.ab==='wrd') bz+='<div class="bdg bdg-w">🛡️</div>'; if(c.ab==='tox') bz+='<div class="bdg bdg-t">☠️</div>';
-        if(c.ab==='stm') bz+='<div class="bdg bdg-s">⚡</div>'; if(c.ab==='stl') bz+='<div class="bdg bdg-h">👁️</div>';
-        st=`<div class="stats"><div class="stat-atk">⚔️${c.a}</div><div class="stat-hp">❤️${c.cur}</div></div>`;
+        if(c.ab==='wrd')bz+='<div class="bdg b-w">🛡️</div>'; if(c.ab==='tox')bz+='<div class="bdg b-t">☠️</div>';
+        if(c.ab==='stm')bz+='<div class="bdg b-s">⚡</div>'; if(c.ab==='stl')bz+='<div class="bdg b-h">👁️</div>';
+        st=`<div class="c-stats-box"><div class="st-val st-atk">⚔️${c.a}</div><div class="st-val st-hp">❤️${c.cur}</div></div>`;
     }
     d.innerHTML=`
-        <div class="c-head"><span>${nam}</span><span style="color:var(--primary)">${sym}</span></div>
+        <div class="c-header"><span class="card-name">${c.n}</span><span class="card-symbol-small">${c.s}</span></div>
         <div class="c-art-box"><div class="css-art ${art}"></div></div>
-        <div class="c-text">${!isEl && c.sk ? c.sk[0].n : (isEl?'素材':'')}</div>
-        ${!isEl ? `<div class="badges" style="top:25px;right:2px;flex-direction:column">${bz}</div>` : ''}
+        <div class="c-text-box">${!isEl&&c.sk?`<span class="skill-name-small">${c.sk[0].n}</span>`:(isEl?'素材':'')}</div>
+        ${!isEl?`<div class="badges">${bz}</div>`:''}
         ${st}
     `;
-    if(isSel) d.classList.add('selected');
-    if(isCan) d.classList.add('can-attack');
-    if(isTgt) d.classList.add('valid-target');
-    if(!d.onclick) d.onclick=(e)=>{e.stopPropagation(); if(gs.h.includes(c)) onHand(c.id); else if(gs.f.includes(c)) onField(c.id,true); else if(gs.ef.includes(c)) onField(c.id,false); };
+    if(isSel)d.classList.add('selected'); if(isCan)d.classList.add('can-attack'); if(isTgt)d.classList.add('valid-target');
+    d.onclick=(e)=>{e.stopPropagation(); if(gs.h.includes(c))onHand(c.id); else if(gs.f.includes(c))onField(c.id,true); else if(gs.ef.includes(c))onField(c.id,false); };
     return d;
 }
 
@@ -492,12 +464,13 @@ function showDet(c, isEl){
     const st=document.getElementById('dt-st'), ds=document.getElementById('dt-desc');
     if(isEl){ st.innerText=""; ds.innerText=`レアリティ: ${c.r}\n合成素材`; }
     else{
-        st.innerHTML=`⚔️${c.a} <span style="margin-left:15px;color:var(--success)">❤️${c.cur}/${c.max}</span>`;
+        st.innerHTML=`<span style="color:#e67e22">⚔️${c.a}</span> <span style="color:#2ecc71">❤️${c.cur}/${c.max}</span>`;
         ds.innerHTML=c.sk.map(s=>`<div><b>【${s.n}】</b> ${s.d}</div>`).join('');
     }
 }
-function msg(t){const b=document.getElementById('msg-box');b.innerText=t;b.style.opacity=1;setTimeout(()=>b.style.opacity=0,1500);}
 
+function msg(t){const b=document.getElementById('msg-box');b.innerText=t;b.style.opacity=1;setTimeout(()=>b.style.opacity=0,1500);}
+function confetti(){ const c=document.getElementById('confetti'); if(!c)return; c.innerHTML=''; for(let i=0;i<50;i++){ const p=document.createElement('div'); p.className='confetti'; p.style.left=Math.random()*100+'vw'; p.style.background=`hsl(${Math.random()*360},100%,50%)`; p.style.animationDuration=(Math.random()*3+2)+'s'; c.appendChild(p); } }
 </script>
 </body>
 </html>
